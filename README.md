@@ -5,11 +5,11 @@ RabbitMQ driver for Laravel
 
 Require this package in your composer.json and run composer update:
 
-	fintech-fab/laravel-queue-rabbitmq
+	"fintech-fab/laravel-queue-rabbitmq": "dev-master"
     
 or run:
 
-	composer require fintech-fab/laravel-queue-rabbitmq:*
+	composer require "fintech-fab/laravel-queue-rabbitmq": "dev-master"
 
 After composer update is finished you need to add ServiceProvider to your `providers` array in app.php:
 				
