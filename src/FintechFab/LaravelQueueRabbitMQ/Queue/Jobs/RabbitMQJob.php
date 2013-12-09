@@ -57,8 +57,15 @@ class RabbitMQJob extends Job
 		// write attempts to body
 		$body['data']['attempts'] = $attempts + 1;
 
+		$job = $body['job'];
+		$data = $body['data'];
+
 		// push back to a queue
-		Queue::push($body['job'], $body['data']);
+		if ($delay > 0) {
+			Queue::later($delay, $job, $data, $this->queue->getName());
+		} else {
+			Queue::push($job, $data, $this->queue->getName());
+		}
 	}
 
 	/**
