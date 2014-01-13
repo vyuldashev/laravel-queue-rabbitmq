@@ -63,6 +63,33 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	}
 
 	/**
+	 * Push a raw payload onto the queue.
+	 *
+	 * @param  string $payload
+	 * @param  string $queue
+	 * @param  array  $options
+	 *
+	 * @throws \AMQPException
+	 * @return mixed
+	 */
+	public function pushRaw($payload, $queue = null, array $options = array())
+	{
+		$queue = $this->declareQueue($queue);
+
+		// get queue
+		$queue = $this->declareQueue($queue);
+
+		// push task to a queue
+		$job = $this->exchange->publish($payload, $queue->getName());
+
+		if (!$job) {
+			throw new AMQPException('Could not push job to a queue');
+		}
+
+		return $job;
+	}
+
+	/**
 	 * Push a new job onto the queue after a delay.
 	 *
 	 * @param  \DateTime|int $delay
