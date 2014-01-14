@@ -74,8 +74,6 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	 */
 	public function pushRaw($payload, $queue = null, array $options = array())
 	{
-		$queue = $this->declareQueue($queue);
-
 		// get queue
 		$queue = $this->declareQueue($queue);
 
