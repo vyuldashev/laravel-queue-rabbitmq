@@ -20,27 +20,37 @@ After composer update is finished you need to add ServiceProvider to your `provi
 now you are able to configure your connections in queue.php:
 
     return array(
-    
-        'default'     => 'rabbitmq',
-    
-        'connections' => array(
-    
-            'rabbitmq' => array(
-                'driver'        => 'rabbitmq',
-    
-                'host'          => '',
-                'port'          => '',
-    
-                'vhost'         => '',
-                'login'         => '',
-                'password'      => '',
-    
-                'queue'         => '', // name of the default queue
-                'exchange_name' => '', // name of the exchange
-            ),
-    
-        ),
-    
+
+    	'default'     => 'rabbitmq',
+
+    	'connections' => array(
+
+    		'rabbitmq' => array(
+    			'driver'         => 'rabbitmq',
+
+    			'host'           => '',
+    			'port'           => '',
+
+    			'vhost'          => '',
+    			'login'          => '',
+    			'password'       => '',
+
+    			'queue'          => '', // name of the default queue
+
+    			'exchange_name'  => '', // name of the exchange
+
+    			// Type of your exchange
+    			// Can be AMQP_EX_TYPE_DIRECT or AMQP_EX_TYPE_FANOUT
+    			// see documentation for more info
+    			// http://www.rabbitmq.com/tutorials/amqp-concepts.html
+    			'exchange_type'  => AMQP_EX_TYPE_DIRECT,
+    			'exchange_flags' => AMQP_DURABLE,
+
+
+    		),
+
+    	),
+
     );
 
 You can also find these examples in src/examples folder. 
