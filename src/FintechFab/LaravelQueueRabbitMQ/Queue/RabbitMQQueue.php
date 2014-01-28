@@ -18,19 +18,24 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	protected $exchange;
 	protected $default_queue;
 	protected $exchange_name;
+	protected $exchange_type;
+	protected $exchange_flags;
 
 	/**
 	 * @param AMQPConnection $amqpConnection
 	 * @param string         $default_queue
 	 * @param string         $exchange_name
 	 *
-	 * @internal param string $routing_key
+	 * @param mixed          $exchange_type
+	 * @param mixed          $exchange_flags
 	 */
-	public function __construct(AMQPConnection $amqpConnection, $default_queue, $exchange_name)
+	public function __construct(AMQPConnection $amqpConnection, $default_queue, $exchange_name, $exchange_type, $exchange_flags)
 	{
 		$this->connection = $amqpConnection;
 		$this->default_queue = $default_queue;
 		$this->exchange_name = $exchange_name;
+		$this->exchange_type = $exchange_type;
+		$this->exchange_flags = $exchange_flags;
 		$this->channel = $this->getChannel();
 		$this->exchange = $this->getExchange($this->channel);
 	}
@@ -49,6 +54,31 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	{
 		$payload = $this->createPayload($job, $data);
 
+		// get queue
+		$queue = $this->declareQueue($queue);
+
+		// push task to a queue
+		$job = $this->exchange->publish($payload, $queue->getName());
+
+		if (!$job) {
+			throw new AMQPException('Could not push job to a queue');
+		}
+
+		return $job;
+	}
+
+	/**
+	 * Push a raw payload onto the queue.
+	 *
+	 * @param  string $payload
+	 * @param  string $queue
+	 * @param  array  $options
+	 *
+	 * @throws \AMQPException
+	 * @return mixed
+	 */
+	public function pushRaw($payload, $queue = null, array $options = array())
+	{
 		// get queue
 		$queue = $this->declareQueue($queue);
 
@@ -139,7 +169,8 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	{
 		$exchange = new AMQPExchange($channel);
 		$exchange->setName($this->exchange_name);
-		$exchange->setType(AMQP_EX_TYPE_DIRECT);
+		$exchange->setFlags($this->exchange_flags);
+		$exchange->setType($this->exchange_type);
 		$exchange->declareExchange();
 
 		return $exchange;

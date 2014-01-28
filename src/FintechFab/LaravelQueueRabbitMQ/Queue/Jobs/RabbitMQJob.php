@@ -29,6 +29,16 @@ class RabbitMQJob extends Job
 	}
 
 	/**
+	 * Get the raw body string for the job.
+	 *
+	 * @return string
+	 */
+	public function getRawBody()
+	{
+		return $this->envelope->getBody();
+	}
+
+	/**
 	 * Delete the job from the queue.
 	 *
 	 * @return void

@@ -21,10 +21,20 @@ class RabbitMQConnector implements ConnectorInterface
 		$connection = new AMQPConnection($config);
 		$connection->connect();
 
+		if (!isset($config['exchange_type'])) {
+			$config['exchange_type'] = AMQP_EX_TYPE_DIRECT;
+		}
+
+		if (!isset($config['exchange_flags'])) {
+			$config['exchange_flags'] = AMQP_DURABLE;
+		}
+
 		return new RabbitMQQueue(
 			$connection,
 			$config['queue'],
-			$config['exchange_name']
+			$config['exchange_name'],
+			$config['exchange_type'],
+			$config['exchange_flags']
 		);
 	}
 }
