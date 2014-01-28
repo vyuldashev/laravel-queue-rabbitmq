@@ -12,17 +12,27 @@ return array(
 	'connections' => array(
 
 		'rabbitmq' => array(
-			'driver'        => 'rabbitmq',
+			'driver'         => 'rabbitmq',
 
-			'host'          => '',
-			'port'          => '',
+			'host'           => '',
+			'port'           => '',
 
-			'vhost'         => '',
-			'login'         => '',
-			'password'      => '',
+			'vhost'          => '',
+			'login'          => '',
+			'password'       => '',
 
-			'queue'         => '', // name of the default queue
-			'exchange_name' => '', // name of the exchange
+			'queue'          => '', // name of the default queue
+
+			'exchange_name'  => '', // name of the exchange
+
+			// Type of your exchange
+			// Can be AMQP_EX_TYPE_DIRECT or AMQP_EX_TYPE_FANOUT
+			// see documentation for more info
+			// http://www.rabbitmq.com/tutorials/amqp-concepts.html
+			'exchange_type'  => AMQP_EX_TYPE_DIRECT,
+			'exchange_flags' => AMQP_DURABLE,
+
+
 		),
 
 	),
