@@ -45,7 +45,18 @@ class RabbitMQJob extends Job
 	 */
 	public function delete()
 	{
+		parent::delete();
 		$this->queue->ack($this->envelope->getDeliveryTag());
+	}
+
+	/**
+	 * Get queue name
+	 *
+	 * @return string
+	 */
+	public function getQueue()
+	{
+		return $this->queue->getName();
 	}
 
 	/**
