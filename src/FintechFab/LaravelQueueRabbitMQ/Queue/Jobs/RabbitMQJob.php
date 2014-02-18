@@ -83,9 +83,9 @@ class RabbitMQJob extends Job
 
 		// push back to a queue
 		if ($delay > 0) {
-			Queue::later($delay, $job, $data, $this->queue->getName());
+			Queue::later($delay, $job, $data, $this->getQueue());
 		} else {
-			Queue::push($job, $data, $this->queue->getName());
+			Queue::push($job, $data, $this->getQueue());
 		}
 	}
 
