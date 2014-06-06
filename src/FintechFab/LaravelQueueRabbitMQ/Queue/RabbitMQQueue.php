@@ -77,7 +77,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	 * @throws \AMQPException
 	 * @return mixed
 	 */
-	public function pushRaw($payload, $queue = null, array $options = array())
+	public function pushRaw($payload, $queue = null, array $options = [])
 	{
 		// get queue
 		$queue = $this->declareQueue($queue);
@@ -212,11 +212,11 @@ class RabbitMQQueue extends Queue implements QueueInterface
 		$queue = new AMQPQueue($this->channel);
 		$queue->setName($name);
 		$queue->setFlags(AMQP_DURABLE);
-		$queue->setArguments(array(
+		$queue->setArguments([
 			'x-dead-letter-exchange'    => $this->exchange->getName(),
 			'x-dead-letter-routing-key' => $destination,
 			'x-message-ttl'             => $delay * 1000,
-		));
+		]);
 
 		$queue->declareQueue();
 

@@ -1,9 +1,9 @@
 <?php
 
-return array(
+return [
 
-	'providers' => array(
+	'providers' => [
 		'FintechFab\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider',
-	),
+	],
 
-);
+];

@@ -1,6 +1,6 @@
 {
 	"name": "fintech-fab/laravel-queue-rabbitmq",
-	"version": "4.1",
+	"version": "4.2",
 	"description": "RabbitMQ driver for Laravel Queue",
 	"license": "Apache-2.0",
 	"authors": [
@@ -10,9 +10,9 @@
 		}
 	],
 	"require": {
-		"php": ">=5.3.0",
-		"illuminate/support": "4.1.*@dev",
-		"illuminate/queue": "4.1.*@dev"
+		"php": ">=5.4.0",
+		"illuminate/support": "4.2.*@dev",
+		"illuminate/queue": "4.2.*@dev"
 	},
 	"suggest": {
 		"ext-amqp": "PECL extension for the AMQP protocol - this is preferred"

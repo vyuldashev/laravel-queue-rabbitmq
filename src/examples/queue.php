@@ -5,13 +5,13 @@
  * you can add as many connections as you want
  */
 
-return array(
+return [
 
 	'default'     => 'rabbitmq',
 
-	'connections' => array(
+	'connections' => [
 
-		'rabbitmq' => array(
+		'rabbitmq' => [
 			'driver'         => 'rabbitmq',
 
 			'host'           => '',
@@ -33,8 +33,8 @@ return array(
 			'exchange_flags' => AMQP_DURABLE,
 
 
-		),
+		],
 
-	),
+	],
 
-);
+];
