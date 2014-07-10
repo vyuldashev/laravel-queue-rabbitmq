@@ -161,6 +161,13 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	}
 
 	/**
+	 * @return AMQPExchange
+	 */
+	public function getCurrentExchange() {
+		return $this->exchange;
+	}
+
+	/**
 	 * @param AMQPChannel $channel
 	 *
 	 * @return AMQPExchange
