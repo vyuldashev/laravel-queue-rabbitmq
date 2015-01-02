@@ -70,7 +70,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	/**
 	 * Push a raw payload onto the queue.
 	 *
-	 * @param  string $payload
+	 * @param  string|array $payload
 	 * @param  string $queue
 	 * @param  array  $options
 	 *
@@ -82,8 +82,13 @@ class RabbitMQQueue extends Queue implements QueueInterface
 		// get queue
 		$queue = $this->declareQueue($queue);
 
+		if (is_array($payload)) {
+			$payload = json_encode($payload);
+			$options['content_type'] = 'application/json';
+		}
+
 		// push task to a queue
-		$job = $this->exchange->publish($payload, $queue->getName());
+		$job = $this->exchange->publish($payload, $queue->getName(), 0, $options);
 
 		if (!$job) {
 			throw new AMQPException('Could not push job to a queue');
