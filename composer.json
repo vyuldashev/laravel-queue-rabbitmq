@@ -1,26 +1,26 @@
 {
-	"name": "fintech-fab/laravel-queue-rabbitmq",
-	"version": "4.2",
-	"description": "RabbitMQ driver for Laravel Queue",
-	"license": "Apache-2.0",
-	"authors": [
-		{
-			"name": "FINTECH_FAB",
-			"email": "dev@fintech-fab.ru"
-		}
-	],
-	"require": {
-		"php": ">=5.4.0",
-		"illuminate/support": "4.2.*@dev",
-		"illuminate/queue": "4.2.*@dev"
-	},
-	"suggest": {
-		"ext-amqp": "PECL extension for the AMQP protocol - this is preferred"
-	},
-	"autoload": {
-		"psr-0": {
-			"FintechFab\\LaravelQueueRabbitMQ": "src/"
-		}
-	},
-	"minimum-stability": "dev"
+  "name": "fintech-fab/laravel-queue-rabbitmq",
+  "version": "5.0",
+  "description": "RabbitMQ driver for Laravel Queue",
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "FINTECH_FAB",
+      "email": "dev@fintech-fab.ru"
+    }
+  ],
+  "require": {
+    "php": ">=5.4.0",
+    "illuminate/support": "5.0.*",
+    "illuminate/queue": "5.0.*"
+  },
+  "suggest": {
+    "ext-amqp": "PECL extension for the AMQP protocol - it won't work without"
+  },
+  "autoload": {
+    "psr-0": {
+      "FintechFab\\LaravelQueueRabbitMQ": "src/"
+    }
+  },
+  "minimum-stability": "dev"
 }

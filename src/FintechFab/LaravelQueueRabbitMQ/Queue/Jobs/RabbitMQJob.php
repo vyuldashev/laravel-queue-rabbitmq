@@ -2,8 +2,8 @@
 
 use AMQPEnvelope;
 use AMQPQueue;
+use Illuminate\Container\Container;
 use Illuminate\Queue\Jobs\Job;
-use Queue;
 
 class RabbitMQJob extends Job
 {
@@ -11,7 +11,11 @@ class RabbitMQJob extends Job
 	protected $queue;
 	protected $envelope;
 
-	public function __construct($container, AMQPQueue $queue, AMQPEnvelope $envelope)
+	public function __construct(
+		Container $container,
+		AMQPQueue $queue,
+		AMQPEnvelope $envelope
+	)
 	{
 		$this->container = $container;
 		$this->queue = $queue;
@@ -47,16 +51,6 @@ class RabbitMQJob extends Job
 	{
 		parent::delete();
 		$this->queue->ack($this->envelope->getDeliveryTag());
-	}
-
-	/**
-	 * Get queue name
-	 *
-	 * @return string
-	 */
-	public function getQueue()
-	{
-		return $this->queue->getName();
 	}
 
 	/**
@@ -98,7 +92,7 @@ class RabbitMQJob extends Job
 	{
 		$body = json_decode($this->envelope->getBody(), true);
 
-		return isset($body['data']['attempts']) ? $body['data']['attempts'] : 0;
+		return isset($body['data']['attempts']) ? (int)$body['data']['attempts'] : 0;
 	}
 
 	/**
@@ -110,5 +104,16 @@ class RabbitMQJob extends Job
 	{
 		return $this->envelope->getMessageId();
 	}
+
+	/**
+	 * Get queue name
+	 *
+	 * @return string
+	 */
+	public function getQueue()
+	{
+		return $this->queue->getName();
+	}
+
 
 }

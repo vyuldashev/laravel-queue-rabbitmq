@@ -1,11 +1,11 @@
-RabbitMQ driver for Laravel
+RabbitMQ Queue driver for Laravel
 ======================
 
 ####Installation
 
-Require this package in your composer.json and run composer update:
+Require this package in your composer.json and run composer update (IMPORTANT! DO NOT USE "dev-master"):
 
-	"fintech-fab/laravel-queue-rabbitmq": "4.2"
+	"fintech-fab/laravel-queue-rabbitmq": "5.0"
     
 or run:
 
@@ -62,4 +62,4 @@ Once you completed the configuration you can use Laravel Queue API. If you used 
 Unit tests will be provided soon.
 
 ####Contribution
-You can contribute to this package by discovering buys and opening issues. Enjoy!
+You can contribute to this package by discovering bugs and opening issues. Enjoy!

@@ -14,12 +14,14 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		$this->app->booted(function () {
+		/**
+		 * @var \Illuminate\Queue\QueueManager $manager
+		 */
+		$manager = $this->app['queue'];
 
-			Queue::extend('rabbitmq', function () {
-				return new RabbitMQConnector;
-			});
-
+		$manager->addConnector('rabbitmq', function () {
+			return new RabbitMQConnector;
 		});
 	}
+
 }

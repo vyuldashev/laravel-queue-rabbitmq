@@ -12,7 +12,7 @@ class RabbitMQConnector implements ConnectorInterface
 	 *
 	 * @param  array $config
 	 *
-	 * @return \Illuminate\Queue\QueueInterface
+	 * @return \Illuminate\Contracts\Queue\Queue
 	 */
 	public function connect(array $config)
 	{
@@ -37,4 +37,5 @@ class RabbitMQConnector implements ConnectorInterface
 			$config['exchange_flags']
 		);
 	}
+
 }

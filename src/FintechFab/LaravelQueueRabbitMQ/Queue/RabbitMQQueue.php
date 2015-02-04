@@ -7,10 +7,10 @@ use AMQPException;
 use AMQPExchange;
 use AMQPQueue;
 use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
+use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Queue\Queue;
-use Illuminate\Queue\QueueInterface;
 
-class RabbitMQQueue extends Queue implements QueueInterface
+class RabbitMQQueue extends Queue implements QueueContract
 {
 
 	protected $connection;
@@ -23,19 +23,19 @@ class RabbitMQQueue extends Queue implements QueueInterface
 
 	/**
 	 * @param AMQPConnection $amqpConnection
-	 * @param string         $default_queue
-	 * @param string         $exchange_name
+	 * @param string         $queueName
+	 * @param string         $exchangeName
 	 *
-	 * @param mixed          $exchange_type
-	 * @param mixed          $exchange_flags
+	 * @param mixed          $exchangeType
+	 * @param mixed          $exchangeFlags
 	 */
-	public function __construct(AMQPConnection $amqpConnection, $default_queue, $exchange_name, $exchange_type, $exchange_flags)
+	public function __construct(AMQPConnection $amqpConnection, $queueName, $exchangeName, $exchangeType, $exchangeFlags)
 	{
 		$this->connection = $amqpConnection;
-		$this->default_queue = $default_queue;
-		$this->exchange_name = $exchange_name;
-		$this->exchange_type = $exchange_type;
-		$this->exchange_flags = $exchange_flags;
+		$this->default_queue = $queueName;
+		$this->exchange_name = $exchangeName;
+		$this->exchange_type = $exchangeType;
+		$this->exchange_flags = $exchangeFlags;
 		$this->channel = $this->getChannel();
 		$this->exchange = $this->getExchange($this->channel);
 	}
@@ -147,15 +147,15 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	 *
 	 * @return string
 	 */
-	public function getQueueName($queue)
+	private function getQueueName($queue)
 	{
-		return $queue ? : $this->default_queue;
+		return $queue ?: $this->default_queue;
 	}
 
 	/**
 	 * @return AMQPChannel
 	 */
-	public function getChannel()
+	private function getChannel()
 	{
 		return new AMQPChannel($this->connection);
 	}
@@ -163,7 +163,8 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	/**
 	 * @return AMQPExchange
 	 */
-	public function getCurrentExchange() {
+	private function getCurrentExchange()
+	{
 		return $this->exchange;
 	}
 
@@ -172,7 +173,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	 *
 	 * @return AMQPExchange
 	 */
-	public function getExchange(AMQPChannel $channel)
+	private function getExchange(AMQPChannel $channel)
 	{
 		$exchange = new AMQPExchange($channel);
 		$exchange->setName($this->exchange_name);
@@ -188,7 +189,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	 *
 	 * @return AMQPQueue
 	 */
-	public function declareQueue($name)
+	private function declareQueue($name)
 	{
 		$name = $this->getQueueName($name);
 
@@ -211,7 +212,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	 *
 	 * @return AMQPQueue
 	 */
-	public function declareDelayedQueue($destination, $delay)
+	private function declareDelayedQueue($destination, $delay)
 	{
 		$destination = $this->getQueueName($destination);
 		$name = $destination . '_deferred_' . $delay;
