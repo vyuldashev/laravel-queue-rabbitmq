@@ -6,6 +6,7 @@ use AMQPEnvelope;
 use AMQPException;
 use AMQPExchange;
 use AMQPQueue;
+use DateTime;
 use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Queue\Queue;
@@ -208,13 +209,14 @@ class RabbitMQQueue extends Queue implements QueueContract
 	/**
 	 * @param string $destination
 	 *
-	 * @param int    $delay
+	 * @param DateTime|int $delay
 	 *
 	 * @return AMQPQueue
 	 */
 	private function declareDelayedQueue($destination, $delay)
 	{
 		$destination = $this->getQueueName($destination);
+		$delay = $this->getSeconds($delay);
 		$name = $destination . '_deferred_' . $delay;
 
 		$queue = new AMQPQueue($this->channel);
