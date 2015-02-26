@@ -17,7 +17,7 @@ class RabbitMQConnector implements ConnectorInterface
 	public function connect(array $config)
 	{
 		// create connection with AMQP
-		$connection = new AMQPConnection($config['host'], $config['port'], $config['login'], $config['password']);
+		$connection = new AMQPConnection($config['host'], $config['port'], $config['login'], $config['password'], $config['vhost']);
 
 		return new RabbitMQQueue(
 			$connection,
