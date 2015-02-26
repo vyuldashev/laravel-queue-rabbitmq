@@ -7,6 +7,7 @@ use Illuminate\Queue\QueueInterface;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
+use PhpAmqpLib\Wire\AMQPTable;
 
 class RabbitMQQueue extends Queue implements QueueInterface
 {
@@ -94,7 +95,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	{
 		$payload = $this->createPayload($job, $data);
 		$this->declareQueue($queue);
-		$this->declareDelayedQueue($queue, $delay);
+		$queue = $this->declareDelayedQueue($queue, $delay);
 
 		// push job to a queue
 		$message = new AMQPMessage($payload, [
@@ -102,7 +103,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 			'delivery_mode' => 2,
 		]);
 
-		$this->channel->basic_publish($message, $this->configExchange['name']);
+		$this->channel->basic_publish($message, $queue);
 
 		return true;
 	}
@@ -152,9 +153,11 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	 */
 	public function declareQueue($name)
 	{
+		$name = $this->getQueueName($name);
+
 		// declare queue
 		$this->channel->queue_declare(
-			$this->getQueueName($name),
+			$name,
 			$this->configQueue['passive'],
 			$this->configQueue['durable'],
 			$this->configQueue['exclusive'],
@@ -171,12 +174,14 @@ class RabbitMQQueue extends Queue implements QueueInterface
 		);
 
 		// bind queue to the exchange
-		$this->channel->queue_bind($this->getQueueName($name), $this->configExchange['name']);
+		$this->channel->queue_bind($name, $this->configExchange['name'], $name);
 	}
 
 	/**
 	 * @param string       $destination
 	 * @param DateTime|int $delay
+	 *
+	 * @return string
 	 */
 	public function declareDelayedQueue($destination, $delay)
 	{
@@ -192,15 +197,15 @@ class RabbitMQQueue extends Queue implements QueueInterface
 			$this->configQueue['exclusive'],
 			$this->configQueue['auto_delete'],
 			false,
-			[
-				'x-dead-letter-exchange'    => $this->configExchange['name'],
-				'x-dead-letter-routing-key' => $destination,
+			new AMQPTable([
+				'x-dead-letter-exchange' => $destination,
 				'x-message-ttl'             => $delay * 1000,
-			]
+			])
 		);
 
-		// bind queue to the exchange
-		$this->channel->queue_bind($name, $this->configExchange['name']);
+		$this->channel->queue_bind($name, $this->configExchange['name'], $name);
+
+		return $name;
 	}
 
 }
