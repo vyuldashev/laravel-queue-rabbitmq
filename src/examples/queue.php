@@ -30,7 +30,6 @@ return [
 			],
 
 			'exchange' => [
-				'name'        => '', // name of the exchange
 				'type'        => 'direct', // more info at http://www.rabbitmq.com/tutorials/amqp-concepts.html
 				'passive'     => false,
 				'durable'     => true, // the exchange will survive server restarts

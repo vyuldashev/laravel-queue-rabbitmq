@@ -42,6 +42,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	 */
 	public function push($job, $data = '', $queue = null)
 	{
+		$queue = $this->getQueueName($queue);
 		$payload = $this->createPayload($job, $data);
 		$this->declareQueue($queue);
 
@@ -51,7 +52,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 			'delivery_mode' => 2,
 		]);
 
-		$this->channel->basic_publish($message, $this->configExchange['name']);
+		$this->channel->basic_publish($message, $queue, $queue);
 
 		return true;
 	}
@@ -67,6 +68,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	 */
 	public function pushRaw($payload, $queue = null, array $options = [])
 	{
+		$queue = $this->getQueueName($queue);
 		$this->declareQueue($queue);
 
 		// push job to a queue
@@ -76,7 +78,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 		]);
 
 		// push task to a queue
-		$this->channel->basic_publish($message, $this->configExchange['name']);
+		$this->channel->basic_publish($message, $queue, $queue);
 
 		return true;
 	}
@@ -103,7 +105,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 			'delivery_mode' => 2,
 		]);
 
-		$this->channel->basic_publish($message, $queue);
+		$this->channel->basic_publish($message, $queue, $queue);
 
 		return true;
 	}
@@ -117,6 +119,8 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	 */
 	public function pop($queue = null)
 	{
+		$queue = $this->getQueueName($queue);
+
 		// declare queue if not exists
 		$this->declareQueue($queue);
 
@@ -131,7 +135,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	}
 
 	/**
-	 * @param $queue
+	 * @param string $queue
 	 *
 	 * @return string
 	 */
@@ -166,7 +170,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 
 		// declare exchange
 		$this->channel->exchange_declare(
-			$this->configExchange['name'],
+			$name,
 			$this->configExchange['type'],
 			$this->configExchange['passive'],
 			$this->configExchange['durable'],
@@ -174,7 +178,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 		);
 
 		// bind queue to the exchange
-		$this->channel->queue_bind($name, $this->configExchange['name'], $name);
+		$this->channel->queue_bind($name, $name, $name);
 	}
 
 	/**
@@ -189,6 +193,15 @@ class RabbitMQQueue extends Queue implements QueueInterface
 		$destination = $this->getQueueName($destination);
 		$name = $this->getQueueName($destination) . '_deferred_' . $delay;
 
+		// declare exchange
+		$this->channel->exchange_declare(
+			$name,
+			$this->configExchange['type'],
+			$this->configExchange['passive'],
+			$this->configExchange['durable'],
+			$this->configExchange['auto_delete']
+		);
+
 		// declare queue
 		$this->channel->queue_declare(
 			$name,
@@ -198,12 +211,14 @@ class RabbitMQQueue extends Queue implements QueueInterface
 			$this->configQueue['auto_delete'],
 			false,
 			new AMQPTable([
-				'x-dead-letter-exchange' => $destination,
+				'x-dead-letter-exchange'    => $destination,
+				'x-dead-letter-routing-key' => $destination,
 				'x-message-ttl'             => $delay * 1000,
 			])
 		);
 
-		$this->channel->queue_bind($name, $this->configExchange['name'], $name);
+		// bind queue to the exchange
+		$this->channel->queue_bind($name, $name, $name);
 
 		return $name;
 	}
