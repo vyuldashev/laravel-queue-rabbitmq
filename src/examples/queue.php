@@ -21,15 +21,16 @@ return [
 			'login'    => '',
 			'password' => '',
 
-			'queue'    => [
-				'name'        => '', // name of the default queue,
+			'queue'           => '', // name of the default queue,
+
+			'queue_params'    => [
 				'passive'     => false,
 				'durable'     => true,
 				'exclusive'   => false,
 				'auto_delete' => false,
 			],
 
-			'exchange' => [
+			'exchange_params' => [
 				'type'        => 'direct', // more info at http://www.rabbitmq.com/tutorials/amqp-concepts.html
 				'passive'     => false,
 				'durable'     => true, // the exchange will survive server restarts

@@ -15,6 +15,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	protected $connection;
 	protected $channel;
 
+	protected $defaultQueue;
 	protected $configQueue;
 	protected $configExchange;
 
@@ -25,8 +26,9 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	public function __construct(AMQPConnection $amqpConnection, $config)
 	{
 		$this->connection = $amqpConnection;
-		$this->configQueue = $config['queue'];
-		$this->configExchange = $config['exchange'];
+		$this->defaultQueue = $config['queue'];
+		$this->configQueue = $config['queue_params'];
+		$this->configExchange = $config['exchange_params'];
 
 		$this->channel = $this->getChannel();
 	}
@@ -141,7 +143,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	 */
 	public function getQueueName($queue)
 	{
-		return $queue ?: $this->configQueue['name'];
+		return $queue ?: $this->defaultQueue;
 	}
 
 	/**
