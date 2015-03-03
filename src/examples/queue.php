@@ -15,9 +15,9 @@ return [
 			'driver'   => 'rabbitmq',
 
 			'host'     => '',
-			'port'  => 5672,
+			'port'     => 5672,
 
-			'vhost' => '/',
+			'vhost'    => '/',
 			'login'    => '',
 			'password' => '',
 
