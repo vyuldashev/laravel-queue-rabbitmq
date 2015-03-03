@@ -117,18 +117,7 @@ class RabbitMQJob extends Job
 	 */
 	public function getJobId()
 	{
-		return $this->message->body;
+		return $this->message->get('correlation_id');
 	}
-
-	/**
-	 * Get queue name
-	 *
-	 * @return string
-	 */
-	public function getQueue()
-	{
-		return $this->queue->getName();
-	}
-
 
 }

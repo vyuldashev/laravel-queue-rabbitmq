@@ -142,7 +142,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 	 *
 	 * @return string
 	 */
-	public function getQueueName($queue)
+	private function getQueueName($queue)
 	{
 		return $queue ?: $this->defaultQueue;
 	}
@@ -150,7 +150,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 	/**
 	 * @return AMQPChannel
 	 */
-	public function getChannel()
+	private function getChannel()
 	{
 		return $this->connection->channel();
 	}
@@ -190,7 +190,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 	 *
 	 * @return string
 	 */
-	public function declareDelayedQueue($destination, $delay)
+	private function declareDelayedQueue($destination, $delay)
 	{
 		$delay = $this->getSeconds($delay);
 		$destination = $this->getQueueName($destination);
