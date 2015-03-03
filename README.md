@@ -7,15 +7,9 @@ Require this package in your composer.json and run composer update (IMPORTANT! D
 
 	"fintech-fab/laravel-queue-rabbitmq": "5.0"
     
-or run:
-
-	composer require "fintech-fab/laravel-queue-rabbitmq"
-
 After composer update is finished you need to add ServiceProvider to your `providers` array in app.php:
 				
-   
 	'FintechFab\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider',
-
 
 now you are able to configure your connections in queue.php:
 
@@ -26,26 +20,30 @@ now you are able to configure your connections in queue.php:
 		'connections' => [
 	
 			'rabbitmq' => [
-				'driver'         => 'rabbitmq',
+				'driver'          => 'rabbitmq',
 	
-				'host'           => '',
-				'port'           => '',
+				'host'            => '',
+				'port'            => 5672,
 	
-				'vhost'          => '',
-				'login'          => '',
-				'password'       => '',
+				'vhost'           => '/',
+				'login'           => '',
+				'password'        => '',
 	
-				'queue'          => '', // name of the default queue
+				'queue'           => '', // name of the default queue,
 	
-				'exchange_name'  => '', // name of the exchange
+				'queue_params'    => [
+					'passive'     => false,
+					'durable'     => true,
+					'exclusive'   => false,
+					'auto_delete' => false,
+				],
 	
-				// Type of your exchange
-				// Can be AMQP_EX_TYPE_DIRECT or AMQP_EX_TYPE_FANOUT
-				// see documentation for more info
-				// http://www.rabbitmq.com/tutorials/amqp-concepts.html
-				'exchange_type'  => AMQP_EX_TYPE_DIRECT,
-				'exchange_flags' => AMQP_DURABLE,
-	
+				'exchange_params' => [
+					'type'        => 'direct', // more info at http://www.rabbitmq.com/tutorials/amqp-concepts.html
+					'passive'     => false,
+					'durable'     => true, // the exchange will survive server restarts
+					'auto_delete' => false, // the exchange won't be deleted once the channel is closed.
+				],
 	
 			],
 	

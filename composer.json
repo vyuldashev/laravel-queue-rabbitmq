@@ -12,10 +12,8 @@
   "require": {
     "php": ">=5.4.0",
     "illuminate/support": "5.0.*",
-    "illuminate/queue": "5.0.*"
-  },
-  "suggest": {
-    "ext-amqp": "PECL extension for the AMQP protocol - it won't work without"
+    "illuminate/queue": "5.0.*",
+    "videlalvaro/php-amqplib": "2.5.*"
   },
   "autoload": {
     "psr-0": {

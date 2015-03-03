@@ -1,8 +1,8 @@
 <?php namespace FintechFab\LaravelQueueRabbitMQ\Queue\Connectors;
 
-use AMQPConnection;
 use FintechFab\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 use Illuminate\Queue\Connectors\ConnectorInterface;
+use PhpAmqpLib\Connection\AMQPConnection;
 
 class RabbitMQConnector implements ConnectorInterface
 {
@@ -16,25 +16,12 @@ class RabbitMQConnector implements ConnectorInterface
 	 */
 	public function connect(array $config)
 	{
-
 		// create connection with AMQP
-		$connection = new AMQPConnection($config);
-		$connection->connect();
-
-		if (!isset($config['exchange_type'])) {
-			$config['exchange_type'] = AMQP_EX_TYPE_DIRECT;
-		}
-
-		if (!isset($config['exchange_flags'])) {
-			$config['exchange_flags'] = AMQP_DURABLE;
-		}
+		$connection = new AMQPConnection($config['host'], $config['port'], $config['login'], $config['password'], $config['vhost']);
 
 		return new RabbitMQQueue(
 			$connection,
-			$config['queue'],
-			$config['exchange_name'],
-			$config['exchange_type'],
-			$config['exchange_flags']
+			$config
 		);
 	}
 

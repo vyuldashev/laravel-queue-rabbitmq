@@ -12,26 +12,30 @@ return [
 	'connections' => [
 
 		'rabbitmq' => [
-			'driver'         => 'rabbitmq',
+			'driver'   => 'rabbitmq',
 
-			'host'           => '',
-			'port'           => '',
+			'host'     => '',
+			'port'     => 5672,
 
-			'vhost'          => '',
-			'login'          => '',
-			'password'       => '',
+			'vhost'    => '/',
+			'login'    => '',
+			'password' => '',
 
-			'queue'          => '', // name of the default queue
+			'queue'           => '', // name of the default queue,
 
-			'exchange_name'  => '', // name of the exchange
+			'queue_params'    => [
+				'passive'     => false,
+				'durable'     => true,
+				'exclusive'   => false,
+				'auto_delete' => false,
+			],
 
-			// Type of your exchange
-			// Can be AMQP_EX_TYPE_DIRECT or AMQP_EX_TYPE_FANOUT
-			// see documentation for more info
-			// http://www.rabbitmq.com/tutorials/amqp-concepts.html
-			'exchange_type'  => AMQP_EX_TYPE_DIRECT,
-			'exchange_flags' => AMQP_DURABLE,
-
+			'exchange_params' => [
+				'type'        => 'direct', // more info at http://www.rabbitmq.com/tutorials/amqp-concepts.html
+				'passive'     => false,
+				'durable'     => true, // the exchange will survive server restarts
+				'auto_delete' => false, // the exchange won't be deleted once the channel is closed.
+			],
 
 		],
 
