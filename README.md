@@ -50,7 +50,7 @@ And add these properties to `.env` with proper values:
 	RABBITMQ_VHOST=/
 	RABBITMQ_LOGIN=guest
 	RABBITMQ_PASSWORD=guest
-	RABBITMQ_QUEUE=invoices
+	RABBITMQ_QUEUE=queue_name
 
 You can also find full examples in src/examples folder. 
 
