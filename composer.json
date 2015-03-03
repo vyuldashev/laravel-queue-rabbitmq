@@ -1,6 +1,6 @@
 {
   "name": "fintech-fab/laravel-queue-rabbitmq",
-  "version": "4.2",
+  "version": "4.2-nopecl",
   "description": "RabbitMQ driver for Laravel Queue",
   "license": "Apache-2.0",
   "authors": [
