@@ -7,7 +7,7 @@ Require this package in your composer.json and run composer update (IMPORTANT! D
 
 	"fintech-fab/laravel-queue-rabbitmq": "5.0"
     
-After composer update is finished you need to add ServiceProvider to your `providers` array in app.php:
+After composer update is finished you need to add ServiceProvider to your `providers` array in `app.php`:
 				
 	'FintechFab\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider',
 
