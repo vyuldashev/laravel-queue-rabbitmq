@@ -3,13 +3,17 @@ RabbitMQ driver for Laravel
 
 ####Installation
 
-Require this package in your composer.json and run composer update:
+If you with to use PECL extension you should require this package version:
 
-	"fintech-fab/laravel-queue-rabbitmq": "4.2-nopecl"
-    
-or run:
+	"fintech-fab/laravel-queue-rabbitmq": "4.2"
 
-	composer require "fintech-fab/laravel-queue-rabbitmq"
+But using "videlalvaro/php-amqplib" is more preferable and if you wish to use it you should require this package version:
+
+	"fintech-fab/laravel-queue-rabbitmq": "4.2.*@dev"
+
+And run:
+
+	composer update
 
 After composer update is finished you need to add ServiceProvider to your `providers` array in app.php:
 				
