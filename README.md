@@ -43,6 +43,8 @@ Add these lines to your `app/config/queue.php` file to `connections` array:
 		
 And add these properties to `.env` with proper values: 
 
+	QUEUE_DRIVER=rabbitmq
+
 	RABBITMQ_HOST=127.0.0.1
 	RABBITMQ_PORT=5672
 	RABBITMQ_VHOST=/
