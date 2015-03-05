@@ -4,9 +4,8 @@ use DateTime;
 use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Queue\Queue;
-use Illuminate\Queue\QueueInterface;
 use PhpAmqpLib\Channel\AMQPChannel;
-use PhpAmqpLib\Connection\AMQPConnection;
+use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
 
@@ -17,6 +16,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 	protected $channel;
 
 	protected $defaultQueue;
+	protected $exchange;
 	protected $configQueue;
 	protected $configExchange;
 
@@ -24,10 +24,11 @@ class RabbitMQQueue extends Queue implements QueueContract
 	 * @param AMQPConnection $amqpConnection
 	 * @param array          $config
 	 */
-	public function __construct(AMQPConnection $amqpConnection, $config)
+	public function __construct(AMQPStreamConnection $amqpConnection, $config)
 	{
 		$this->connection = $amqpConnection;
 		$this->defaultQueue = $config['queue'];
+		$this->exchange = isset($config['exchange_name']) ? $config['exchange_name'] : $this->getQueueName($config['queue']);
 		$this->configQueue = $config['queue_params'];
 		$this->configExchange = $config['exchange_params'];
 
@@ -55,7 +56,10 @@ class RabbitMQQueue extends Queue implements QueueContract
 			'delivery_mode' => 2,
 		]);
 
-		$this->channel->basic_publish($message, $queue, $queue);
+		//Set the routing key if there is one
+		$routingKey = isset($this->configQueue['routing_key']) ? $this->configQueue['routing_key'] : '';
+
+		$this->channel->basic_publish($message, $this->exchange, $routingKey);
 
 		return true;
 	}
@@ -80,8 +84,10 @@ class RabbitMQQueue extends Queue implements QueueContract
 			'delivery_mode' => 2,
 		]);
 
-		// push task to a queue
-		$this->channel->basic_publish($message, $queue, $queue);
+		//Set the routing key if there is one
+		$routingKey = isset($this->configQueue['routing_key']) ? $this->configQueue['routing_key'] : '';
+
+		$this->channel->basic_publish($message, $this->exchange, $routingKey);
 
 		return true;
 	}
@@ -100,7 +106,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 	{
 		$payload = $this->createPayload($job, $data);
 		$this->declareQueue($queue);
-		$queue = $this->declareDelayedQueue($queue, $delay);
+		$exchange = $this->declareDelayedQueue($queue, $delay);
 
 		// push job to a queue
 		$message = new AMQPMessage($payload, [
@@ -108,7 +114,10 @@ class RabbitMQQueue extends Queue implements QueueContract
 			'delivery_mode' => 2,
 		]);
 
-		$this->channel->basic_publish($message, $queue, $queue);
+		//Set the routing key if there is one
+		$routingKey = isset($this->configQueue['routing_key']) ? $this->configQueue['routing_key'] : '';
+
+		$this->channel->basic_publish($message, $exchange, $routingKey);
 
 		return true;
 	}
@@ -122,8 +131,6 @@ class RabbitMQQueue extends Queue implements QueueContract
 	 */
 	public function pop($queue = null)
 	{
-		$queue = $this->getQueueName($queue);
-
 		// declare queue if not exists
 		$this->declareQueue($queue);
 
@@ -173,15 +180,18 @@ class RabbitMQQueue extends Queue implements QueueContract
 
 		// declare exchange
 		$this->channel->exchange_declare(
-			$name,
+			$this->exchange,
 			$this->configExchange['type'],
 			$this->configExchange['passive'],
 			$this->configExchange['durable'],
 			$this->configExchange['auto_delete']
 		);
 
+		//Get the routing key if set
+		$routingKey = isset($this->configQueue['routing_key']) ? $this->configQueue['routing_key'] : '';
+
 		// bind queue to the exchange
-		$this->channel->queue_bind($name, $name, $name);
+		$this->channel->queue_bind($name, $this->exchange, $routingKey);
 	}
 
 	/**
@@ -195,6 +205,9 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$delay = $this->getSeconds($delay);
 		$destination = $this->getQueueName($destination);
 		$name = $this->getQueueName($destination) . '_deferred_' . $delay;
+
+		//Get the routing key if set
+		$routingKey = isset($this->configQueue['routing_key']) ? $this->configQueue['routing_key'] : '';
 
 		// declare exchange
 		$this->channel->exchange_declare(
@@ -214,8 +227,8 @@ class RabbitMQQueue extends Queue implements QueueContract
 			$this->configQueue['auto_delete'],
 			false,
 			new AMQPTable([
-				'x-dead-letter-exchange'    => $destination,
-				'x-dead-letter-routing-key' => $destination,
+				'x-dead-letter-exchange'    => $this->exchange,
+				'x-dead-letter-routing-key' => $routingKey,
 				'x-message-ttl'             => $delay * 1000,
 			])
 		);
