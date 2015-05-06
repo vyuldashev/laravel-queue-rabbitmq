@@ -130,7 +130,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 		$message = $this->channel->basic_get($queue);
 
 		if ($message instanceof AMQPMessage) {
-			return new RabbitMQJob($this->container, $this->channel, $queue, $message);
+			return new RabbitMQJob($this->container, $this, $this->channel, $queue, $message);
 		}
 
 		return null;

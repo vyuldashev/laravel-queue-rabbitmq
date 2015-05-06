@@ -1,5 +1,6 @@
 <?php namespace FintechFab\LaravelQueueRabbitMQ\Queue\Jobs;
 
+use FintechFab\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 use Illuminate\Queue\Jobs\Job;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Message\AMQPMessage;
@@ -10,11 +11,13 @@ class RabbitMQJob extends Job
 
 	protected $channel;
 	protected $queue;
+	protected $connection;
 	protected $message;
 
-	public function __construct($container, AMQPChannel $channel, $queue, AMQPMessage $message)
+	public function __construct($container, RabbitMQQueue $connection, AMQPChannel $channel, $queue, AMQPMessage $message)
 	{
 		$this->container = $container;
+		$this->connection = $connection;
 		$this->channel = $channel;
 		$this->queue = $queue;
 		$this->message = $message;
@@ -86,9 +89,9 @@ class RabbitMQJob extends Job
 
 		// push back to a queue
 		if ($delay > 0) {
-			Queue::later($delay, $job, $data, $this->getQueue());
+			$this->connection->later($delay, $job, $data, $this->getQueue());
 		} else {
-			Queue::push($job, $data, $this->getQueue());
+			$this->connection->push($job, $data, $this->getQueue());
 		}
 	}
 
