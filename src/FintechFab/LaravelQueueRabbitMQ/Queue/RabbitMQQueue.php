@@ -44,19 +44,22 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	 */
 	public function push($job, $data = '', $queue = null)
 	{
-		$queue = $this->getQueueName($queue);
-		$payload = $this->createPayload($job, $data);
-		$this->declareQueue($queue);
+		return $this->pushRaw($this->createPayload($job, $data), $queue, []);
+	}
 
-		// push job to a queue
-		$message = new AMQPMessage($payload, [
-			'Content-Type'  => 'application/json',
-			'delivery_mode' => 2,
-		]);
-
-		$this->channel->basic_publish($message, $queue, $queue);
-
-		return true;
+	/**
+	 * Push a new job onto the queue after a delay.
+	 *
+	 * @param  \DateTime|int $delay
+	 * @param  string        $job
+	 * @param  mixed         $data
+	 * @param  string        $queue
+	 *
+	 * @return mixed
+	 */
+	public function later($delay, $job, $data = '', $queue = null)
+	{
+		return $this->pushRaw($this->createPayload($job, $data), $queue, ['delay' => $delay]);
 	}
 
 	/**
@@ -72,6 +75,10 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	{
 		$queue = $this->getQueueName($queue);
 		$this->declareQueue($queue);
+		if (isset($options['delay']))
+		{
+			$queue = $this->declareDelayedQueue($queue, $options['delay']);
+		}
 
 		// push job to a queue
 		$message = new AMQPMessage($payload, [
@@ -80,33 +87,6 @@ class RabbitMQQueue extends Queue implements QueueInterface
 		]);
 
 		// push task to a queue
-		$this->channel->basic_publish($message, $queue, $queue);
-
-		return true;
-	}
-
-	/**
-	 * Push a new job onto the queue after a delay.
-	 *
-	 * @param  \DateTime|int $delay
-	 * @param  string        $job
-	 * @param  mixed         $data
-	 * @param  string        $queue
-	 *
-	 * @return mixed
-	 */
-	public function later($delay, $job, $data = '', $queue = null)
-	{
-		$payload = $this->createPayload($job, $data);
-		$this->declareQueue($queue);
-		$queue = $this->declareDelayedQueue($queue, $delay);
-
-		// push job to a queue
-		$message = new AMQPMessage($payload, [
-			'Content-Type'  => 'application/json',
-			'delivery_mode' => 2,
-		]);
-
 		$this->channel->basic_publish($message, $queue, $queue);
 
 		return true;

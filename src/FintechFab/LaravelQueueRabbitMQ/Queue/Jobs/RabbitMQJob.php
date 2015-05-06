@@ -82,17 +82,10 @@ class RabbitMQJob extends Job
 		$attempts = $this->attempts();
 
 		// write attempts to body
-		$body['data']['attempts'] = $attempts + 1;
+		$body['attempts'] = $attempts + 1;
 
-		$job = $body['job'];
-		$data = $body['data'];
-
-		// push back to a queue
-		if ($delay > 0) {
-			$this->connection->later($delay, $job, $data, $this->getQueue());
-		} else {
-			$this->connection->push($job, $data, $this->getQueue());
-		}
+		$this->connection->pushRaw(json_encode($body), $this->getQueue(),
+			$delay > 0 ? [ 'delay' => $delay ] : []);
 	}
 
 	/**
@@ -104,7 +97,7 @@ class RabbitMQJob extends Job
 	{
 		$body = json_decode($this->message->body, true);
 
-		return isset($body['data']['attempts']) ? $body['data']['attempts'] : 0;
+		return isset($body['attempts']) ? $body['attempts'] : 0;
 	}
 
 	/**
