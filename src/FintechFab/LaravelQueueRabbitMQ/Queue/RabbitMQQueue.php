@@ -4,7 +4,6 @@ use DateTime;
 use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Queue\Queue;
-use Illuminate\Queue\QueueInterface;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
@@ -45,19 +44,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 	 */
 	public function push($job, $data = '', $queue = null)
 	{
-		$queue = $this->getQueueName($queue);
-		$payload = $this->createPayload($job, $data);
-		$this->declareQueue($queue);
-
-		// push job to a queue
-		$message = new AMQPMessage($payload, [
-			'Content-Type'  => 'application/json',
-			'delivery_mode' => 2,
-		]);
-
-		$this->channel->basic_publish($message, $queue, $queue);
-
-		return true;
+		return $this->pushRaw($this->createPayload($job, $data), $queue, []);
 	}
 
 	/**
@@ -73,6 +60,9 @@ class RabbitMQQueue extends Queue implements QueueContract
 	{
 		$queue = $this->getQueueName($queue);
 		$this->declareQueue($queue);
+		if (isset($options['delay'])) {
+			$queue = $this->declareDelayedQueue($queue, $options['delay']);
+		}
 
 		// push job to a queue
 		$message = new AMQPMessage($payload, [
@@ -98,19 +88,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 	 */
 	public function later($delay, $job, $data = '', $queue = null)
 	{
-		$payload = $this->createPayload($job, $data);
-		$this->declareQueue($queue);
-		$queue = $this->declareDelayedQueue($queue, $delay);
-
-		// push job to a queue
-		$message = new AMQPMessage($payload, [
-			'Content-Type'  => 'application/json',
-			'delivery_mode' => 2,
-		]);
-
-		$this->channel->basic_publish($message, $queue, $queue);
-
-		return true;
+		return $this->pushRaw($this->createPayload($job, $data), $queue, ['delay' => $delay]);
 	}
 
 	/**
@@ -131,7 +109,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$message = $this->channel->basic_get($queue);
 
 		if ($message instanceof AMQPMessage) {
-			return new RabbitMQJob($this->container, $this->channel, $queue, $message);
+			return new RabbitMQJob($this->container, $this, $this->channel, $queue, $message);
 		}
 
 		return null;
