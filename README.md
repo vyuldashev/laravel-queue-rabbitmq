@@ -63,6 +63,6 @@ Unit tests will be provided soon.
 ####Contribution
 You can contribute to this package by discovering bugs and opening issues. Enjoy!
 
-####Supported version of Laravel
+####Supported versions of Laravel
 4.0, 4.1, 4.2, 5.0
-This version is matching by the release tag of this library.
+The version is being matched by the release tag of this library.
