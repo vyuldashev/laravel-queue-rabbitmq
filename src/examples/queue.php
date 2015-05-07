@@ -89,6 +89,7 @@ return [
 				'durable'     => env('RABBITMQ_QUEUE_DURABLE', true),
 				'exclusive'   => env('RABBITMQ_QUEUE_EXCLUSIVE', false),
 				'auto_delete' => env('RABBITMQ_QUEUE_AUTODELETE', false),
+				'routing_key' => env('RABBITMQ_QUEUE_ROUTING_KEY', ''),
 			],
 
 			'exchange_params' => [
