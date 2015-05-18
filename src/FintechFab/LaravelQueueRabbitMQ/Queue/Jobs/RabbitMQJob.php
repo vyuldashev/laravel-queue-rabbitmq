@@ -96,9 +96,9 @@ class RabbitMQJob extends Job implements JobContract
 		$data = $body['data'];
 
 		if ($delay > 0) {
-			$this->connection->later($delay, $job, $data, $this->getQueue());
+			$this->connection->later($delay, $job, $data, $this->getQueue(), $this->message->get_properties());
 		} else {
-			$this->connection->push($job, $data, $this->getQueue());
+			$this->connection->push($job, $data, $this->getQueue(), $this->message->get_properties());
 		}
 	}
 

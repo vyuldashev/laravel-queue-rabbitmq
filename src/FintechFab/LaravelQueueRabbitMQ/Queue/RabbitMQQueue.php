@@ -17,6 +17,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
 	protected $defaultQueue;
 	protected $configQueue;
+	protected $configQueues;
 	protected $configExchange;
 
 	/**
@@ -28,6 +29,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$this->connection = $amqpConnection;
 		$this->defaultQueue = $config['queue'];
 		$this->configQueue = $config['queue_params'];
+		$this->configQueues = $config['queues_params'];
 		$this->configExchange = $config['exchange_params'];
 
 		$this->channel = $this->getChannel();
@@ -42,9 +44,9 @@ class RabbitMQQueue extends Queue implements QueueContract
 	 *
 	 * @return bool
 	 */
-	public function push($job, $data = '', $queue = null)
+	public function push($job, $data = '', $queue = null, array $properties = [])
 	{
-		return $this->pushRaw($this->createPayload($job, $data), $queue, []);
+		return $this->pushRaw($this->createPayload($job, $data), $queue, [], $properties);
 	}
 
 	/**
@@ -56,7 +58,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 	 *
 	 * @return mixed
 	 */
-	public function pushRaw($payload, $queue = null, array $options = [])
+	public function pushRaw($payload, $queue = null, array $options = [], array $properties = [])
 	{
 		$queue = $this->getQueueName($queue);
 		$this->declareQueue($queue);
@@ -65,7 +67,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 		}
 
 		// push job to a queue
-		$message = new AMQPMessage($payload, [
+		$message = new AMQPMessage($payload, $properties + [
 			'Content-Type'  => 'application/json',
 			'delivery_mode' => 2,
 		]);
@@ -86,9 +88,9 @@ class RabbitMQQueue extends Queue implements QueueContract
 	 *
 	 * @return mixed
 	 */
-	public function later($delay, $job, $data = '', $queue = null)
+	public function later($delay, $job, $data = '', $queue = null, array $properties = [])
 	{
-		return $this->pushRaw($this->createPayload($job, $data), $queue, ['delay' => $delay]);
+		return $this->pushRaw($this->createPayload($job, $data), $queue, ['delay' => $delay], $properties);
 	}
 
 	/**
@@ -116,6 +118,57 @@ class RabbitMQQueue extends Queue implements QueueContract
 	}
 
 	/**
+	 * Subscribe.
+	 *
+	 * @param string|null $queue
+	 * @param string $tag
+	 * @param Closure callback
+	 *
+	 * @return true
+	 */
+
+	public function subscribe($queue, $tag, \Closure $callback)
+	{
+		$queue = $this->getQueueName($queue);
+
+		// declare queue if not exists
+		$this->declareQueue($queue);
+
+		$callbackEnvelope = function($message) use ($callback, $queue) {
+			return $callback(new RabbitMQJob($this->container, $this, $this->channel, $queue, $message));
+		};
+
+		$this->channel->basic_consume(
+			$queue,    // queue
+			$tag,      // consumer tag
+			false,     // no local
+			false,     // no ack
+			false,     // exclusive
+			false,     // no wait
+			$callbackEnvelope // callback
+		);
+
+		while(count($this->channel->callbacks)) {
+			$this->channel->wait();
+		}
+
+		return true;
+	}
+
+	/**
+	 * Unsubscribe.
+	 *
+	 * @param string $tag
+	 *
+	 * @return void
+	 */
+
+	public function unsubscribe($tag)
+	{
+		$this->channel->basic_cancel($tag);
+	}
+
+	/**
 	 * @param string $queue
 	 *
 	 * @return string
@@ -140,13 +193,18 @@ class RabbitMQQueue extends Queue implements QueueContract
 	{
 		$name = $this->getQueueName($name);
 
+		$nowait = isset($this->configQueues[$name]['no_wait']) ? $this->configQueues['no_wait'] : false;
+		$arguments = isset($this->configQueues[$name]['arguments']) ? $this->configQueues[$name]['arguments'] : null;
+
 		// declare queue
 		$this->channel->queue_declare(
 			$name,
 			$this->configQueue['passive'],
 			$this->configQueue['durable'],
 			$this->configQueue['exclusive'],
-			$this->configQueue['auto_delete']
+			$this->configQueue['auto_delete'],
+			$nowait,
+			$arguments
 		);
 
 		// declare exchange
@@ -174,13 +232,18 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$destination = $this->getQueueName($destination);
 		$name = $this->getQueueName($destination) . '_deferred_' . $delay;
 
+		$nowait = isset($this->configQueue['passive']) ? $this->configQueue['passive'] : false;
+		$arguments = isset($this->configQueue['arguments']) ? $this->configQueue['arguments'] : null;
+
 		// declare exchange
 		$this->channel->exchange_declare(
 			$name,
 			$this->configExchange['type'],
 			$this->configExchange['passive'],
 			$this->configExchange['durable'],
-			$this->configExchange['auto_delete']
+			$this->configExchange['auto_delete'],
+			$nowait,
+			$arguments
 		);
 
 		// declare queue
