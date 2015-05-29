@@ -13,7 +13,9 @@
     "php": ">=5.4.0",
     "illuminate/support": "5.0.*",
     "illuminate/queue": "5.0.*",
-    "videlalvaro/php-amqplib": "2.5.*",
+    "videlalvaro/php-amqplib": "2.5.*"
+  },
+  "require-dev" : {
     "orchestra/testbench": "~3.0"
   },
   "autoload": {
