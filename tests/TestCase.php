@@ -22,8 +22,10 @@ class TestCase extends \Orchestra\Testbench\TestCase
                     'login'           => env('RABBITMQ_LOGIN', 'guest'),
                     'password'        => env('RABBITMQ_PASSWORD', 'guest'),
 
+                    // default queue name
                     'queue'           => env('RABBITMQ_QUEUE'),
 
+                    // global queues params
                     'queue_params'    => [
                         'passive'     => env('RABBITMQ_QUEUE_PASSIVE', false),
                         'durable'     => env('RABBITMQ_QUEUE_DURABLE', true),
@@ -31,7 +33,14 @@ class TestCase extends \Orchestra\Testbench\TestCase
                         'auto_delete' => env('RABBITMQ_QUEUE_AUTODELETE', false),
                     ],
 
+                    // individual queues params
                     'queues_params'   => [
+                        // '<queue_name>' => [
+                        //      'arguments' => [
+                        //          'x-max-priority' => 10, // since 3.5.0
+                        //      ],
+                        //      'no_wait' => false,
+                        // ],
                     ],
 
                     'exchange_params' => [

@@ -29,7 +29,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$this->connection = $amqpConnection;
 		$this->defaultQueue = $config['queue'];
 		$this->configQueue = $config['queue_params'];
-		$this->configQueues = $config['queues_params'];
+		$this->configQueues = isset($config['queues_params']) ? $config['queues_params'] : [];
 		$this->configExchange = $config['exchange_params'];
 
 		$this->channel = $this->getChannel();
