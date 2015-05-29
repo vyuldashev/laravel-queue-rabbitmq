@@ -41,6 +41,7 @@ Add these lines to your `app/config/queue.php` file to `connections` array:
 			//          'x-max-priority' => 10, // since 3.5.0
 			//      ],
 			//      'no_wait' => false,
+			//      'prefetch_count' => 1, // see http://www.rabbitmq.com/consumer-prefetch.html
 			// ],
 		],
 

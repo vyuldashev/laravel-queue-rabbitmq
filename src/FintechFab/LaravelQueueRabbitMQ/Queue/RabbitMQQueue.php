@@ -221,6 +221,10 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$nowait = isset($this->configQueues[$name]['no_wait']) ? $this->configQueues['no_wait'] : false;
 		$arguments = isset($this->configQueues[$name]['arguments']) ? new AMQPTable($this->configQueues[$name]['arguments']) : null;
 
+		$prefetch_count = isset($this->configQueues[$name]['prefetch_count'])
+							? $this->configQueues[$name]['prefetch_count']
+							: null;
+
 		// declare queue
 		$this->channel->queue_declare(
 			$name,
@@ -231,6 +235,11 @@ class RabbitMQQueue extends Queue implements QueueContract
 			$nowait,
 			$arguments
 		);
+
+		if ($prefetch_count !== null) {
+			// see http://www.rabbitmq.com/consumer-prefetch.html
+			$this->channel->basic_qos(0, $prefetch_count, false);
+		}
 
 		// declare exchange
 		$this->channel->exchange_declare(

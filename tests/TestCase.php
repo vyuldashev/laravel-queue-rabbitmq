@@ -40,6 +40,7 @@ class TestCase extends \Orchestra\Testbench\TestCase
                         //          'x-max-priority' => 10, // since 3.5.0
                         //      ],
                         //      'no_wait' => false,
+                        //      'prefetch_count' => 1,
                         // ],
                     ],
 
