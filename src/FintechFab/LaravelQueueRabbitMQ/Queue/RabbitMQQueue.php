@@ -36,6 +36,31 @@ class RabbitMQQueue extends Queue implements QueueContract
 	}
 
 	/**
+	 * Purge queue.
+	 *
+	 * @param  string $queue
+	 *
+	 * @return void
+	 */
+	public function purge($queue, $nowait = false, $ticket = null)
+	{
+		$this->channel->queue_purge($queue, $nowait, $ticket);
+	}
+
+	/**
+	 * Delete queue.
+	 *
+	 * @param  string $queue
+	 *
+	 * @return void
+	 */
+	public function delete($queue, $if_unused = false, $if_empty = false, $nowait = false, $ticket = null)
+	{
+		$this->channel->queue_delete($queue, $if_unused, $if_empty, $nowait, $ticket);
+	}
+
+
+	/**
 	 * Push a new job onto the queue.
 	 *
 	 * @param  string $job
@@ -194,7 +219,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$name = $this->getQueueName($name);
 
 		$nowait = isset($this->configQueues[$name]['no_wait']) ? $this->configQueues['no_wait'] : false;
-		$arguments = isset($this->configQueues[$name]['arguments']) ? $this->configQueues[$name]['arguments'] : null;
+		$arguments = isset($this->configQueues[$name]['arguments']) ? new AMQPTable($this->configQueues[$name]['arguments']) : null;
 
 		// declare queue
 		$this->channel->queue_declare(
@@ -232,8 +257,9 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$destination = $this->getQueueName($destination);
 		$name = $this->getQueueName($destination) . '_deferred_' . $delay;
 
-		$nowait = isset($this->configQueue['passive']) ? $this->configQueue['passive'] : false;
-		$arguments = isset($this->configQueue['arguments']) ? $this->configQueue['arguments'] : null;
+		// arguments from normal (non-delayed == destination) queue
+		$nowait = isset($this->configQueues[$destination]['no_wait']) ? $this->configQueues[$destination]['no_wait'] : false;
+		$arguments = isset($this->configQueues[$destination]['arguments']) ? $this->configQueues[$destination]['arguments'] : [];
 
 		// declare exchange
 		$this->channel->exchange_declare(
@@ -241,9 +267,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 			$this->configExchange['type'],
 			$this->configExchange['passive'],
 			$this->configExchange['durable'],
-			$this->configExchange['auto_delete'],
-			$nowait,
-			$arguments
+			$this->configExchange['auto_delete']
 		);
 
 		// declare queue
@@ -253,12 +277,12 @@ class RabbitMQQueue extends Queue implements QueueContract
 			$this->configQueue['durable'],
 			$this->configQueue['exclusive'],
 			$this->configQueue['auto_delete'],
-			false,
+			$nowait,
 			new AMQPTable([
 				'x-dead-letter-exchange'    => $destination,
 				'x-dead-letter-routing-key' => $destination,
 				'x-message-ttl'             => $delay * 1000,
-			])
+			] + $arguments)
 		);
 
 		// bind queue to the exchange
