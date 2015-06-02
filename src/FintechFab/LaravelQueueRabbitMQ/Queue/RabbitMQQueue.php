@@ -218,7 +218,6 @@ class RabbitMQQueue extends Queue implements QueueContract
 	{
 		$name = $this->getQueueName($name);
 
-		$nowait = isset($this->configQueues[$name]['no_wait']) ? $this->configQueues['no_wait'] : false;
 		$arguments = isset($this->configQueues[$name]['arguments']) ? new AMQPTable($this->configQueues[$name]['arguments']) : null;
 
 		$prefetch_count = isset($this->configQueues[$name]['prefetch_count'])
@@ -232,7 +231,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 			$this->configQueue['durable'],
 			$this->configQueue['exclusive'],
 			$this->configQueue['auto_delete'],
-			$nowait,
+			false,
 			$arguments
 		);
 
@@ -267,7 +266,6 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$name = $this->getQueueName($destination) . '_deferred_' . $delay;
 
 		// arguments from normal (non-delayed == destination) queue
-		$nowait = isset($this->configQueues[$destination]['no_wait']) ? $this->configQueues[$destination]['no_wait'] : false;
 		$arguments = isset($this->configQueues[$destination]['arguments']) ? $this->configQueues[$destination]['arguments'] : [];
 
 		// declare exchange
@@ -286,7 +284,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 			$this->configQueue['durable'],
 			$this->configQueue['exclusive'],
 			$this->configQueue['auto_delete'],
-			$nowait,
+			false,
 			new AMQPTable([
 				'x-dead-letter-exchange'    => $destination,
 				'x-dead-letter-routing-key' => $destination,
