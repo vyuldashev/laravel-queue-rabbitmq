@@ -17,8 +17,7 @@ class PriorityTest extends \TestCase {
             ],
         ]);
 
-        $p = new LaravelQueueRabbitMQServiceProvider($this->app);
-        $p->boot();
+        $this->app->register('FintechFab\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider');
 
         /* priority test */
 

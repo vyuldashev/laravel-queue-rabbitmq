@@ -21,8 +21,7 @@ class QosTest extends \TestCase {
             ],
         ]);
 
-        $p = new LaravelQueueRabbitMQServiceProvider($this->app);
-        $p->boot();
+        $this->app->register('FintechFab\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider');
 
         Queue::delete('test_qos');
 
