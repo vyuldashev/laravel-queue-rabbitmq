@@ -20,6 +20,8 @@ class RabbitMQQueue extends Queue implements QueueContract
 	protected $configQueues;
 	protected $configExchange;
 
+	protected $messageCount;
+
 	/**
 	 * @param AMQPConnection $amqpConnection
 	 * @param array          $config
@@ -59,6 +61,18 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$this->channel->queue_delete($queue, $if_unused, $if_empty, $nowait, $ticket);
 	}
 
+	/**
+	 * Get message count (only for queues with nowait == false).
+	 *
+	 * @param  string $queue
+	 *
+	 * @return integer
+	 */
+	public function getMessageCount($queue)
+	{
+		$this->declareQueue($queue);
+		return $this->messageCount;
+	}
 
 	/**
 	 * Push a new job onto the queue.
@@ -225,7 +239,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 							: null;
 
 		// declare queue
-		$this->channel->queue_declare(
+		$declare_result = $this->channel->queue_declare(
 			$name,
 			$this->configQueue['passive'],
 			$this->configQueue['durable'],
@@ -234,6 +248,11 @@ class RabbitMQQueue extends Queue implements QueueContract
 			false,
 			$arguments
 		);
+
+		if ($declare_result !== null) {
+			// if and only if nowait == false
+			$this->messageCount = $declare_result[1];
+		}
 
 		if ($prefetch_count !== null) {
 			// see http://www.rabbitmq.com/consumer-prefetch.html
