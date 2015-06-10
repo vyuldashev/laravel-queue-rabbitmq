@@ -2,7 +2,6 @@
 
 use FintechFab\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 use Illuminate\Support\ServiceProvider;
-use Queue;
 
 class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
 {
