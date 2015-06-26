@@ -19,6 +19,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 	protected $configQueue;
 	protected $configQueues;
 	protected $configExchange;
+	protected $prefix;
 
 	protected $messageCount;
 
@@ -33,6 +34,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$this->configQueue = $config['queue_params'];
 		$this->configQueues = isset($config['queues_params']) ? $config['queues_params'] : [];
 		$this->configExchange = $config['exchange_params'];
+		$this->prefix = isset($config['prefix']) ? $config['prefix'] : '';
 
 		$this->channel = $this->getChannel();
 	}
@@ -46,6 +48,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 	 */
 	public function purge($queue, $nowait = false, $ticket = null)
 	{
+		$queue = $this->getQueueName($queue);
 		$this->channel->queue_purge($queue, $nowait, $ticket);
 	}
 
@@ -58,6 +61,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 	 */
 	public function delete($queue, $if_unused = false, $if_empty = false, $nowait = false, $ticket = null)
 	{
+		$queue = $this->getQueueName($queue);
 		$this->channel->queue_delete($queue, $if_unused, $if_empty, $nowait, $ticket);
 	}
 
@@ -70,6 +74,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 	 */
 	public function getMessageCount($queue)
 	{
+		$queue = $this->getQueueName($queue);
 		$this->declareQueue($queue);
 		return $this->messageCount;
 	}
@@ -212,9 +217,9 @@ class RabbitMQQueue extends Queue implements QueueContract
 	 *
 	 * @return string
 	 */
-	private function getQueueName($queue)
+	private function getQueueName($queue, $prefix = true)
 	{
-		return $queue ?: $this->defaultQueue;
+		return ($prefix ? $this->prefix : '') . ($queue ? : $this->defaultQueue);
 	}
 
 	/**
@@ -230,7 +235,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 	 */
 	private function declareQueue($name)
 	{
-		$name = $this->getQueueName($name);
+		$name = $this->getQueueName($name, false); // $name is already with prefix
 
 		$arguments = isset($this->configQueues[$name]['arguments']) ? new AMQPTable($this->configQueues[$name]['arguments']) : null;
 
@@ -281,8 +286,8 @@ class RabbitMQQueue extends Queue implements QueueContract
 	private function declareDelayedQueue($destination, $delay)
 	{
 		$delay = $this->getSeconds($delay);
-		$destination = $this->getQueueName($destination);
-		$name = $this->getQueueName($destination) . '_deferred_' . $delay;
+		$destination = $this->getQueueName($destination, false); // $destination is already with prefix
+		$name = $destination . '_deferred_' . $delay;
 
 		// arguments from normal (non-delayed == destination) queue
 		$arguments = isset($this->configQueues[$destination]['arguments']) ? $this->configQueues[$destination]['arguments'] : [];

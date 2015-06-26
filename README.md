@@ -26,6 +26,9 @@ Add these lines to your `app/config/queue.php` file to `connections` array:
 		// default queue name
 		'queue'           => env('RABBITMQ_QUEUE'),
 
+		// prefix
+		// 'prefix' => env('RABBITMQ_QUEUE_PREFIX'),
+
 		// global queues params
 		'queue_params'    => [
 			'passive'     => env('RABBITMQ_QUEUE_PASSIVE', false),
