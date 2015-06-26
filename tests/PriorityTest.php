@@ -21,17 +21,19 @@ class PriorityTest extends \TestCase {
 
         /* priority test */
 
-        Queue::delete('test_priority');
+        $queue = 'test_priority';
+
+        Queue::delete($queue);
 
         // push 1, then 2 (and 2 with higher priority)
-        Queue::push('test_priority', ['data' => 1], 'test_priority', ['priority' => 10]);
-        Queue::push('test_priority', ['data' => 2], 'test_priority', ['priority' => 20]);
+        Queue::push($queue, ['data' => 1], $queue, ['priority' => 10]);
+        Queue::push($queue, ['data' => 2], $queue, ['priority' => 20]);
 
         $tag = 'tag';
 
         $order = [];
 
-        Queue::subscribe('test_priority', $tag, function (RabbitMQJob $job) use (& $order, $tag) {
+        Queue::subscribe($queue, $tag, function (RabbitMQJob $job) use (& $order, $tag) {
             $data = json_decode($job->getRawBody(), 'assoc')['data']['data'];
             $order []= $data;
             $job->delete();
@@ -50,12 +52,12 @@ class PriorityTest extends \TestCase {
         $step = 0;
         $time1 = microtime(true);
 
-        Queue::delete('test_priority');
-        Queue::delete('test_priority_deferred_' . $delay);
+        Queue::delete($queue);
+        Queue::delete($queue . '_deferred_' . $delay);
 
-        Queue::push('test_priority', ['data' => 1], 'test_priority', ['priority' => 1]);
+        Queue::push($queue, ['data' => 1], $queue, ['priority' => 1]);
 
-        Queue::subscribe('test_priority', $tag, function (RabbitMQJob $job) use (& $step, $tag, $delay) {
+        Queue::subscribe($queue, $tag, function (RabbitMQJob $job) use (& $step, $tag, $delay) {
             $data = json_decode($job->getRawBody(), 'assoc')['data']['data'];
             if ($step == 0) {
                 // delay at first step
@@ -73,6 +75,9 @@ class PriorityTest extends \TestCase {
         $time2 = microtime(true);
         //var_dump("$time2 - $time1 = " . ($time2 - $time1));
         $this->assertTrue($time2 - $time1 >= $delay);
+
+        Queue::delete($queue);
+        Queue::delete($queue . '_deferred_' . $delay);
     }
 
 }
