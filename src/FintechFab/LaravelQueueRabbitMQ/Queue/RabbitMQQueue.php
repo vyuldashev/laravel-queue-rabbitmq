@@ -219,7 +219,14 @@ class RabbitMQQueue extends Queue implements QueueContract
 	 */
 	private function getQueueName($queue, $prefix = true)
 	{
-		return ($prefix ? $this->prefix : '') . ($queue ? : $this->defaultQueue);
+		$queue = $queue ? : $this->defaultQueue;
+
+		if ($this->prefix and strpos($queue, $this->prefix) === 0) {
+			// prefix already present at the beginning
+			$prefix = '';
+		}
+
+		return ($prefix ? $this->prefix : '') . $queue;
 	}
 
 	/**

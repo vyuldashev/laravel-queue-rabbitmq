@@ -27,7 +27,15 @@ class PrefixTest extends \TestCase {
 
         $this->assertTrue(Queue::getMessageCount($queue) === $count - 1);
 
-        Queue::subscribe($queue, 'sub', function (RabbitMQJob $job) use (& $count) {
+        $delay_one = false;
+
+        Queue::subscribe($queue, 'sub', function (RabbitMQJob $job) use (& $count, & $delay_one) {
+            if (! $delay_one) {
+                $job->release(1);
+                $delay_one = true;
+                return;
+            }
+
             $job->delete();
             $count --;
             if ($count == 0) {
