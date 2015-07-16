@@ -1,5 +1,6 @@
 RabbitMQ Queue driver for Laravel
 ======================
+[![Latest Stable Version](https://poser.pugx.org/fintech-fab/laravel-queue-rabbitmq/v/stable)](https://packagist.org/packages/fintech-fab/laravel-queue-rabbitmq) [![Total Downloads](https://poser.pugx.org/fintech-fab/laravel-queue-rabbitmq/downloads)](https://packagist.org/packages/fintech-fab/laravel-queue-rabbitmq) [![Latest Unstable Version](https://poser.pugx.org/fintech-fab/laravel-queue-rabbitmq/v/unstable)](https://packagist.org/packages/fintech-fab/laravel-queue-rabbitmq) [![License](https://poser.pugx.org/fintech-fab/laravel-queue-rabbitmq/license)](https://packagist.org/packages/fintech-fab/laravel-queue-rabbitmq)
 
 ####Installation
 
