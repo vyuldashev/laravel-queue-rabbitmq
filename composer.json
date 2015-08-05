@@ -19,6 +19,9 @@
     "illuminate/queue": "5.1.*",
     "videlalvaro/php-amqplib": "2.5.*"
   },
+  "require-dev" : {
+    "orchestra/testbench": "~3.0"
+  },
   "autoload": {
     "psr-0": {
       "FintechFab\\LaravelQueueRabbitMQ": "src/"

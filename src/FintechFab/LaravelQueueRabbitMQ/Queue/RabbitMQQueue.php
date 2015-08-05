@@ -17,7 +17,11 @@ class RabbitMQQueue extends Queue implements QueueContract
 
 	protected $defaultQueue;
 	protected $configQueue;
+	protected $configQueues;
 	protected $configExchange;
+	protected $prefix;
+
+	protected $messageCount;
 
 	/**
 	 * @param AMQPConnection $amqpConnection
@@ -28,9 +32,51 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$this->connection = $amqpConnection;
 		$this->defaultQueue = $config['queue'];
 		$this->configQueue = $config['queue_params'];
+		$this->configQueues = isset($config['queues_params']) ? $config['queues_params'] : [];
 		$this->configExchange = $config['exchange_params'];
+		$this->prefix = isset($config['prefix']) ? $config['prefix'] : '';
 
 		$this->channel = $this->getChannel();
+	}
+
+	/**
+	 * Purge queue.
+	 *
+	 * @param  string $queue
+	 *
+	 * @return void
+	 */
+	public function purge($queue, $nowait = false, $ticket = null)
+	{
+		$queue = $this->getQueueName($queue);
+		$this->channel->queue_purge($queue, $nowait, $ticket);
+	}
+
+	/**
+	 * Delete queue.
+	 *
+	 * @param  string $queue
+	 *
+	 * @return void
+	 */
+	public function delete($queue, $if_unused = false, $if_empty = false, $nowait = false, $ticket = null)
+	{
+		$queue = $this->getQueueName($queue);
+		$this->channel->queue_delete($queue, $if_unused, $if_empty, $nowait, $ticket);
+	}
+
+	/**
+	 * Get message count (only for queues with nowait == false).
+	 *
+	 * @param  string $queue
+	 *
+	 * @return integer
+	 */
+	public function getMessageCount($queue)
+	{
+		$queue = $this->getQueueName($queue);
+		$this->declareQueue($queue);
+		return $this->messageCount;
 	}
 
 	/**
@@ -42,9 +88,9 @@ class RabbitMQQueue extends Queue implements QueueContract
 	 *
 	 * @return bool
 	 */
-	public function push($job, $data = '', $queue = null)
+	public function push($job, $data = '', $queue = null, array $properties = [])
 	{
-		return $this->pushRaw($this->createPayload($job, $data), $queue, []);
+		return $this->pushRaw($this->createPayload($job, $data), $queue, [], $properties);
 	}
 
 	/**
@@ -56,7 +102,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 	 *
 	 * @return mixed
 	 */
-	public function pushRaw($payload, $queue = null, array $options = [])
+	public function pushRaw($payload, $queue = null, array $options = [], array $properties = [])
 	{
 		$queue = $this->getQueueName($queue);
 		$this->declareQueue($queue);
@@ -65,7 +111,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 		}
 
 		// push job to a queue
-		$message = new AMQPMessage($payload, [
+		$message = new AMQPMessage($payload, $properties + [
 			'Content-Type'  => 'application/json',
 			'delivery_mode' => 2,
 		]);
@@ -86,9 +132,9 @@ class RabbitMQQueue extends Queue implements QueueContract
 	 *
 	 * @return mixed
 	 */
-	public function later($delay, $job, $data = '', $queue = null)
+	public function later($delay, $job, $data = '', $queue = null, array $properties = [])
 	{
-		return $this->pushRaw($this->createPayload($job, $data), $queue, ['delay' => $delay]);
+		return $this->pushRaw($this->createPayload($job, $data), $queue, ['delay' => $delay], $properties);
 	}
 
 	/**
@@ -116,13 +162,71 @@ class RabbitMQQueue extends Queue implements QueueContract
 	}
 
 	/**
+	 * Subscribe.
+	 *
+	 * @param string|null $queue
+	 * @param string $tag
+	 * @param Closure callback
+	 *
+	 * @return true
+	 */
+
+	public function subscribe($queue, $tag, \Closure $callback)
+	{
+		$queue = $this->getQueueName($queue);
+
+		// declare queue if not exists
+		$this->declareQueue($queue);
+
+		$callbackEnvelope = function($message) use ($callback, $queue) {
+			return $callback(new RabbitMQJob($this->container, $this, $this->channel, $queue, $message));
+		};
+
+		$this->channel->basic_consume(
+			$queue,    // queue
+			$tag,      // consumer tag
+			false,     // no local
+			false,     // no ack
+			false,     // exclusive
+			false,     // no wait
+			$callbackEnvelope // callback
+		);
+
+		while(count($this->channel->callbacks)) {
+			$this->channel->wait();
+		}
+
+		return true;
+	}
+
+	/**
+	 * Unsubscribe.
+	 *
+	 * @param string $tag
+	 *
+	 * @return void
+	 */
+
+	public function unsubscribe($tag)
+	{
+		$this->channel->basic_cancel($tag);
+	}
+
+	/**
 	 * @param string $queue
 	 *
 	 * @return string
 	 */
-	private function getQueueName($queue)
+	private function getQueueName($queue, $prefix = true)
 	{
-		return $queue ?: $this->defaultQueue;
+		$queue = $queue ? : $this->defaultQueue;
+
+		if ($this->prefix and strpos($queue, $this->prefix) === 0) {
+			// prefix already present at the beginning
+			$prefix = '';
+		}
+
+		return ($prefix ? $this->prefix : '') . $queue;
 	}
 
 	/**
@@ -138,16 +242,34 @@ class RabbitMQQueue extends Queue implements QueueContract
 	 */
 	private function declareQueue($name)
 	{
-		$name = $this->getQueueName($name);
+		$name = $this->getQueueName($name, false); // $name is already with prefix
+
+		$arguments = isset($this->configQueues[$name]['arguments']) ? new AMQPTable($this->configQueues[$name]['arguments']) : null;
+
+		$prefetch_count = isset($this->configQueues[$name]['prefetch_count'])
+							? $this->configQueues[$name]['prefetch_count']
+							: null;
 
 		// declare queue
-		$this->channel->queue_declare(
+		$declare_result = $this->channel->queue_declare(
 			$name,
 			$this->configQueue['passive'],
 			$this->configQueue['durable'],
 			$this->configQueue['exclusive'],
-			$this->configQueue['auto_delete']
+			$this->configQueue['auto_delete'],
+			false,
+			$arguments
 		);
+
+		if ($declare_result !== null) {
+			// if and only if nowait == false
+			$this->messageCount = $declare_result[1];
+		}
+
+		if ($prefetch_count !== null) {
+			// see http://www.rabbitmq.com/consumer-prefetch.html
+			$this->channel->basic_qos(0, $prefetch_count, false);
+		}
 
 		// declare exchange
 		$this->channel->exchange_declare(
@@ -171,8 +293,11 @@ class RabbitMQQueue extends Queue implements QueueContract
 	private function declareDelayedQueue($destination, $delay)
 	{
 		$delay = $this->getSeconds($delay);
-		$destination = $this->getQueueName($destination);
-		$name = $this->getQueueName($destination) . '_deferred_' . $delay;
+		$destination = $this->getQueueName($destination, false); // $destination is already with prefix
+		$name = $destination . '_deferred_' . $delay;
+
+		// arguments from normal (non-delayed == destination) queue
+		$arguments = isset($this->configQueues[$destination]['arguments']) ? $this->configQueues[$destination]['arguments'] : [];
 
 		// declare exchange
 		$this->channel->exchange_declare(
@@ -195,7 +320,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 				'x-dead-letter-exchange'    => $destination,
 				'x-dead-letter-routing-key' => $destination,
 				'x-message-ttl'             => $delay * 1000,
-			])
+			] + $arguments)
 		);
 
 		// bind queue to the exchange

@@ -24,13 +24,28 @@ Add these lines to your `app/config/queue.php` file to `connections` array:
 		'login'           => env('RABBITMQ_LOGIN', 'guest'),
 		'password'        => env('RABBITMQ_PASSWORD', 'guest'),
 
-		'queue'           => env('RABBITMQ_QUEUE'), // name of the default queue,
+		// default queue name
+		'queue'           => env('RABBITMQ_QUEUE'),
 
+		// prefix
+		// 'prefix' => env('RABBITMQ_QUEUE_PREFIX'),
+
+		// global queues params
 		'queue_params'    => [
 			'passive'     => env('RABBITMQ_QUEUE_PASSIVE', false),
 			'durable'     => env('RABBITMQ_QUEUE_DURABLE', true),
 			'exclusive'   => env('RABBITMQ_QUEUE_EXCLUSIVE', false),
 			'auto_delete' => env('RABBITMQ_QUEUE_AUTODELETE', false),
+		],
+
+		// individual queues params
+		'queues_params'   => [
+			// '<queue_name>' => [
+			//      'arguments' => [
+			//          'x-max-priority' => 10, // since 3.5.0
+			//      ],
+			//      'prefetch_count' => 1, // see http://www.rabbitmq.com/consumer-prefetch.html
+			// ],
 		],
 
 		'exchange_params' => [

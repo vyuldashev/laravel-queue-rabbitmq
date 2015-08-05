@@ -31,4 +31,20 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
         });
     }
 
+	/**
+	 * Boot the service provider ($this->app->booted() is not called in Lumen, see Application::booted()).
+	 *
+	 * @return void
+	 */
+
+	public function boot()
+	{
+		if (strpos($this->app->version(), "Lumen") !== false) {
+			$manager = $this->app['queue'];
+			$manager->addConnector('rabbitmq', function () {
+				return new RabbitMQConnector;
+			});
+		}
+	}
+
 }
