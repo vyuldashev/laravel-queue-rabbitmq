@@ -59,6 +59,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 	public function pushRaw($payload, $queue = null, array $options = [])
 	{
 		$queue = $this->getQueueName($queue);
+		$exchange = $this->configExchange['name'] ?:$queue;
 		$this->declareQueue($queue);
 		if (isset($options['delay'])) {
 			$queue = $this->declareDelayedQueue($queue, $options['delay']);
@@ -71,7 +72,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 		]);
 
 		// push task to a queue
-		$this->channel->basic_publish($message, $queue, $queue);
+		$this->channel->basic_publish($message, $exchange, $queue);
 
 		return true;
 	}
@@ -139,6 +140,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 	private function declareQueue($name)
 	{
 		$name = $this->getQueueName($name);
+		$exchange = $this->configExchange['name'] ?:$name;
 
 		// declare queue
 		$this->channel->queue_declare(
@@ -151,7 +153,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
 		// declare exchange
 		$this->channel->exchange_declare(
-			$name,
+			$exchange,
 			$this->configExchange['type'],
 			$this->configExchange['passive'],
 			$this->configExchange['durable'],
@@ -159,7 +161,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 		);
 
 		// bind queue to the exchange
-		$this->channel->queue_bind($name, $name, $name);
+		$this->channel->queue_bind($name, $exchange, $name);
 	}
 
 	/**
@@ -173,6 +175,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$delay = $this->getSeconds($delay);
 		$destination = $this->getQueueName($destination);
 		$name = $this->getQueueName($destination) . '_deferred_' . $delay;
+		$exchange = $this->configExchange['name'] ?:$name;
 
 		// declare exchange
 		$this->channel->exchange_declare(
@@ -185,7 +188,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
 		// declare queue
 		$this->channel->queue_declare(
-			$name,
+			$exchange,
 			$this->configQueue['passive'],
 			$this->configQueue['durable'],
 			$this->configQueue['exclusive'],
@@ -199,7 +202,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 		);
 
 		// bind queue to the exchange
-		$this->channel->queue_bind($name, $name, $name);
+		$this->channel->queue_bind($name, $exchange, $name);
 
 		return $name;
 	}

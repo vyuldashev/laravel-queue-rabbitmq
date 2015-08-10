@@ -34,6 +34,7 @@ Add these lines to your `app/config/queue.php` file to `connections` array:
 		],
 
 		'exchange_params' => [
+			'name'        => env('RABBITMQ_EXCHANGE_NAME', null),
 			'type'        => env('RABBITMQ_EXCHANGE_TYPE', 'direct'), // more info at http://www.rabbitmq.com/tutorials/amqp-concepts.html
 			'passive'     => env('RABBITMQ_EXCHANGE_PASSIVE', false),
 			'durable'     => env('RABBITMQ_EXCHANGE_DURABLE', true), // the exchange will survive server restarts
