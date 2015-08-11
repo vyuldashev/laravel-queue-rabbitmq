@@ -15,6 +15,9 @@ class RabbitMQQueue extends Queue implements QueueContract
 	protected $connection;
 	protected $channel;
 
+	protected $declareExchange;
+	protected $declareBindQueue;
+
 	protected $defaultQueue;
 	protected $configQueue;
 	protected $configExchange;
@@ -29,6 +32,8 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$this->defaultQueue = $config['queue'];
 		$this->configQueue = $config['queue_params'];
 		$this->configExchange = $config['exchange_params'];
+		$this->declareExchange = $config['exchange_declare'];
+		$this->declareBindQueue = $config['queue_declare_bind'];
 
 		$this->channel = $this->getChannel();
 	}
@@ -140,26 +145,30 @@ class RabbitMQQueue extends Queue implements QueueContract
 	{
 		$name = $this->getQueueName($name);
 
-		// declare queue
-		$this->channel->queue_declare(
-			$name,
-			$this->configQueue['passive'],
-			$this->configQueue['durable'],
-			$this->configQueue['exclusive'],
-			$this->configQueue['auto_delete']
-		);
+		if ($this->declareExchange) {
+			// declare exchange
+			$this->channel->exchange_declare(
+				$name,
+				$this->configExchange['type'],
+				$this->configExchange['passive'],
+				$this->configExchange['durable'],
+				$this->configExchange['auto_delete']
+			);
+		}
 
-		// declare exchange
-		$this->channel->exchange_declare(
-			$name,
-			$this->configExchange['type'],
-			$this->configExchange['passive'],
-			$this->configExchange['durable'],
-			$this->configExchange['auto_delete']
-		);
+		if ($this->declareBindQueue) {
+			// declare queue
+			$this->channel->queue_declare(
+				$name,
+				$this->configQueue['passive'],
+				$this->configQueue['durable'],
+				$this->configQueue['exclusive'],
+				$this->configQueue['auto_delete']
+			);
 
-		// bind queue to the exchange
-		$this->channel->queue_bind($name, $name, $name);
+			// bind queue to the exchange
+			$this->channel->queue_bind($name, $name, $name);
+		}
 	}
 
 	/**
