@@ -40,6 +40,9 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
             $connector->getConnection()->close();
         });
 
+        $this->app->singleton('rabbitmq.connection', function ($app) use ($connector) {
+            return $connector->getConnection();
+        });
     }
 
 }
