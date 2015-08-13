@@ -7,22 +7,32 @@ use PhpAmqpLib\Connection\AMQPConnection;
 class RabbitMQConnector implements ConnectorInterface
 {
 
-	/**
-	 * Establish a queue connection.
-	 *
-	 * @param  array $config
-	 *
-	 * @return \Illuminate\Contracts\Queue\Queue
-	 */
-	public function connect(array $config)
-	{
-		// create connection with AMQP
-		$connection = new AMQPConnection($config['host'], $config['port'], $config['login'], $config['password'], $config['vhost']);
+    /**
+     * @var AMQPConnection
+     */
+    protected $connection;
 
-		return new RabbitMQQueue(
-			$connection,
-			$config
-		);
-	}
+    /**
+     * Establish a queue connection.
+     *
+     * @param  array $config
+     *
+     * @return \Illuminate\Contracts\Queue\Queue
+     */
+    public function connect(array $config)
+    {
+        // create connection with AMQP
+        $this->connection = new AMQPConnection($config['host'], $config['port'], $config['login'], $config['password'], $config['vhost']);
+
+        return new RabbitMQQueue(
+            $this->connection,
+            $config
+        );
+    }
+
+    public function getConnection()
+    {
+        return $this->connection;
+    }
 
 }
