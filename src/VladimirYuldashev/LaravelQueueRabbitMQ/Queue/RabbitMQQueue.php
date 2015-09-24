@@ -143,6 +143,12 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	{
 		$name = $this->getQueueName($name);
 
+		static $init = [];
+		if (isset($init[$name])) {
+			return;
+		}
+		$init[$name] = true;
+
 		// declare queue
 		$this->channel->queue_declare(
 			$name,
@@ -176,6 +182,12 @@ class RabbitMQQueue extends Queue implements QueueInterface
 		$delay = $this->getSeconds($delay);
 		$destination = $this->getQueueName($destination);
 		$name = $this->getQueueName($destination) . '_deferred_' . $delay;
+
+		static $init = [];
+		if (isset($init[$name])) {
+			return $name;
+		}
+		$init[$name] = true;
 
 		// declare exchange
 		$this->channel->exchange_declare(
