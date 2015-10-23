@@ -123,4 +123,25 @@ class RabbitMQJob extends Job implements JobContract
 		return $this->message->get('correlation_id');
 	}
 
+	/**
+	 * Wrapper for {@link \PhpAmqpLib\Wire\GenericContent::get_properties()}
+	 *
+	 * @return array
+	 * @see \PhpAmqpLib\Wire\GenericContent::get_properties()
+	 */
+	public function getProperties() {
+		return $this->message->get_properties();
+	}
+
+	/**
+	 * Wrapper for {@link \PhpAmqpLib\Wire\GenericContent::get()}
+	 *
+	 * @param $name string
+	 * @return mixed|\PhpAmqpLib\Channel\AMQPChannel
+	 * @see \PhpAmqpLib\Wire\GenericContent::get()
+	 */
+	public function getProperty($name) {
+		return $this->message->get($name);
+	}
+
 }

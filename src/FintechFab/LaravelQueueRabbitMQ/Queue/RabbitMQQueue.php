@@ -70,11 +70,16 @@ class RabbitMQQueue extends Queue implements QueueContract
 			$queue = $this->declareDelayedQueue($queue, $options['delay']);
 		}
 
-		// push job to a queue
-		$message = new AMQPMessage($payload, [
-			'Content-Type'  => 'application/json',
+		$properties = [
+			'content_type'  => 'application/json',
 			'delivery_mode' => 2,
-		]);
+		];
+		if (isset($options['properties']) && is_array($options['properties'])) {
+			$properties = $properties + $options['properties'];
+		}
+
+		// push job to a queue
+		$message = new AMQPMessage($payload, $properties);
 
 		// push task to a queue
 		$this->channel->basic_publish($message, $exchange, $queue);
