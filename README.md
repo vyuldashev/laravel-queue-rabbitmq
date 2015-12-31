@@ -1,15 +1,17 @@
 RabbitMQ Queue driver for Laravel
 ======================
 
+[![Latest Stable Version](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/v/stable)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq) [![Total Downloads](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/downloads)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq) [![Latest Unstable Version](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/v/unstable)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq) [![License](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/license)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq)
+
 ####Installation
 
 Require this package in your composer.json and run composer update (IMPORTANT! DO NOT USE "dev-master"):
 
-	"fintech-fab/laravel-queue-rabbitmq": "5.0"
+	"vladimir-yuldashev/laravel-queue-rabbitmq": "5.0"
     
 After composer update is finished you need to add ServiceProvider to your `providers` array in `app.php`:
 				
-	'FintechFab\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider',
+	'VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider',
 
 Add these lines to your `app/config/queue.php` file to `connections` array:
    
