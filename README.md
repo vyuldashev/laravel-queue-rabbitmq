@@ -1,15 +1,16 @@
 RabbitMQ driver for Laravel
 ======================
+[![Latest Stable Version](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/v/stable)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq) [![Total Downloads](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/downloads)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq) [![Latest Unstable Version](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/v/unstable)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq) [![License](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/license)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq)
 
 ####Installation
 
 If you with to use PECL extension you should require this package version:
 
-	"fintech-fab/laravel-queue-rabbitmq": "4.2"
+	"vladimir-yuldashev/laravel-queue-rabbitmq": "4.2"
 
 But using "videlalvaro/php-amqplib" is more preferable and if you wish to use it you should require this package version:
 
-	"fintech-fab/laravel-queue-rabbitmq": "4.2.*@dev"
+	"vladimir-yuldashev/laravel-queue-rabbitmq": "4.2.*@dev"
 
 And run:
 
@@ -18,7 +19,7 @@ And run:
 After composer update is finished you need to add ServiceProvider to your `providers` array in app.php:
 				
    
-	'FintechFab\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider',
+	'VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider',
 
 
 now you are able to configure your connections in queue.php:

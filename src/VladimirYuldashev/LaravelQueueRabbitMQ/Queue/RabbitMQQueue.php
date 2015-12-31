@@ -1,13 +1,15 @@
-<?php namespace FintechFab\LaravelQueueRabbitMQ\Queue;
+<?php
+
+namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
 use DateTime;
-use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use Illuminate\Queue\Queue;
 use Illuminate\Queue\QueueInterface;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 class RabbitMQQueue extends Queue implements QueueInterface
 {

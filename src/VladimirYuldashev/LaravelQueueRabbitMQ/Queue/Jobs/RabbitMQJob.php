@@ -1,10 +1,12 @@
-<?php namespace FintechFab\LaravelQueueRabbitMQ\Queue\Jobs;
+<?php
 
-use FintechFab\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
+namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs;
+
 use Illuminate\Queue\Jobs\Job;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Message\AMQPMessage;
 use Queue;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQJob extends Job
 {
