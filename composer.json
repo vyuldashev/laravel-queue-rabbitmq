@@ -1,13 +1,9 @@
 {
-  "name": "fintech-fab/laravel-queue-rabbitmq",
+  "name": "vladimir-yuldashev/laravel-queue-rabbitmq",
   "version": "5.1",
   "description": "RabbitMQ driver for Laravel Queue",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "authors": [
-    {
-      "name": "FINTECH_FAB",
-      "email": "dev@fintech-fab.ru"
-    },
     {
       "name": "Vladimir Yuldashev",
       "email": "misterio92@gmail.com"
@@ -21,7 +17,7 @@
   },
   "autoload": {
     "psr-0": {
-      "FintechFab\\LaravelQueueRabbitMQ": "src/"
+      "VladimirYuldashev\\LaravelQueueRabbitMQ": "src/"
     }
   },
   "minimum-stability": "dev"
