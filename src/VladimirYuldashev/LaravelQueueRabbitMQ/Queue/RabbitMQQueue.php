@@ -149,6 +149,12 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$name = $this->getQueueName($name);
 		$exchange = $this->configExchange['name'] ?:$name;
 
+		static $init = [];
+		if (isset($init[$name])) {
+			return;
+		}
+		$init[$name] = true;
+
 		if ($this->declareExchange) {
 			// declare exchange
 			$this->channel->exchange_declare(
@@ -187,6 +193,12 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$destination = $this->getQueueName($destination);
 		$name = $this->getQueueName($destination) . '_deferred_' . $delay;
 		$exchange = $this->configExchange['name'] ?:$name;
+
+		static $init = [];
+		if (isset($init[$name])) {
+			return $name;
+		}
+		$init[$name] = true;
 
 		// declare exchange
 		$this->channel->exchange_declare(
