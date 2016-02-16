@@ -13,7 +13,7 @@
     "php": ">=5.5.9",
     "illuminate/support": "5.1.*",
     "illuminate/queue": "5.1.*",
-    "videlalvaro/php-amqplib": "2.5.*"
+    "php-amqplib/php-amqplib": "2.5.*"
   },
   "autoload": {
     "psr-0": {
