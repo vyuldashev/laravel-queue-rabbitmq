@@ -89,10 +89,11 @@ class RabbitMQJob extends Job implements JobContract
 
         $attempts = $this->attempts();
 
-        // write attempts to body
-        $body['data']['attempts'] = $attempts + 1;
+        $job = unserialize($body['data']['command']);
 
-        $job = $body['job'];
+        // write attempts to job
+        $job->attempts = $attempts + 1;
+
         $data = $body['data'];
 
         if ($delay > 0) {
