@@ -4,13 +4,9 @@ RabbitMQ driver for Laravel
 
 ####Installation
 
-If you with to use PECL extension you should require this package version:
+Require this package in your composer.json and run composer update (IMPORTANT! DO NOT USE "dev-master"):
 
 	"vladimir-yuldashev/laravel-queue-rabbitmq": "4.2"
-
-But using "videlalvaro/php-amqplib" is more preferable and if you wish to use it you should require this package version:
-
-	"vladimir-yuldashev/laravel-queue-rabbitmq": "4.2.*@dev"
 
 And run:
 
