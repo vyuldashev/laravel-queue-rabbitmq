@@ -1,6 +1,6 @@
 {
   "name": "vladimir-yuldashev/laravel-queue-rabbitmq",
-  "version": "4.2-nopecl",
+  "version": "4.2",
   "description": "RabbitMQ driver for Laravel Queue",
   "license": "MIT",
   "authors": [
