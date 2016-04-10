@@ -69,9 +69,10 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$exchange = $this->configExchange['name'] ?:$queue;
 		$this->declareQueue($queue);
 		if (isset($options['delay'])) {
-			$queue = $this->declareDelayedQueue($queue, $options['delay']);
+			list($queue,$exchange) = $this->declareDelayedQueue($queue, $options['delay']);
+		}else{
+			 $this->declareQueue($queue);
 		}
-
 		// push job to a queue
 		$message = new AMQPMessage($payload, [
 			'Content-Type'  => 'application/json',
@@ -215,7 +216,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 		// bind queue to the exchange
 		$this->channel->queue_bind($name, $exchange, $name);
 
-		return $name;
+		return [$name,$exchange];
 	}
 
 }
