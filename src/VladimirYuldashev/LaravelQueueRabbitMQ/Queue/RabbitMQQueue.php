@@ -66,7 +66,6 @@ class RabbitMQQueue extends Queue implements QueueContract
 	public function pushRaw($payload, $queue = null, array $options = [])
 	{
 		$queue = $this->getQueueName($queue);
-		//$exchange = $this->configExchange['name'] ?:$queue;
 		$this->declareQueue($queue);
 		if (isset($options['delay'])) {
 			$queue = $this->declareDelayedQueue($queue, $options['delay']);
