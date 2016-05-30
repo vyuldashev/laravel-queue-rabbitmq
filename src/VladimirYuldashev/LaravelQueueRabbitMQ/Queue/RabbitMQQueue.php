@@ -185,12 +185,13 @@ class RabbitMQQueue extends Queue implements QueueContract
 	{
 		$delay = $this->getSeconds($delay);
 		$destination = $this->getQueueName($destination);
+		$destinationExchange = $this->configExchange['name'] ?:$destination;
 		$name = $this->getQueueName($destination) . '_deferred_' . $delay;
-		$exchange = $this->configExchange['name'] ?:$name;
+		$exchange = $this->configExchange['name'] ?:$destination;
 
 		// declare exchange
 		$this->channel->exchange_declare(
-            $exchange,
+			$exchange,
 			$this->configExchange['type'],
 			$this->configExchange['passive'],
 			$this->configExchange['durable'],
@@ -199,14 +200,14 @@ class RabbitMQQueue extends Queue implements QueueContract
 
 		// declare queue
 		$this->channel->queue_declare(
-            $name,
+			$name,
 			$this->configQueue['passive'],
 			$this->configQueue['durable'],
 			$this->configQueue['exclusive'],
 			$this->configQueue['auto_delete'],
-			false,
+			false ,
 			new AMQPTable([
-				'x-dead-letter-exchange'    => $destination,
+				'x-dead-letter-exchange'    => $destinationExchange,
 				'x-dead-letter-routing-key' => $destination,
 				'x-message-ttl'             => $delay * 1000,
 			])
