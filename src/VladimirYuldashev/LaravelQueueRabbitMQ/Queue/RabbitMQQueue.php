@@ -142,6 +142,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
+     * @param $name
      * @return array
      */
     private function declareQueue($name)
