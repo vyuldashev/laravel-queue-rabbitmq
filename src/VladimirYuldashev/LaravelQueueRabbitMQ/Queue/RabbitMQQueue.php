@@ -70,7 +70,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         if (isset($options['delay']) && $options['delay'] > 0) {
             list($queue, $exchange) = $this->declareDelayedQueue($queue, $options['delay']);
         } else {
-            $this->declareQueue($queue);
+            list($queue, $exchange) = $this->declareQueue($queue);
         }
         // push job to a queue
         $message = new AMQPMessage($payload, [
@@ -79,7 +79,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         ]);
 
         // push task to a queue
-        $this->channel->basic_publish($message, $queue, $queue);
+        $this->channel->basic_publish($message, $exchange, $queue);
 
         return true;
     }
@@ -142,7 +142,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * @param string $name
+     * @return array
      */
     private function declareQueue($name)
     {
@@ -173,6 +173,8 @@ class RabbitMQQueue extends Queue implements QueueContract
             // bind queue to the exchange
             $this->channel->queue_bind($name, $exchange, $name);
         }
+
+        return [$name, $exchange];
     }
 
     /**
