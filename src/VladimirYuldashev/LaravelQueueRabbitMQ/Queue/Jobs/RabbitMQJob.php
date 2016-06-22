@@ -93,6 +93,7 @@ class RabbitMQJob extends Job implements JobContract
 
         // write attempts to job
         $job->attempts = $attempts + 1;
+        $body['data']['attempts'] = $attempts + 1;
 
         $data = $body['data'];
 
