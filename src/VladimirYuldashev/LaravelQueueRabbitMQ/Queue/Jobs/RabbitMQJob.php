@@ -111,8 +111,12 @@ class RabbitMQJob extends Job implements JobContract
     public function attempts()
     {
         $body = json_decode($this->message->body, true);
-
-        return isset($body['data']['attempts']) ? (int)$body['data']['attempts'] : 0;
+        $job = unserialize($body['data']['command']);
+        if (is_object($job) && property_exists($job, 'attempts'))
+        {
+            return (int) $job->attempts;
+        }
+        return 0;
     }
 
     /**
