@@ -13,6 +13,10 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 class RabbitMQQueue extends Queue implements QueueContract
 {
+    /**
+     * Used for retry logic, to set the retries on the message metadata instead of the message body
+     */
+    const ATTEMPT_COUNT_HEADERS_KEY = 'attempts_count';
 
     protected $connection;
     protected $channel;
@@ -23,6 +27,11 @@ class RabbitMQQueue extends Queue implements QueueContract
     protected $defaultQueue;
     protected $configQueue;
     protected $configExchange;
+
+    /**
+     * @var int
+     */
+    private $attempts;
 
     /**
      * @param AMQPStreamConnection $amqpConnection
@@ -72,11 +81,18 @@ class RabbitMQQueue extends Queue implements QueueContract
         } else {
             list($queue, $exchange) = $this->declareQueue($queue);
         }
-        // push job to a queue
-        $message = new AMQPMessage($payload, [
+
+        $headers = [
             'Content-Type' => 'application/json',
             'delivery_mode' => 2,
-        ]);
+        ];
+
+        if (isset($this->attempts) === true) {
+            $headers['application_headers'] = [self::ATTEMPT_COUNT_HEADERS_KEY => ['I', $this->attempts]];
+        }
+
+        // push job to a queue
+        $message = new AMQPMessage($payload, $headers);
 
         // push task to a queue
         $this->channel->basic_publish($message, $exchange, $queue);
@@ -222,4 +238,15 @@ class RabbitMQQueue extends Queue implements QueueContract
         return [$name, $exchange];
     }
 
+    /**
+     * Sets the attempts member variable to be used in message generation
+     *
+     * @param int $count
+     *
+     * @return void
+     */
+    public function setAttempts($count)
+    {
+        $this->attempts = $count;
+    }
 }
