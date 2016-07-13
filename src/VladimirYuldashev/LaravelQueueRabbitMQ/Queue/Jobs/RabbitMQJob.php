@@ -11,12 +11,26 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQJob extends Job implements JobContract
 {
+    /**
+     * Same as RabbitMQQueue, used for attempt counts
+     */
+    const ATTEMPT_COUNT_HEADERS_KEY = 'attempts_count';
 
     protected $connection;
     protected $channel;
     protected $queue;
     protected $message;
 
+    /**
+     * Creates a new instance of RabbitMQJob.
+     *
+     * @param Illuminate\Container\Container $container
+     * @param VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue $connection
+     * @param PhpAmqpLib\Channel\AMQPChannel $channel
+     * @param string $queue
+     * @param PhpAmqpLib\Message\AMQPMessage $message
+     *
+     */
     public function __construct(
         Container $container,
         RabbitMQQueue $connection,
@@ -38,7 +52,7 @@ class RabbitMQJob extends Job implements JobContract
      */
     public function fire()
     {
-        $this->resolveAndFire(json_decode($this->message->body, true));
+        $this->resolveAndFire($this->getParsedBody());
     }
 
     /**
@@ -52,6 +66,16 @@ class RabbitMQJob extends Job implements JobContract
     }
 
     /**
+     * Retrieves the parsed body for the job.
+     *
+     * @return array|false
+     */
+    public function getParsedBody()
+    {
+        return json_decode($this->getRawBody(), true);
+    }
+
+    /**
      * Delete the job from the queue.
      *
      * @return void
@@ -59,12 +83,11 @@ class RabbitMQJob extends Job implements JobContract
     public function delete()
     {
         parent::delete();
-
-        $this->channel->basic_ack($this->message->delivery_info['delivery_tag']);
+        $this->channel->basic_ack($this->message->get('delivery_tag'));
     }
 
     /**
-     * Get queue name
+     * Get the queue name.
      *
      * @return string
      */
@@ -83,16 +106,18 @@ class RabbitMQJob extends Job implements JobContract
     public function release($delay = 0)
     {
         $this->delete();
+        $this->setAttempts($this->attempts() + 1);
 
-        $body = $this->message->body;
-        $body = json_decode($body, true);
+        $body = $this->getParsedBody();
 
-        $attempts = $this->attempts();
-
-        $job = unserialize($body['data']['command']);
-
-        // write attempts to job
-        $job->attempts = $attempts + 1;
+        /**
+         * Some jobs don't have the command set, so fall back to just sending it the job name string
+         */
+        if (isset($body['data']['command']) === true) {
+            $job = unserialize($body['data']['command']);
+        } else {
+            $job = $this->getName();
+        }
 
         $data = $body['data'];
 
@@ -110,13 +135,26 @@ class RabbitMQJob extends Job implements JobContract
      */
     public function attempts()
     {
-        $body = json_decode($this->message->body, true);
-        $job = unserialize($body['data']['command']);
-        if (is_object($job) && property_exists($job, 'attempts'))
-        {
-            return (int) $job->attempts;
+        if ($this->message->has('application_headers') === true) {
+            $headers = $this->message->get('application_headers')->getNativeData();
+
+            if (isset($headers[self::ATTEMPT_COUNT_HEADERS_KEY]) === true) {
+                return $headers[self::ATTEMPT_COUNT_HEADERS_KEY];
+            }
         }
         return 0;
+    }
+
+    /**
+     * Sets the count of attempts at processing this job.
+     *
+     * @param int $count
+     *
+     * @return void
+     */
+    private function setAttempts($count)
+    {
+        $this->connection->setAttempts($count);
     }
 
     /**
@@ -128,5 +166,4 @@ class RabbitMQJob extends Job implements JobContract
     {
         return $this->message->get('correlation_id');
     }
-
 }
