@@ -1,6 +1,6 @@
 RabbitMQ Queue driver for Laravel
 ======================
-[![Latest Stable Version](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/v/stable)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq) [![Total Downloads](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/downloads)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq) [![Latest Unstable Version](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/v/unstable)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq) [![License](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/license)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq)
+[![Latest Stable Version](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/v/stable)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq?format=flat-square) [![Total Downloads](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/downloads)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq) [![Latest Unstable Version](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/v/unstable)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq) [![License](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/license)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq)
 
 ####Installation
 
