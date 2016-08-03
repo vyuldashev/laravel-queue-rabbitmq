@@ -7,7 +7,6 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 
 class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
 {
-
     /**
      * Register the service provider.
      *
@@ -16,7 +15,7 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__ . '/../../config/rabbitmq.php', 'queue.connections.rabbitmq'
+            __DIR__.'/../../config/rabbitmq.php', 'queue.connections.rabbitmq'
         );
     }
 
@@ -28,12 +27,11 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
     public function boot()
     {
         /**
-         * @var \Illuminate\Queue\QueueManager $manager
+         * @var \Illuminate\Queue\QueueManager
          */
         $manager = $this->app['queue'];
         $manager->addConnector('rabbitmq', function () {
-            return new RabbitMQConnector;
+            return new RabbitMQConnector();
         });
     }
-
 }

@@ -37,38 +37,38 @@ return [
 
         'database' => [
             'driver' => 'database',
-            'table' => 'jobs',
-            'queue' => 'default',
+            'table'  => 'jobs',
+            'queue'  => 'default',
             'expire' => 60,
         ],
 
         'beanstalkd' => [
             'driver' => 'beanstalkd',
-            'host' => 'localhost',
-            'queue' => 'default',
-            'ttr' => 60,
+            'host'   => 'localhost',
+            'queue'  => 'default',
+            'ttr'    => 60,
         ],
 
         'sqs' => [
             'driver' => 'sqs',
-            'key' => 'your-public-key',
+            'key'    => 'your-public-key',
             'secret' => 'your-secret-key',
-            'queue' => 'your-queue-url',
+            'queue'  => 'your-queue-url',
             'region' => 'us-east-1',
         ],
 
         'iron' => [
-            'driver' => 'iron',
-            'host' => 'mq-aws-us-east-1.iron.io',
-            'token' => 'your-token',
+            'driver'  => 'iron',
+            'host'    => 'mq-aws-us-east-1.iron.io',
+            'token'   => 'your-token',
             'project' => 'your-project-id',
-            'queue' => 'your-queue-name',
+            'queue'   => 'your-queue-name',
             'encrypt' => true,
         ],
 
         'redis' => [
             'driver' => 'redis',
-            'queue' => 'default',
+            'queue'  => 'default',
             'expire' => 60,
         ],
 
@@ -78,8 +78,8 @@ return [
             'host' => env('RABBITMQ_HOST', '127.0.0.1'),
             'port' => env('RABBITMQ_PORT', 5672),
 
-            'vhost' => env('RABBITMQ_VHOST', '/'),
-            'login' => env('RABBITMQ_LOGIN', 'guest'),
+            'vhost'    => env('RABBITMQ_VHOST', '/'),
+            'login'    => env('RABBITMQ_LOGIN', 'guest'),
             'password' => env('RABBITMQ_PASSWORD', 'guest'),
 
             'queue' => env('RABBITMQ_QUEUE'),
@@ -90,9 +90,9 @@ return [
             // create the queue if not exists and bind to the exchange
 
             'queue_params' => [
-                'passive' => env('RABBITMQ_QUEUE_PASSIVE', false),
-                'durable' => env('RABBITMQ_QUEUE_DURABLE', true),
-                'exclusive' => env('RABBITMQ_QUEUE_EXCLUSIVE', false),
+                'passive'     => env('RABBITMQ_QUEUE_PASSIVE', false),
+                'durable'     => env('RABBITMQ_QUEUE_DURABLE', true),
+                'exclusive'   => env('RABBITMQ_QUEUE_EXCLUSIVE', false),
                 'auto_delete' => env('RABBITMQ_QUEUE_AUTODELETE', false),
             ],
 
@@ -123,7 +123,7 @@ return [
 
     'failed' => [
         'database' => 'mysql',
-        'table' => 'failed_jobs',
+        'table'    => 'failed_jobs',
     ],
 
 ];
