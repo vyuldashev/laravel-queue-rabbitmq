@@ -1,6 +1,6 @@
 {
   "name": "vladimir-yuldashev/laravel-queue-rabbitmq",
-  "version": "5.2",
+  "version": "5.3",
   "description": "RabbitMQ driver for Laravel Queue",
   "license": "MIT",
   "authors": [
@@ -14,6 +14,9 @@
     "illuminate/support": "5.3.x-dev",
     "illuminate/queue": "5.3.x-dev",
     "php-amqplib/php-amqplib": "2.6.*"
+  },
+  "require-dev": {
+    "laravel/framework": "5.3.x-dev"
   },
   "autoload": {
     "psr-0": {

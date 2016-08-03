@@ -6,7 +6,7 @@ RabbitMQ Queue driver for Laravel
 
 1. Install this package via composer using:
 
-	composer require vladimir-yuldashev/laravel-queue-rabbitmq:5.2
+	composer require vladimir-yuldashev/laravel-queue-rabbitmq:5.3
     
 2. Add LaravelQueueRabbitMQServiceProvider to `providers` array in `config/app.php`:
 				
@@ -69,5 +69,5 @@ Unit tests will be provided soon.
 You can contribute to this package by discovering bugs and opening issues. Enjoy!
 
 ####Supported versions of Laravel
-4.0, 4.1, 4.2, 5.0, 5.1, 5.2
+4.0, 4.1, 4.2, 5.0, 5.1, 5.2, 5.3
 The version is being matched by the release tag of this library.

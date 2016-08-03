@@ -24,11 +24,11 @@ class RabbitMQJob extends Job implements JobContract
     /**
      * Creates a new instance of RabbitMQJob.
      *
-     * @param Illuminate\Container\Container                             $container
-     * @param VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue $connection
-     * @param PhpAmqpLib\Channel\AMQPChannel                             $channel
-     * @param string                                                     $queue
-     * @param PhpAmqpLib\Message\AMQPMessage                             $message
+     * @param \Illuminate\Container\Container $container
+     * @param \VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue $connection
+     * @param \PhpAmqpLib\Channel\AMQPChannel $channel
+     * @param string $queue
+     * @param \PhpAmqpLib\Message\AMQPMessage $message
      */
     public function __construct(
         Container $container,
@@ -42,89 +42,6 @@ class RabbitMQJob extends Job implements JobContract
         $this->channel = $channel;
         $this->queue = $queue;
         $this->message = $message;
-    }
-
-    /**
-     * Fire the job.
-     *
-     * @return void
-     */
-    public function fire()
-    {
-        $this->resolveAndFire($this->getParsedBody());
-    }
-
-    /**
-     * Get the raw body string for the job.
-     *
-     * @return string
-     */
-    public function getRawBody()
-    {
-        return $this->message->body;
-    }
-
-    /**
-     * Retrieves the parsed body for the job.
-     *
-     * @return array|false
-     */
-    public function getParsedBody()
-    {
-        return json_decode($this->getRawBody(), true);
-    }
-
-    /**
-     * Delete the job from the queue.
-     *
-     * @return void
-     */
-    public function delete()
-    {
-        parent::delete();
-        $this->channel->basic_ack($this->message->get('delivery_tag'));
-    }
-
-    /**
-     * Get the queue name.
-     *
-     * @return string
-     */
-    public function getQueue()
-    {
-        return $this->queue;
-    }
-
-    /**
-     * Release the job back into the queue.
-     *
-     * @param int $delay
-     *
-     * @return void
-     */
-    public function release($delay = 0)
-    {
-        $this->delete();
-        $this->setAttempts($this->attempts() + 1);
-
-        $body = $this->getParsedBody();
-
-        /*
-         * Some jobs don't have the command set, so fall back to just sending it the job name string
-         */
-        if (isset($body['data']['command']) === true) {
-            $job = unserialize($body['data']['command']);
-        } else {
-            $job = $this->getName();
-        }
-
-        $data = $body['data'];
-
-        if ($delay > 0) {
-            $this->connection->later($delay, $job, $data, $this->getQueue());
-        } else {
-            $this->connection->push($job, $data, $this->getQueue());
-        }
     }
 
     /**
@@ -143,6 +60,61 @@ class RabbitMQJob extends Job implements JobContract
         }
 
         return 0;
+    }
+
+    /**
+     * Get the raw body string for the job.
+     *
+     * @return string
+     */
+    public function getRawBody()
+    {
+        return $this->message->body;
+    }
+
+    /**
+     * Delete the job from the queue.
+     *
+     * @return void
+     */
+    public function delete()
+    {
+        parent::delete();
+        $this->channel->basic_ack($this->message->get('delivery_tag'));
+    }
+
+    /**
+     * Release the job back into the queue.
+     *
+     * @param int $delay
+     *
+     * @return void
+     */
+    public function release($delay = 0)
+    {
+        parent::release($delay);
+
+        $this->delete();
+        $this->setAttempts($this->attempts() + 1);
+
+        $body = $this->payload();
+
+        /*
+         * Some jobs don't have the command set, so fall back to just sending it the job name string
+         */
+        if (isset($body['data']['command']) === true) {
+            $job = unserialize($body['data']['command']);
+        } else {
+            $job = $this->getName();
+        }
+
+        $data = $body['data'];
+
+        if ($delay > 0) {
+            $this->connection->later($delay, $job, $data, $this->getQueue());
+        } else {
+            $this->connection->push($job, $data, $this->getQueue());
+        }
     }
 
     /**
@@ -166,4 +138,5 @@ class RabbitMQJob extends Job implements JobContract
     {
         return $this->message->get('correlation_id');
     }
+
 }
