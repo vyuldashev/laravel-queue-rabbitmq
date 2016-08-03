@@ -82,9 +82,12 @@ return [
             'login' => env('RABBITMQ_LOGIN', 'guest'),
             'password' => env('RABBITMQ_PASSWORD', 'guest'),
 
-            'queue' => env('RABBITMQ_QUEUE'), // name of the default queue,
-            'exchange_declare' => env('RABBITMQ_EXCHANGE_DECLARE', true), // create the exchange if not exists
-            'queue_declare_bind' => env('RABBITMQ_QUEUE_DECLARE_BIND', true), // create the queue if not exists and bind to the exchange
+            'queue' => env('RABBITMQ_QUEUE'),
+            // name of the default queue,
+            'exchange_declare' => env('RABBITMQ_EXCHANGE_DECLARE', true),
+            // create the exchange if not exists
+            'queue_declare_bind' => env('RABBITMQ_QUEUE_DECLARE_BIND', true),
+            // create the queue if not exists and bind to the exchange
 
             'queue_params' => [
                 'passive' => env('RABBITMQ_QUEUE_PASSIVE', false),
@@ -95,9 +98,11 @@ return [
 
             'exchange_params' => [
                 'name' => env('RABBITMQ_EXCHANGE_NAME', null),
-                'type' => env('RABBITMQ_EXCHANGE_TYPE', 'direct'), // more info at http://www.rabbitmq.com/tutorials/amqp-concepts.html
+                'type' => env('RABBITMQ_EXCHANGE_TYPE', 'direct'),
+                // more info at http://www.rabbitmq.com/tutorials/amqp-concepts.html
                 'passive' => env('RABBITMQ_EXCHANGE_PASSIVE', false),
-                'durable' => env('RABBITMQ_EXCHANGE_DURABLE', true), // the exchange will survive server restarts
+                'durable' => env('RABBITMQ_EXCHANGE_DURABLE', true),
+                // the exchange will survive server restarts
                 'auto_delete' => env('RABBITMQ_EXCHANGE_AUTODELETE', false),
             ],
 
@@ -117,7 +122,8 @@ return [
     */
 
     'failed' => [
-        'database' => 'mysql', 'table' => 'failed_jobs',
+        'database' => 'mysql',
+        'table' => 'failed_jobs',
     ],
 
 ];

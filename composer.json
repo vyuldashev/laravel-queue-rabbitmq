@@ -10,9 +10,9 @@
     }
   ],
   "require": {
-    "php": ">=5.5.9",
-    "illuminate/support": "5.2.*",
-    "illuminate/queue": "5.2.*",
+    "php": ">=5.6.4",
+    "illuminate/support": "5.3.x-dev",
+    "illuminate/queue": "5.3.x-dev",
     "php-amqplib/php-amqplib": "2.6.*"
   },
   "autoload": {
@@ -20,5 +20,5 @@
       "VladimirYuldashev\\LaravelQueueRabbitMQ": "src/"
     }
   },
-  "minimum-stability": "stable"
+  "minimum-stability": "dev"
 }
