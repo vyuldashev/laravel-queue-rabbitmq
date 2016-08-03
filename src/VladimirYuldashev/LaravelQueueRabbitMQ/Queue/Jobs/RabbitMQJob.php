@@ -12,7 +12,7 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 class RabbitMQJob extends Job implements JobContract
 {
     /**
-     * Same as RabbitMQQueue, used for attempt counts
+     * Same as RabbitMQQueue, used for attempt counts.
      */
     const ATTEMPT_COUNT_HEADERS_KEY = 'attempts_count';
 
@@ -24,12 +24,11 @@ class RabbitMQJob extends Job implements JobContract
     /**
      * Creates a new instance of RabbitMQJob.
      *
-     * @param Illuminate\Container\Container $container
+     * @param Illuminate\Container\Container                             $container
      * @param VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue $connection
-     * @param PhpAmqpLib\Channel\AMQPChannel $channel
-     * @param string $queue
-     * @param PhpAmqpLib\Message\AMQPMessage $message
-     *
+     * @param PhpAmqpLib\Channel\AMQPChannel                             $channel
+     * @param string                                                     $queue
+     * @param PhpAmqpLib\Message\AMQPMessage                             $message
      */
     public function __construct(
         Container $container,
@@ -99,7 +98,7 @@ class RabbitMQJob extends Job implements JobContract
     /**
      * Release the job back into the queue.
      *
-     * @param  int $delay
+     * @param int $delay
      *
      * @return void
      */
@@ -110,7 +109,7 @@ class RabbitMQJob extends Job implements JobContract
 
         $body = $this->getParsedBody();
 
-        /**
+        /*
          * Some jobs don't have the command set, so fall back to just sending it the job name string
          */
         if (isset($body['data']['command']) === true) {
@@ -142,6 +141,7 @@ class RabbitMQJob extends Job implements JobContract
                 return $headers[self::ATTEMPT_COUNT_HEADERS_KEY];
             }
         }
+
         return 0;
     }
 

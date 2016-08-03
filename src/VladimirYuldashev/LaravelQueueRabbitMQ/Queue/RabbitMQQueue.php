@@ -14,7 +14,7 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 class RabbitMQQueue extends Queue implements QueueContract
 {
     /**
-     * Used for retry logic, to set the retries on the message metadata instead of the message body
+     * Used for retry logic, to set the retries on the message metadata instead of the message body.
      */
     const ATTEMPT_COUNT_HEADERS_KEY = 'attempts_count';
 
@@ -35,7 +35,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
     /**
      * @param AMQPStreamConnection $amqpConnection
-     * @param array $config
+     * @param array                $config
      */
     public function __construct(AMQPStreamConnection $amqpConnection, $config)
     {
@@ -52,9 +52,9 @@ class RabbitMQQueue extends Queue implements QueueContract
     /**
      * Push a new job onto the queue.
      *
-     * @param  string $job
-     * @param  mixed $data
-     * @param  string $queue
+     * @param string $job
+     * @param mixed  $data
+     * @param string $queue
      *
      * @return bool
      */
@@ -66,9 +66,9 @@ class RabbitMQQueue extends Queue implements QueueContract
     /**
      * Push a raw payload onto the queue.
      *
-     * @param  string $payload
-     * @param  string $queue
-     * @param  array $options
+     * @param string $payload
+     * @param string $queue
+     * @param array  $options
      *
      * @return mixed
      */
@@ -83,7 +83,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         }
 
         $headers = [
-            'Content-Type' => 'application/json',
+            'Content-Type'  => 'application/json',
             'delivery_mode' => 2,
         ];
 
@@ -103,10 +103,10 @@ class RabbitMQQueue extends Queue implements QueueContract
     /**
      * Push a new job onto the queue after a delay.
      *
-     * @param  \DateTime|int $delay
-     * @param  string $job
-     * @param  mixed $data
-     * @param  string $queue
+     * @param \DateTime|int $delay
+     * @param string        $job
+     * @param mixed         $data
+     * @param string        $queue
      *
      * @return mixed
      */
@@ -135,8 +135,6 @@ class RabbitMQQueue extends Queue implements QueueContract
         if ($message instanceof AMQPMessage) {
             return new RabbitMQJob($this->container, $this, $this->channel, $queue, $message);
         }
-
-        return null;
     }
 
     /**
@@ -159,6 +157,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
     /**
      * @param $name
+     *
      * @return array
      */
     private function declareQueue($name)
@@ -195,7 +194,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * @param string $destination
+     * @param string       $destination
      * @param DateTime|int $delay
      *
      * @return string
@@ -205,7 +204,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         $delay = $this->getSeconds($delay);
         $destination = $this->getQueueName($destination);
         $destinationExchange = $this->configExchange['name'] ?: $destination;
-        $name = $this->getQueueName($destination) . '_deferred_' . $delay;
+        $name = $this->getQueueName($destination).'_deferred_'.$delay;
         $exchange = $this->configExchange['name'] ?: $destination;
 
         // declare exchange
@@ -226,9 +225,9 @@ class RabbitMQQueue extends Queue implements QueueContract
             $this->configQueue['auto_delete'],
             false,
             new AMQPTable([
-                'x-dead-letter-exchange' => $destinationExchange,
+                'x-dead-letter-exchange'    => $destinationExchange,
                 'x-dead-letter-routing-key' => $destination,
-                'x-message-ttl' => $delay * 1000,
+                'x-message-ttl'             => $delay * 1000,
             ])
         );
 
@@ -239,7 +238,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Sets the attempts member variable to be used in message generation
+     * Sets the attempts member variable to be used in message generation.
      *
      * @param int $count
      *
