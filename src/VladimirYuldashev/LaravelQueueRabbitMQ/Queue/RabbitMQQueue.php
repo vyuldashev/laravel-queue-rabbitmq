@@ -257,7 +257,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Sets the correlation id for a message to be published
+     * Sets the correlation id for a message to be published.
      *
      * @param string $id
      *
