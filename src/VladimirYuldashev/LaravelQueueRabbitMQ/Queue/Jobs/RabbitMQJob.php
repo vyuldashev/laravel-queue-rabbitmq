@@ -152,6 +152,6 @@ class RabbitMQJob extends Job implements JobContract
      */
     public function setJobId($id)
     {
-        $this->connection->setCorrelationid($id);
+        $this->connection->setCorrelationId($id);
     }
 }
