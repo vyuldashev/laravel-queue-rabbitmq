@@ -93,11 +93,12 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         // push job to a queue
         $message = new AMQPMessage($payload, $headers);
+        $this->message->set('correlation_id', uniqid());
 
         // push task to a queue
         $this->channel->basic_publish($message, $exchange, $queue);
 
-        return true;
+        return $this->message->get('correlation_id');
     }
 
     /**
