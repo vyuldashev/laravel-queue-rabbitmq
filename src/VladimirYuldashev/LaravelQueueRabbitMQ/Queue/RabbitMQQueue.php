@@ -34,6 +34,11 @@ class RabbitMQQueue extends Queue implements QueueContract
     private $attempts;
 
     /**
+     * @var string
+     */
+    private $correlationId;
+
+    /**
      * @param AMQPStreamConnection $amqpConnection
      * @param array                $config
      */
@@ -93,7 +98,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         // push job to a queue
         $message = new AMQPMessage($payload, $headers);
-        $this->message->set('correlation_id', uniqid());
+        $message->set('correlation_id', $this->correlationId ?: uniqid());
 
         // push task to a queue
         $this->channel->basic_publish($message, $exchange, $queue);
@@ -248,5 +253,17 @@ class RabbitMQQueue extends Queue implements QueueContract
     public function setAttempts($count)
     {
         $this->attempts = $count;
+    }
+
+    /**
+     * Sets the correlation id for a message to be published
+     *
+     * @param string $id
+     *
+     * @return void
+     */
+    public function setCorrelationId($id)
+    {
+        $this->correlationId = $id;
     }
 }
