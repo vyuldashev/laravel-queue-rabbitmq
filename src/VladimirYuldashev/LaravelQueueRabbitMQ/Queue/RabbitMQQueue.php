@@ -98,12 +98,14 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         // push job to a queue
         $message = new AMQPMessage($payload, $headers);
-        $message->set('correlation_id', $this->correlationId ?: uniqid());
+
+        $correlationId = $this->getCorrelationId();
+        $message->set('correlation_id', $correlationId);
 
         // push task to a queue
         $this->channel->basic_publish($message, $exchange, $queue);
 
-        return $this->message->get('correlation_id');
+        return $correlationId;
     }
 
     /**
@@ -265,5 +267,15 @@ class RabbitMQQueue extends Queue implements QueueContract
     public function setCorrelationId($id)
     {
         $this->correlationId = $id;
+    }
+
+    /**
+     * Retrieves the correlation id, or a unique id
+     *
+     * @return string
+     */
+    public function getCorrelationId()
+    {
+        return $this->correlationId ?: uniqid();
     }
 }
