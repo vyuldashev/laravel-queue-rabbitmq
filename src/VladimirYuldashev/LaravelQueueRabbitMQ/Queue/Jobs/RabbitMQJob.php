@@ -160,7 +160,7 @@ class RabbitMQJob extends Job implements JobContract
     /**
      * Get the job identifier.
      *
-     * @return string|false
+     * @return string|bool
      */
     public function getJobId()
     {

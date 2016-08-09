@@ -271,7 +271,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Retrieves the correlation id, or a unique id
+     * Retrieves the correlation id, or a unique id.
      *
      * @return string
      */
