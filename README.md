@@ -35,7 +35,7 @@ Once you completed the configuration you can use Laravel Queue API. If you used 
 Unit tests will be provided soon.
 
 ####Contribution
-You can contribute to this package by discovering bugs and opening issues. Enjoy!
+You can contribute to this package by discovering bugs and opening issues. Please, add to which version of package you create pull request or issue. (e.g. [5.2] Fatal error on delayed job) 
 
 ####Supported versions of Laravel (+Lumen)
 `4.0, 4.1, 4.2, 5.0, 5.1, 5.2, 5.3`
