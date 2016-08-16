@@ -14,7 +14,7 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 class RabbitMQQueue extends Queue implements QueueContract
 {
     /**
-     * Used for retry logic, to set the retries on the message metadata instead of the message body
+     * Used for retry logic, to set the retries on the message metadata instead of the message body.
      */
     const ATTEMPT_COUNT_HEADERS_KEY = 'attempts_count';
 
@@ -143,8 +143,6 @@ class RabbitMQQueue extends Queue implements QueueContract
         if ($message instanceof AMQPMessage) {
             return new RabbitMQJob($this->container, $this, $this->channel, $queue, $message);
         }
-
-        return null;
     }
 
     /**
@@ -213,7 +211,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         $delay = $this->getSeconds($delay);
         $destination = $this->getQueueName($destination);
         $destinationExchange = $this->configExchange['name'] ?: $destination;
-        $name = $this->getQueueName($destination) . '_deferred_' . $delay;
+        $name = $this->getQueueName($destination).'_deferred_'.$delay;
         $exchange = $this->configExchange['name'] ?: $destination;
 
         // declare exchange
@@ -247,7 +245,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Sets the attempts member variable to be used in message generation
+     * Sets the attempts member variable to be used in message generation.
      *
      * @param int $count
      *

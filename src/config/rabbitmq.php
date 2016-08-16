@@ -1,7 +1,7 @@
 <?php
 
 /**
- * default configuration for laravel-queue-rabbitmq merged with project config to base key 'queue'
+ * default configuration for laravel-queue-rabbitmq merged with project config to base key 'queue'.
  * @see \MapleSyrupGroup\AMQPEvents\Providers\AMQPEventServiceProvider
  */
 return [
