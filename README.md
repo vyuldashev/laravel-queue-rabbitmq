@@ -23,7 +23,7 @@ RabbitMQ Queue driver for Laravel
 		RABBITMQ_VHOST=/
 		RABBITMQ_LOGIN=guest
 		RABBITMQ_PASSWORD=guest
-		RABBITMQ_QUEUE=queue_name`
+		RABBITMQ_QUEUE=queue_name
 
 
 You can also find full examples in src/examples folder. 
