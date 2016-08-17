@@ -15,9 +15,6 @@
     "illuminate/queue": "5.3.*",
     "php-amqplib/php-amqplib": "2.6.*"
   },
-  "require-dev": {
-    "laravel/framework": "5.3.*"
-  },
   "autoload": {
     "psr-0": {
       "VladimirYuldashev\\LaravelQueueRabbitMQ": "src/"

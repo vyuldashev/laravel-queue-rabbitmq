@@ -55,6 +55,17 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
+     * Get the size of the queue.
+     *
+     * @param  string $queue
+     * @return int
+     */
+    public function size($queue = null)
+    {
+        // TODO: Implement size() method.
+    }
+
+    /**
      * Push a new job onto the queue.
      *
      * @param string $job
@@ -143,6 +154,8 @@ class RabbitMQQueue extends Queue implements QueueContract
         if ($message instanceof AMQPMessage) {
             return new RabbitMQJob($this->container, $this, $this->channel, $queue, $message);
         }
+
+        return null;
     }
 
     /**
@@ -278,4 +291,5 @@ class RabbitMQQueue extends Queue implements QueueContract
     {
         return $this->correlationId ?: uniqid();
     }
+
 }
