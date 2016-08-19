@@ -22,7 +22,10 @@ class RabbitMQQueue extends Queue implements QueueContract
     protected $channel;
 
     protected $declareExchange;
+    protected $declaredExchanges = [];
+
     protected $declareBindQueue;
+    protected $declaredBindQueue = [];
 
     protected $defaultQueue;
     protected $configQueue;
@@ -172,7 +175,8 @@ class RabbitMQQueue extends Queue implements QueueContract
         $name = $this->getQueueName($name);
         $exchange = $this->configExchange['name'] ?: $name;
 
-        if ($this->declareExchange) {
+        if ($this->declareExchange && !in_array($exchange, $this->declaredExchanges)) {
+            $this->declaredExchanges[] = $exchange;
             // declare exchange
             $this->channel->exchange_declare(
                 $exchange,
@@ -183,7 +187,8 @@ class RabbitMQQueue extends Queue implements QueueContract
             );
         }
 
-        if ($this->declareBindQueue) {
+        if ($this->declareBindQueue && !in_array($name, $this->declaredBindQueue)) {
+            $this->declaredBindQueue[] = $name;
             // declare queue
             $this->channel->queue_declare(
                 $name,
