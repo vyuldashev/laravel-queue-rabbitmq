@@ -61,7 +61,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	 */
 	public function later($delay, $job, $data = '', $queue = null)
 	{
-		return $this->pushRaw($this->createPayload($job, $data), $queue, ['delay' => $delay]);
+		return $this->pushRaw($this->createPayload($job, $data), $queue, ['delay' => $this->getSeconds($delay)]);
 	}
 
 	/**
