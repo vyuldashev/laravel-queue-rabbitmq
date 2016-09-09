@@ -196,7 +196,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$name = $this->getQueueName($destination) . '_deferred_' . $delay;
 
 		if (in_array($name, $this->bound)) {
-			return ;
+			return $name;
 		}
 
 		$this->bound[] = $name;
