@@ -3,4 +3,3 @@
 /vendor
 composer.lock
 .phpstorm.meta.php
-phpunit.xml
