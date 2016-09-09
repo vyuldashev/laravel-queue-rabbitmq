@@ -24,7 +24,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 	protected $configQueue;
 	protected $configExchange;
 
-	protected $prevQueue;
+	protected $binding = [];
 
 	/**
 	 * @param AMQPConnection $amqpConnection
@@ -68,7 +68,9 @@ class RabbitMQQueue extends Queue implements QueueContract
 	public function pushRaw($payload, $queue = null, array $options = [])
 	{
 		$queue = $this->getQueueName($queue);
+
 		$this->declareQueue($queue);
+		
 		if (isset($options['delay'])) {
 			$queue = $this->declareDelayedQueue($queue, $options['delay']);
 		}
@@ -149,11 +151,11 @@ class RabbitMQQueue extends Queue implements QueueContract
 	{
 		$name = $this->getQueueName($name);
 
-		if ($this->prevQueue == $name) {
+		if (in_array($name, $this->binding)) {
 			return ;
 		}
 
-		$this->prevQueue = $name;
+		$this->binding[] = $name;
 
 		if ($this->declareExchange) {
 			// declare exchange
@@ -193,11 +195,11 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$destination = $this->getQueueName($destination);
 		$name = $this->getQueueName($destination) . '_deferred_' . $delay;
 
-		if ($this->prevQueue == $name) {
+		if (in_array($name, $this->binding)) {
 			return ;
 		}
 
-		$this->prevQueue = $name;
+		$this->binding[] = $name;
 
 		// declare exchange
 		$this->channel->exchange_declare(
