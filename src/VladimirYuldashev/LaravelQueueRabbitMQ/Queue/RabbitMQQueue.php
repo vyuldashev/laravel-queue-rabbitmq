@@ -24,6 +24,8 @@ class RabbitMQQueue extends Queue implements QueueContract
 	protected $configQueue;
 	protected $configExchange;
 
+	protected $pervQueue;
+
 	/**
 	 * @param AMQPConnection $amqpConnection
 	 * @param array          $config
@@ -147,6 +149,12 @@ class RabbitMQQueue extends Queue implements QueueContract
 	{
 		$name = $this->getQueueName($name);
 
+		if ($this->pervQueue == $name) {
+			return ;
+		}
+
+		$this->pervQueue = $name;
+
 		if ($this->declareExchange) {
 			// declare exchange
 			$this->channel->exchange_declare(
@@ -184,6 +192,12 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$delay = $this->getSeconds($delay);
 		$destination = $this->getQueueName($destination);
 		$name = $this->getQueueName($destination) . '_deferred_' . $delay;
+
+		if ($this->pervQueue == $name) {
+			return ;
+		}
+
+		$this->pervQueue = $name;
 
 		// declare exchange
 		$this->channel->exchange_declare(
