@@ -6,7 +6,6 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQConnectorTest extends TestCase
 {
-
     public function test_connect()
     {
         $config = [
@@ -40,5 +39,4 @@ class RabbitMQConnectorTest extends TestCase
 
         $this->assertInstanceOf(RabbitMQQueue::class, $queue);
     }
-
 }

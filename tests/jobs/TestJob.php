@@ -2,10 +2,7 @@
 
 class TestJob
 {
-
     public function handle()
     {
-
     }
-
 }

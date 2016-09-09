@@ -15,7 +15,6 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
  */
 class RabbitMQQueueTest extends TestCase
 {
-
     public function setUp()
     {
         parent::setUp();
@@ -111,9 +110,9 @@ class RabbitMQQueueTest extends TestCase
 
         // delayed queue
         $this->channel->shouldReceive('queue_bind')->with(
-            $this->config['queue'] . '_deferred_' . $delay,
+            $this->config['queue'].'_deferred_'.$delay,
             $this->config['exchange_params']['name'],
-            $this->config['queue'] . '_deferred_' . $delay
+            $this->config['queue'].'_deferred_'.$delay
         )->once();
 
         $this->channel->shouldReceive('basic_publish')->once();
@@ -155,16 +154,17 @@ class RabbitMQQueueTest extends TestCase
         $this->queue->pop();
     }
 
-    public function test_setAttempts() {
+    public function test_setAttempts()
+    {
         $count = mt_rand();
 
         $this->queue->setAttempts($count);
     }
 
-    public function test_setCorrelationId() {
+    public function test_setCorrelationId()
+    {
         $id = str_random();
 
         $this->queue->setCorrelationId($id);
     }
-
 }
