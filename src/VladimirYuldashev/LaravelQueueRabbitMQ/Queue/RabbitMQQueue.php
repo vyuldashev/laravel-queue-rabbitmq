@@ -22,7 +22,9 @@ class RabbitMQQueue extends Queue implements QueueContract
     protected $channel;
 
     protected $declareExchange;
+    protected $declaredExchanges = [];
     protected $declareBindQueue;
+    protected $declaredQueues = [];
 
     protected $defaultQueue;
     protected $configQueue;
@@ -40,7 +42,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
     /**
      * @param AMQPStreamConnection $amqpConnection
-     * @param array                $config
+     * @param array $config
      */
     public function __construct(AMQPStreamConnection $amqpConnection, $config)
     {
@@ -69,7 +71,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      * Push a new job onto the queue.
      *
      * @param string $job
-     * @param mixed  $data
+     * @param mixed $data
      * @param string $queue
      *
      * @return bool
@@ -84,7 +86,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @param string $payload
      * @param string $queue
-     * @param array  $options
+     * @param array $options
      *
      * @return mixed
      */
@@ -99,7 +101,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         }
 
         $headers = [
-            'Content-Type'  => 'application/json',
+            'Content-Type' => 'application/json',
             'delivery_mode' => 2,
         ];
 
@@ -123,9 +125,9 @@ class RabbitMQQueue extends Queue implements QueueContract
      * Push a new job onto the queue after a delay.
      *
      * @param \DateTime|int $delay
-     * @param string        $job
-     * @param mixed         $data
-     * @param string        $queue
+     * @param string $job
+     * @param mixed $data
+     * @param string $queue
      *
      * @return mixed
      */
@@ -184,7 +186,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         $name = $this->getQueueName($name);
         $exchange = $this->configExchange['name'] ?: $name;
 
-        if ($this->declareExchange) {
+        if ($this->declareExchange && !in_array($exchange, $this->declaredExchanges)) {
             // declare exchange
             $this->channel->exchange_declare(
                 $exchange,
@@ -193,9 +195,11 @@ class RabbitMQQueue extends Queue implements QueueContract
                 $this->configExchange['durable'],
                 $this->configExchange['auto_delete']
             );
+
+            $this->declaredExchanges[] = $exchange;
         }
 
-        if ($this->declareBindQueue) {
+        if ($this->declareBindQueue && !in_array($name, $this->declaredQueues)) {
             // declare queue
             $this->channel->queue_declare(
                 $name,
@@ -207,13 +211,15 @@ class RabbitMQQueue extends Queue implements QueueContract
 
             // bind queue to the exchange
             $this->channel->queue_bind($name, $exchange, $name);
+
+            $this->declaredQueues[] = $name;
         }
 
         return [$name, $exchange];
     }
 
     /**
-     * @param string       $destination
+     * @param string $destination
      * @param DateTime|int $delay
      *
      * @return string
@@ -223,32 +229,36 @@ class RabbitMQQueue extends Queue implements QueueContract
         $delay = $this->getSeconds($delay);
         $destination = $this->getQueueName($destination);
         $destinationExchange = $this->configExchange['name'] ?: $destination;
-        $name = $this->getQueueName($destination).'_deferred_'.$delay;
+        $name = $this->getQueueName($destination) . '_deferred_' . $delay;
         $exchange = $this->configExchange['name'] ?: $destination;
 
         // declare exchange
-        $this->channel->exchange_declare(
-            $exchange,
-            $this->configExchange['type'],
-            $this->configExchange['passive'],
-            $this->configExchange['durable'],
-            $this->configExchange['auto_delete']
-        );
+        if (!in_array($exchange, $this->declaredExchanges)) {
+            $this->channel->exchange_declare(
+                $exchange,
+                $this->configExchange['type'],
+                $this->configExchange['passive'],
+                $this->configExchange['durable'],
+                $this->configExchange['auto_delete']
+            );
+        }
 
         // declare queue
-        $this->channel->queue_declare(
-            $name,
-            $this->configQueue['passive'],
-            $this->configQueue['durable'],
-            $this->configQueue['exclusive'],
-            $this->configQueue['auto_delete'],
-            false,
-            new AMQPTable([
-                'x-dead-letter-exchange'    => $destinationExchange,
-                'x-dead-letter-routing-key' => $destination,
-                'x-message-ttl'             => $delay * 1000,
-            ])
-        );
+        if (!in_array($name, $this->declaredQueues)) {
+            $this->channel->queue_declare(
+                $name,
+                $this->configQueue['passive'],
+                $this->configQueue['durable'],
+                $this->configQueue['exclusive'],
+                $this->configQueue['auto_delete'],
+                false,
+                new AMQPTable([
+                    'x-dead-letter-exchange' => $destinationExchange,
+                    'x-dead-letter-routing-key' => $destination,
+                    'x-message-ttl' => $delay * 1000,
+                ])
+            );
+        }
 
         // bind queue to the exchange
         $this->channel->queue_bind($name, $exchange, $name);
