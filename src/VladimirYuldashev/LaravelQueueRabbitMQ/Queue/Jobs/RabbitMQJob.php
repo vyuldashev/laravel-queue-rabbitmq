@@ -59,7 +59,8 @@ class RabbitMQJob extends Job implements JobContract
             }
         }
 
-        return 0;
+        // set default job attempts to 1 so that jobs can run without retry 
+        return 1;
     }
 
     /**
