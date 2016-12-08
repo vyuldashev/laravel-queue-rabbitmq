@@ -24,11 +24,11 @@ class RabbitMQJob extends Job implements JobContract
     /**
      * Creates a new instance of RabbitMQJob.
      *
-     * @param \Illuminate\Container\Container $container
+     * @param \Illuminate\Container\Container                             $container
      * @param \VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue $connection
-     * @param \PhpAmqpLib\Channel\AMQPChannel $channel
-     * @param string $queue
-     * @param \PhpAmqpLib\Message\AMQPMessage $message
+     * @param \PhpAmqpLib\Channel\AMQPChannel                             $channel
+     * @param string                                                      $queue
+     * @param \PhpAmqpLib\Message\AMQPMessage                             $message
      */
     public function __construct(
         Container $container,
@@ -59,7 +59,8 @@ class RabbitMQJob extends Job implements JobContract
             }
         }
 
-        return 0;
+        // set default job attempts to 1 so that jobs can run without retry
+        return 1;
     }
 
     /**
