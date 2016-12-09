@@ -3,8 +3,11 @@
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
 use DateTime;
+use ErrorException;
+use Exception;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Queue\Queue;
+use Log;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
@@ -23,6 +26,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 	protected $defaultQueue;
 	protected $configQueue;
 	protected $configExchange;
+	protected $sleepOnError;
 
 	/**
 	 * @param AMQPConnection $amqpConnection
@@ -36,6 +40,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$this->configExchange = $config['exchange_params'];
 		$this->declareExchange = $config['exchange_declare'];
 		$this->declareBindQueue = $config['queue_declare_bind'];
+		$this->sleepOnError = $config['sleep_on_error'];
 
 		$this->channel = $this->getChannel();
 	}
@@ -66,19 +71,23 @@ class RabbitMQQueue extends Queue implements QueueContract
 	public function pushRaw($payload, $queue = null, array $options = [])
 	{
 		$queue = $this->getQueueName($queue);
-		$this->declareQueue($queue);
-		if (isset($options['delay'])) {
-			$queue = $this->declareDelayedQueue($queue, $options['delay']);
+		try {
+			$this->declareQueue($queue);
+			if (isset($options['delay'])) {
+				$queue = $this->declareDelayedQueue($queue, $options['delay']);
+			}
+
+			// push job to a queue
+			$message = new AMQPMessage($payload, [
+				'Content-Type'  => 'application/json',
+				'delivery_mode' => 2,
+			]);
+
+			// push task to a queue
+			$this->channel->basic_publish($message, $queue, $queue);
+		} catch (ErrorException $e) {
+			$this->reportConnectionError('pushRaw', $e);
 		}
-
-		// push job to a queue
-		$message = new AMQPMessage($payload, [
-			'Content-Type'  => 'application/json',
-			'delivery_mode' => 2,
-		]);
-
-		// push task to a queue
-		$this->channel->basic_publish($message, $queue, $queue);
 
 		return true;
 	}
@@ -109,14 +118,18 @@ class RabbitMQQueue extends Queue implements QueueContract
 	{
 		$queue = $this->getQueueName($queue);
 
-		// declare queue if not exists
-		$this->declareQueue($queue);
+		try {
+			// declare queue if not exists
+			$this->declareQueue($queue);
 
-		// get envelope
-		$message = $this->channel->basic_get($queue);
+			// get envelope
+			$message = $this->channel->basic_get($queue);
 
-		if ($message instanceof AMQPMessage) {
-			return new RabbitMQJob($this->container, $this, $this->channel, $queue, $message);
+			if ($message instanceof AMQPMessage) {
+				return new RabbitMQJob($this->container, $this, $this->channel, $queue, $message);
+			}
+		} catch (ErrorException $e) {
+			$this->reportConnectionError('pop', $e);
 		}
 
 		return null;
@@ -215,4 +228,15 @@ class RabbitMQQueue extends Queue implements QueueContract
 		return $name;
 	}
 
+	/**
+	 * @param string    $action
+	 * @param Exception $e
+	 */
+	private function reportConnectionError($action, Exception $e)
+	{
+		Log::error('AMQP error while attempting ' . $action . ': ' . $e->getMessage());
+
+		// Sleep so that we don't flood the log file
+		sleep($this->sleepOnError);
+	}
 }
