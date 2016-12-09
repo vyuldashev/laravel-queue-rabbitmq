@@ -40,7 +40,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 		$this->configExchange = $config['exchange_params'];
 		$this->declareExchange = $config['exchange_declare'];
 		$this->declareBindQueue = $config['queue_declare_bind'];
-		$this->sleepOnError = $config['sleep_on_error'];
+		$this->sleepOnError = isset($config['sleep_on_error']) ? $config['sleep_on_error'] : 5;
 
 		$this->channel = $this->getChannel();
 	}
