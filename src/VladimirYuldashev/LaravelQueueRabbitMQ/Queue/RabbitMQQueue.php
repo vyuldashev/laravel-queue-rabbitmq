@@ -33,7 +33,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     /**
      * @var int
      */
-    private $attempts;
+    private $retryAfter;
 
     /**
      * @var string
@@ -105,8 +105,8 @@ class RabbitMQQueue extends Queue implements QueueContract
             'delivery_mode' => 2,
         ];
 
-        if (isset($this->attempts) === true) {
-            $headers['application_headers'] = [self::ATTEMPT_COUNT_HEADERS_KEY => ['I', $this->attempts]];
+        if (isset($this->retryAfter) === true) {
+            $headers['application_headers'] = [self::ATTEMPT_COUNT_HEADERS_KEY => ['I', $this->retryAfter]];
         }
 
         // push job to a queue
@@ -133,7 +133,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     public function later($delay, $job, $data = '', $queue = null)
     {
-        return $this->pushRaw($this->createPayload($job, $data), $queue, ['delay' => $this->getSeconds($delay)]);
+        return $this->pushRaw($this->createPayload($job, $data), $queue, ['delay' => $this->secondsUntil($delay)]);
     }
 
     /**
@@ -226,7 +226,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     private function declareDelayedQueue($destination, $delay)
     {
-        $delay = $this->getSeconds($delay);
+        $delay = $this->secondsUntil($delay);
         $destination = $this->getQueueName($destination);
         $destinationExchange = $this->configExchange['name'] ?: $destination;
         $name = $this->getQueueName($destination) . '_deferred_' . $delay;
@@ -275,7 +275,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     public function setAttempts($count)
     {
-        $this->attempts = $count;
+        $this->retryAfter = $count;
     }
 
     /**
