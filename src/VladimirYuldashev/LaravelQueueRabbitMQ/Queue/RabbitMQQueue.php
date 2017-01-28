@@ -33,7 +33,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     /**
      * @var int
      */
-    private $attempts;
+    private $retryAfter;
 
     /**
      * @var string
@@ -42,7 +42,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
     /**
      * @param AMQPStreamConnection $amqpConnection
-     * @param array $config
+     * @param array                $config
      */
     public function __construct(AMQPStreamConnection $amqpConnection, $config)
     {
@@ -59,7 +59,8 @@ class RabbitMQQueue extends Queue implements QueueContract
     /**
      * Get the size of the queue.
      *
-     * @param  string $queue
+     * @param string $queue
+     *
      * @return int
      */
     public function size($queue = null)
@@ -71,7 +72,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      * Push a new job onto the queue.
      *
      * @param string $job
-     * @param mixed $data
+     * @param mixed  $data
      * @param string $queue
      *
      * @return bool
@@ -86,7 +87,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @param string $payload
      * @param string $queue
-     * @param array $options
+     * @param array  $options
      *
      * @return mixed
      */
@@ -101,12 +102,12 @@ class RabbitMQQueue extends Queue implements QueueContract
         }
 
         $headers = [
-            'Content-Type' => 'application/json',
+            'Content-Type'  => 'application/json',
             'delivery_mode' => 2,
         ];
 
-        if (isset($this->attempts) === true) {
-            $headers['application_headers'] = [self::ATTEMPT_COUNT_HEADERS_KEY => ['I', $this->attempts]];
+        if (isset($this->retryAfter) === true) {
+            $headers['application_headers'] = [self::ATTEMPT_COUNT_HEADERS_KEY => ['I', $this->retryAfter]];
         }
 
         // push job to a queue
@@ -125,15 +126,15 @@ class RabbitMQQueue extends Queue implements QueueContract
      * Push a new job onto the queue after a delay.
      *
      * @param \DateTime|int $delay
-     * @param string $job
-     * @param mixed $data
-     * @param string $queue
+     * @param string        $job
+     * @param mixed         $data
+     * @param string        $queue
      *
      * @return mixed
      */
     public function later($delay, $job, $data = '', $queue = null)
     {
-        return $this->pushRaw($this->createPayload($job, $data), $queue, ['delay' => $this->getSeconds($delay)]);
+        return $this->pushRaw($this->createPayload($job, $data), $queue, ['delay' => $this->secondsUntil($delay)]);
     }
 
     /**
@@ -219,17 +220,17 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * @param string $destination
+     * @param string       $destination
      * @param DateTime|int $delay
      *
      * @return string
      */
     private function declareDelayedQueue($destination, $delay)
     {
-        $delay = $this->getSeconds($delay);
+        $delay = $this->secondsUntil($delay);
         $destination = $this->getQueueName($destination);
         $destinationExchange = $this->configExchange['name'] ?: $destination;
-        $name = $this->getQueueName($destination) . '_deferred_' . $delay;
+        $name = $this->getQueueName($destination).'_deferred_'.$delay;
         $exchange = $this->configExchange['name'] ?: $destination;
 
         // declare exchange
@@ -253,9 +254,9 @@ class RabbitMQQueue extends Queue implements QueueContract
                 $this->configQueue['auto_delete'],
                 false,
                 new AMQPTable([
-                    'x-dead-letter-exchange' => $destinationExchange,
+                    'x-dead-letter-exchange'    => $destinationExchange,
                     'x-dead-letter-routing-key' => $destination,
-                    'x-message-ttl' => $delay * 1000,
+                    'x-message-ttl'             => $delay * 1000,
                 ])
             );
         }
@@ -275,7 +276,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     public function setAttempts($count)
     {
-        $this->attempts = $count;
+        $this->retryAfter = $count;
     }
 
     /**
