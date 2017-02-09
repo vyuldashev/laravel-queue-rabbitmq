@@ -7,6 +7,7 @@ use ErrorException;
 use Exception;
 use Log;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
+use Illuminate\Contracts\Queue\Factory as QueueFactory;
 use Illuminate\Queue\Queue;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
@@ -14,7 +15,7 @@ use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
-class RabbitMQQueue extends Queue implements QueueContract
+class RabbitMQQueue extends Queue implements QueueContract, QueueFactory
 {
     /**
      * Used for retry logic, to set the retries on the message metadata instead of the message body.
@@ -330,4 +331,14 @@ class RabbitMQQueue extends Queue implements QueueContract
         sleep($this->sleepOnError);
     }
 
+    /**
+     * Resolve a queue connection instance.
+     *
+     * @param  string  $name
+     * @return \Illuminate\Contracts\Queue\Queue
+     */
+    public function connection($name = null)
+    {
+        return $this;
+    }
 }
