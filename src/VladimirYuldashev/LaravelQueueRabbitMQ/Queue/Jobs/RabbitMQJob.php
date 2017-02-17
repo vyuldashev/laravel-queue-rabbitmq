@@ -2,8 +2,10 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs;
 
+use Exception;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Queue\Job as JobContract;
+use Illuminate\Database\DetectsDeadlocks;
 use Illuminate\Queue\Jobs\Job;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Message\AMQPMessage;
@@ -11,6 +13,9 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQJob extends Job implements JobContract
 {
+
+    use DetectsDeadlocks;
+
     /**
      * Same as RabbitMQQueue, used for attempt counts.
      */
@@ -24,11 +29,11 @@ class RabbitMQJob extends Job implements JobContract
     /**
      * Creates a new instance of RabbitMQJob.
      *
-     * @param \Illuminate\Container\Container                             $container
+     * @param \Illuminate\Container\Container $container
      * @param \VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue $connection
-     * @param \PhpAmqpLib\Channel\AMQPChannel                             $channel
-     * @param string                                                      $queue
-     * @param \PhpAmqpLib\Message\AMQPMessage                             $message
+     * @param \PhpAmqpLib\Channel\AMQPChannel $channel
+     * @param string $queue
+     * @param \PhpAmqpLib\Message\AMQPMessage $message
      */
     public function __construct(
         Container $container,
@@ -36,7 +41,8 @@ class RabbitMQJob extends Job implements JobContract
         AMQPChannel $channel,
         $queue,
         AMQPMessage $message
-    ) {
+    )
+    {
         $this->container = $container;
         $this->connection = $connection;
         $this->channel = $channel;
@@ -88,8 +94,8 @@ class RabbitMQJob extends Job implements JobContract
      * Release the job back into the queue.
      *
      * @param int $delay
-     *
      * @return void
+     * @throws Exception
      */
     public function release($delay = 0)
     {
@@ -104,7 +110,17 @@ class RabbitMQJob extends Job implements JobContract
          * Some jobs don't have the command set, so fall back to just sending it the job name string
          */
         if (isset($body['data']['command']) === true) {
-            $job = unserialize($body['data']['command']);
+            try {
+                $job = unserialize($body['data']['command']);
+            } catch (Exception $exception) {
+                if ($this->causedByDeadlock($exception)) {
+                    sleep(2);
+                    $this->release($delay);
+                    return;
+                }
+
+                throw $exception;
+            }
         } else {
             $job = $this->getName();
         }
