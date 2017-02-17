@@ -7,6 +7,7 @@ use Illuminate\Container\Container;
 use Illuminate\Contracts\Queue\Job as JobContract;
 use Illuminate\Database\DetectsDeadlocks;
 use Illuminate\Queue\Jobs\Job;
+use Illuminate\Support\Str;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Message\AMQPMessage;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
@@ -113,7 +114,10 @@ class RabbitMQJob extends Job implements JobContract
             try {
                 $job = unserialize($body['data']['command']);
             } catch (Exception $exception) {
-                if ($this->causedByDeadlock($exception)) {
+                if (
+                    $this->causedByDeadlock($exception) ||
+                    Str::contains($exception->getMessage(), ['detected deadlock'])
+                ) {
                     sleep(2);
                     $this->release($delay);
                     return;
