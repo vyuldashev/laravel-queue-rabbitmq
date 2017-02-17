@@ -111,20 +111,7 @@ class RabbitMQJob extends Job implements JobContract
          * Some jobs don't have the command set, so fall back to just sending it the job name string
          */
         if (isset($body['data']['command']) === true) {
-            try {
-                $job = unserialize($body['data']['command']);
-            } catch (Exception $exception) {
-                if (
-                    $this->causedByDeadlock($exception) ||
-                    Str::contains($exception->getMessage(), ['detected deadlock'])
-                ) {
-                    sleep(2);
-                    $this->release($delay);
-                    return;
-                }
-
-                throw $exception;
-            }
+            $job = $this->unserialize($body);
         } else {
             $job = $this->getName();
         }
@@ -171,4 +158,29 @@ class RabbitMQJob extends Job implements JobContract
     {
         $this->connection->setCorrelationId($id);
     }
+
+    /**
+     * Unserialize job
+     *
+     * @param array $body
+     * @return mixed
+     * @throws Exception
+     */
+    private function unserialize(array $body)
+    {
+        try {
+            return unserialize($body['data']['command']);
+        } catch (Exception $exception) {
+            if (
+                $this->causedByDeadlock($exception) ||
+                Str::contains($exception->getMessage(), ['detected deadlock'])
+            ) {
+                sleep(2);
+                return $this->unserialize($body);
+            }
+
+            throw $exception;
+        }
+    }
+
 }
