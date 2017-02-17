@@ -52,6 +52,35 @@ class RabbitMQJob extends Job implements JobContract
     }
 
     /**
+     * Fire the job.
+     * @return void
+     * @throws Exception
+     */
+    public function fire()
+    {
+        $payload = $this->payload();
+
+        list($class, $method) = $this->parseJob($payload['job']);
+
+        $this->instance = $this->resolve($class);
+
+        try {
+            $this->instance->{$method}($this, $payload['data']);
+        } catch (Exception $exception) {
+            if (
+                $this->causedByDeadlock($exception) ||
+                Str::contains($exception->getMessage(), ['detected deadlock'])
+            ) {
+                sleep(2);
+                $this->fire();
+                return;
+            }
+
+            throw $exception;
+        }
+    }
+
+    /**
      * Get the number of times the job has been attempted.
      *
      * @return int
