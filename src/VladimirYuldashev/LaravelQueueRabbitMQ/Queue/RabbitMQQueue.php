@@ -330,4 +330,14 @@ class RabbitMQQueue extends Queue implements QueueContract
         sleep($this->sleepOnError);
     }
 
+    /**
+     * Return rabbit connection layer
+     *
+     * @return AMQPStreamConnection
+     */
+    public function getConnection()
+    {
+        return $this->connection;
+    }
+
 }
