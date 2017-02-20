@@ -26,6 +26,10 @@ class RabbitMQConnector implements ConnectorInterface
             $config['vhost']
         );
 
+        app('queue')->stopping(function () use ($connection) {
+            $connection->close();
+        });
+
         return new RabbitMQQueue(
             $connection,
             $config
