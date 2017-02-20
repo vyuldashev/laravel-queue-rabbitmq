@@ -59,7 +59,6 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->declareBindQueue = $config['queue_declare_bind'];
         $this->sleepOnError = isset($config['sleep_on_error']) ? $config['sleep_on_error'] : 5;
 
-        $this->addCloseConnectionEvent();
         $this->channel = $this->getChannel();
     }
 
@@ -321,19 +320,6 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Close Rabbit connection when worker exit or die
-     *
-     */
-    protected function addCloseConnectionEvent()
-    {
-        $connection = $this->connection;
-
-        app('queue')->stopping(function () use ($connection) {
-            $connection->close();
-        });
-    }
-
-    /**
      * @param string    $action
      * @param Exception $e
      */
@@ -342,6 +328,11 @@ class RabbitMQQueue extends Queue implements QueueContract
         Log::error('AMQP error while attempting ' . $action . ': ' . $e->getMessage());
         // Sleep so that we don't flood the log file
         sleep($this->sleepOnError);
+    }
+
+    public function getConnection()
+    {
+        return $this->connection;
     }
 
 }
