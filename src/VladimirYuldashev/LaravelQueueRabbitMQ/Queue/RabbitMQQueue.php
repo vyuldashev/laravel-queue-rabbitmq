@@ -59,6 +59,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->declareBindQueue = $config['queue_declare_bind'];
         $this->sleepOnError = isset($config['sleep_on_error']) ? $config['sleep_on_error'] : 5;
 
+        $this->addCloseConnectionEvent();
         $this->channel = $this->getChannel();
     }
 
@@ -317,6 +318,19 @@ class RabbitMQQueue extends Queue implements QueueContract
     public function getCorrelationId()
     {
         return $this->correlationId ?: uniqid();
+    }
+
+    /**
+     * Close Rabbit connection when worker exit or die
+     *
+     */
+    protected function addCloseConnectionEvent()
+    {
+        $connection = $this->connection;
+
+        app('queue')->stopping(function () use ($connection) {
+            $connection->close();
+        });
     }
 
     /**
