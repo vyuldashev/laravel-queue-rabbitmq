@@ -15,7 +15,6 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQJob extends Job implements JobContract
 {
-
     use DetectsDeadlocks;
 
     /**
@@ -31,11 +30,11 @@ class RabbitMQJob extends Job implements JobContract
     /**
      * Creates a new instance of RabbitMQJob.
      *
-     * @param \Illuminate\Container\Container $container
+     * @param \Illuminate\Container\Container                             $container
      * @param \VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue $connection
-     * @param \PhpAmqpLib\Channel\AMQPChannel $channel
-     * @param string $queue
-     * @param \PhpAmqpLib\Message\AMQPMessage $message
+     * @param \PhpAmqpLib\Channel\AMQPChannel                             $channel
+     * @param string                                                      $queue
+     * @param \PhpAmqpLib\Message\AMQPMessage                             $message
      */
     public function __construct(
         Container $container,
@@ -43,8 +42,7 @@ class RabbitMQJob extends Job implements JobContract
         AMQPChannel $channel,
         $queue,
         AMQPMessage $message
-    )
-    {
+    ) {
         $this->container = $container;
         $this->connection = $connection;
         $this->channel = $channel;
@@ -54,8 +52,10 @@ class RabbitMQJob extends Job implements JobContract
 
     /**
      * Fire the job.
-     * @return void
+     *
      * @throws Exception
+     *
+     * @return void
      */
     public function fire()
     {
@@ -74,6 +74,7 @@ class RabbitMQJob extends Job implements JobContract
             ) {
                 sleep(2);
                 $this->fire();
+
                 return;
             }
 
@@ -125,8 +126,10 @@ class RabbitMQJob extends Job implements JobContract
      * Release the job back into the queue.
      *
      * @param int $delay
-     * @return void
+     *
      * @throws Exception
+     *
+     * @return void
      */
     public function release($delay = 0)
     {
@@ -190,11 +193,13 @@ class RabbitMQJob extends Job implements JobContract
     }
 
     /**
-     * Unserialize job
+     * Unserialize job.
      *
      * @param array $body
-     * @return mixed
+     *
      * @throws Exception
+     *
+     * @return mixed
      */
     private function unserialize(array $body)
     {
@@ -206,11 +211,11 @@ class RabbitMQJob extends Job implements JobContract
                 Str::contains($exception->getMessage(), ['detected deadlock'])
             ) {
                 sleep(2);
+
                 return $this->unserialize($body);
             }
 
             throw $exception;
         }
     }
-
 }
