@@ -2,6 +2,7 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ;
 
+use Illuminate\Queue\QueueManager;
 use Illuminate\Support\ServiceProvider;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 
@@ -26,15 +27,16 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $appQueue = app('queue');
-        $rabbitMQConnector = new RabbitMQConnector();
+        /** @var QueueManager $queue */
+        $queue = $this->app['queue'];
+        $connector = new RabbitMQConnector;
 
-        $appQueue->stopping(function () use ($rabbitMQConnector) {
-            $rabbitMQConnector->getConnection()->close();
+        $queue->stopping(function () use ($connector) {
+            $connector->connection()->close();
         });
 
-        $appQueue->addConnector('rabbitmq', function () use ($rabbitMQConnector) {
-            return $rabbitMQConnector;
+        $queue->addConnector('rabbitmq', function () use ($connector) {
+            return $connector;
         });
     }
 }
