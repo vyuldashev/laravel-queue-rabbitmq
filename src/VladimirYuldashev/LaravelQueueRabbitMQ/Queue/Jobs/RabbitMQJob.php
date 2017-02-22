@@ -7,6 +7,7 @@ use Illuminate\Container\Container;
 use Illuminate\Contracts\Queue\Job as JobContract;
 use Illuminate\Database\DetectsDeadlocks;
 use Illuminate\Queue\Jobs\Job;
+use Illuminate\Queue\Jobs\JobName;
 use Illuminate\Support\Str;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Message\AMQPMessage;
@@ -60,7 +61,7 @@ class RabbitMQJob extends Job implements JobContract
     {
         $payload = $this->payload();
 
-        list($class, $method) = $this->parseJob($payload['job']);
+        list($class, $method) = JobName::parse($payload['job']);
 
         $this->instance = $this->resolve($class);
 
