@@ -1,5 +1,6 @@
 <?php
 
+use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PHPUnit\Framework\TestCase;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
@@ -38,5 +39,6 @@ class RabbitMQConnectorTest extends TestCase
         $queue = $connector->connect($config);
 
         $this->assertInstanceOf(RabbitMQQueue::class, $queue);
+        $this->assertInstanceOf(AMQPStreamConnection::class, $connector->connection());
     }
 }
