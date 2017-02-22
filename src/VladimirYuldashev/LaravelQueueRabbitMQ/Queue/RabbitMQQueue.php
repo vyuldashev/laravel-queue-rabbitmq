@@ -5,9 +5,9 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 use DateTime;
 use ErrorException;
 use Exception;
-use Log;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Queue\Queue;
+use Log;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
@@ -130,8 +130,6 @@ class RabbitMQQueue extends Queue implements QueueContract
         } catch (ErrorException $exception) {
             $this->reportConnectionError('pushRaw', $exception);
         }
-
-        return null;
     }
 
     /**
@@ -170,12 +168,9 @@ class RabbitMQQueue extends Queue implements QueueContract
             if ($message instanceof AMQPMessage) {
                 return new RabbitMQJob($this->container, $this, $this->channel, $queue, $message);
             }
-        }
-        catch(ErrorException $exception) {
+        } catch (ErrorException $exception) {
             $this->reportConnectionError('pop', $exception);
         }
-
-        return null;
     }
 
     /**
@@ -326,9 +321,8 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     private function reportConnectionError($action, Exception $e)
     {
-        Log::error('AMQP error while attempting ' . $action . ': ' . $e->getMessage());
+        Log::error('AMQP error while attempting '.$action.': '.$e->getMessage());
         // Sleep so that we don't flood the log file
         sleep($this->sleepOnError);
     }
-
 }

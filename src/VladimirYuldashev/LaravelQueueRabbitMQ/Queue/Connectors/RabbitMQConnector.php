@@ -8,7 +8,6 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQConnector implements ConnectorInterface
 {
-
     /** @var AMQPStreamConnection */
     private $connection;
 
@@ -40,5 +39,4 @@ class RabbitMQConnector implements ConnectorInterface
     {
         return $this->connection;
     }
-
 }
