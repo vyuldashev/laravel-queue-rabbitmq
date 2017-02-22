@@ -8,6 +8,10 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQConnector implements ConnectorInterface
 {
+
+    /** @var AMQPStreamConnection */
+    private $connection;
+
     /**
      * Establish a queue connection.
      *
@@ -18,7 +22,7 @@ class RabbitMQConnector implements ConnectorInterface
     public function connect(array $config)
     {
         // create connection with AMQP
-        $connection = new AMQPStreamConnection(
+        $this->connection = new AMQPStreamConnection(
             $config['host'],
             $config['port'],
             $config['login'],
@@ -27,8 +31,14 @@ class RabbitMQConnector implements ConnectorInterface
         );
 
         return new RabbitMQQueue(
-            $connection,
+            $this->connection,
             $config
         );
     }
+
+    public function connection()
+    {
+        return $this->connection;
+    }
+
 }
