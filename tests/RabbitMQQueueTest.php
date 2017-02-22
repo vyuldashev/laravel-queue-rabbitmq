@@ -5,6 +5,7 @@ use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use PHPUnit\Framework\TestCase;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 /**
@@ -110,9 +111,9 @@ class RabbitMQQueueTest extends TestCase
 
         // delayed queue
         $this->channel->shouldReceive('queue_bind')->with(
-            $this->config['queue'].'_deferred_'.$delay,
+            $this->config['queue'] . '_deferred_' . $delay,
             $this->config['exchange_params']['name'],
-            $this->config['queue'].'_deferred_'.$delay
+            $this->config['queue'] . '_deferred_' . $delay
         )->once();
 
         $this->channel->shouldReceive('basic_publish')->once();

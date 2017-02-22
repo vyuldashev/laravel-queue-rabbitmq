@@ -12,8 +12,8 @@ return [
     'host' => env('RABBITMQ_HOST', '127.0.0.1'),
     'port' => env('RABBITMQ_PORT', 5672),
 
-    'vhost'    => env('RABBITMQ_VHOST', '/'),
-    'login'    => env('RABBITMQ_LOGIN', 'guest'),
+    'vhost' => env('RABBITMQ_VHOST', '/'),
+    'login' => env('RABBITMQ_LOGIN', 'guest'),
     'password' => env('RABBITMQ_PASSWORD', 'guest'),
 
     'queue' => env('RABBITMQ_QUEUE'),
@@ -25,9 +25,9 @@ return [
     // create the queue if not exists and bind to the exchange
 
     'queue_params' => [
-        'passive'     => env('RABBITMQ_QUEUE_PASSIVE', false),
-        'durable'     => env('RABBITMQ_QUEUE_DURABLE', true),
-        'exclusive'   => env('RABBITMQ_QUEUE_EXCLUSIVE', false),
+        'passive' => env('RABBITMQ_QUEUE_PASSIVE', false),
+        'durable' => env('RABBITMQ_QUEUE_DURABLE', true),
+        'exclusive' => env('RABBITMQ_QUEUE_EXCLUSIVE', false),
         'auto_delete' => env('RABBITMQ_QUEUE_AUTODELETE', false),
     ],
     'exchange_params' => [
@@ -39,5 +39,7 @@ return [
         // the exchange will survive server restarts
         'auto_delete' => env('RABBITMQ_EXCHANGE_AUTODELETE', false),
     ],
+
+    'sleep_on_error' => env('RABBITMQ_ERROR_SLEEP', 5), // the number of seconds to sleep if there's an error communicating with rabbitmq
 
 ];
