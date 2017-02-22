@@ -59,14 +59,12 @@ class RabbitMQJob extends Job implements JobContract
      */
     public function fire()
     {
-        $payload = $this->payload();
-
-        list($class, $method) = JobName::parse($payload['job']);
-
-        $this->instance = $this->resolve($class);
-
         try {
-            $this->instance->{$method}($this, $payload['data']);
+            $payload = $this->payload();
+
+            list($class, $method) = JobName::parse($payload['job']);
+
+            with($this->instance = $this->resolve($class))->{$method}($this, $payload['data']);
         } catch (Exception $exception) {
             if (
                 $this->causedByDeadlock($exception) ||
