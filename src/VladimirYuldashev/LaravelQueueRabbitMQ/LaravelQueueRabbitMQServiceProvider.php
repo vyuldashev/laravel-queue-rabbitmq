@@ -29,7 +29,7 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
     {
         /** @var QueueManager $queue */
         $queue = $this->app['queue'];
-        $connector = new RabbitMQConnector;
+        $connector = new RabbitMQConnector();
 
         $queue->stopping(function () use ($connector) {
             $connector->connection()->close();
