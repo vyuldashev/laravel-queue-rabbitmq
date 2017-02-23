@@ -39,6 +39,8 @@ Unit tests will be provided soon.
 ####Contribution
 You can contribute to this package by discovering bugs and opening issues. Please, add to which version of package you create pull request or issue. (e.g. [5.2] Fatal error on delayed job)
 
+> If you want to make feature for several versions (for example: 5.2, 5.3 and 5.4). Create PR for the lowest version (5.2). Hence, you should use branch v5.2.
+
 ####Supported versions of Laravel (+Lumen)
 `4.0, 4.1, 4.2, 5.0, 5.1, 5.2, 5.3, 5.4`
 
