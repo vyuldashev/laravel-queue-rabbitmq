@@ -6,7 +6,7 @@ RabbitMQ Queue driver for Laravel
 [![StyleCI](https://styleci.io/repos/14976752/shield)](https://styleci.io/repos/14976752)
 [![License](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/license?format=flat-square)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq)
 
-####Installation
+#### Installation
 
 1. Install this package via composer using:
 
@@ -30,18 +30,22 @@ RabbitMQ Queue driver for Laravel
 
 You can also find full examples in src/examples folder.
 
-####Usage
+#### Usage
+
 Once you completed the configuration you can use Laravel Queue API. If you used other queue drivers you do not need to change anything else. If you do not know how to use Queue API, please refer to the official Laravel documentation: http://laravel.com/docs/queues
 
-####PHPUnit
+#### PHPUnit
+
 Unit tests will be provided soon.
 
-####Contribution
+#### Contribution
+
 You can contribute to this package by discovering bugs and opening issues. Please, add to which version of package you create pull request or issue. (e.g. [5.2] Fatal error on delayed job)
 
 > If you want to make feature for several versions (for example: 5.2, 5.3 and 5.4). Create PR for the lowest version (5.2). Hence, you should use branch v5.2.
 
-####Supported versions of Laravel (+Lumen)
+#### Supported versions of Laravel (+Lumen)
+
 `4.0, 4.1, 4.2, 5.0, 5.1, 5.2, 5.3, 5.4`
 
 The version is being matched by the release tag of this library.
