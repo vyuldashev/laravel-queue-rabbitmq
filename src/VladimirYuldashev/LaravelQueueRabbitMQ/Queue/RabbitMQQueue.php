@@ -100,7 +100,6 @@ class RabbitMQQueue extends Queue implements QueueContract
     {
         try {
             $queue = $this->getQueueName($queue);
-            $this->declareQueue($queue);
             if (isset($options['delay']) && $options['delay'] > 0) {
                 list($queue, $exchange) = $this->declareDelayedQueue($queue, $options['delay']);
             } else {
