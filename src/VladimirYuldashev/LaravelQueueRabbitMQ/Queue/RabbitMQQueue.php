@@ -101,7 +101,6 @@ class RabbitMQQueue extends Queue implements QueueContract
     {
         try {
             $queue = $this->getQueueName($queue);
-            $this->declareQueue($queue);
             if (isset($options['delay']) && $options['delay'] > 0) {
                 list($queue, $exchange) = $this->declareDelayedQueue($queue, $options['delay']);
             } else {
@@ -113,7 +112,7 @@ class RabbitMQQueue extends Queue implements QueueContract
                 'delivery_mode' => 2,
             ];
 
-            if (isset($this->retryAfter) === true) {
+            if ($this->retryAfter !== null) {
                 $headers['application_headers'] = [self::ATTEMPT_COUNT_HEADERS_KEY => ['I', $this->retryAfter]];
             }
 
@@ -201,7 +200,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         $name = $this->getQueueName($name);
         $exchange = $this->configExchange['name'] ?: $name;
 
-        if ($this->declareExchange && !in_array($exchange, $this->declaredExchanges)) {
+        if ($this->declareExchange && !in_array($exchange, $this->declaredExchanges, true)) {
             // declare exchange
             $this->channel->exchange_declare(
                 $exchange,
@@ -214,7 +213,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             $this->declaredExchanges[] = $exchange;
         }
 
-        if ($this->declareBindQueue && !in_array($name, $this->declaredQueues)) {
+        if ($this->declareBindQueue && !in_array($name, $this->declaredQueues, true)) {
             // declare queue
             $this->channel->queue_declare(
                 $name,
@@ -237,7 +236,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      * @param string       $destination
      * @param DateTime|int $delay
      *
-     * @return string
+     * @return array
      */
     private function declareDelayedQueue($destination, $delay)
     {
@@ -248,7 +247,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         $exchange = $this->configExchange['name'] ?: $destination;
 
         // declare exchange
-        if (!in_array($exchange, $this->declaredExchanges)) {
+        if (!in_array($exchange, $this->declaredExchanges, true)) {
             $this->channel->exchange_declare(
                 $exchange,
                 $this->configExchange['type'],
@@ -259,7 +258,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         }
 
         // declare queue
-        if (!in_array($name, $this->declaredQueues)) {
+        if (!in_array($name, $this->declaredQueues, true)) {
             $this->channel->queue_declare(
                 $name,
                 $this->configQueue['passive'],
@@ -312,7 +311,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     public function getCorrelationId()
     {
-        return $this->correlationId ?: uniqid();
+        return $this->correlationId ?: uniqid('', true);
     }
 
     /**
