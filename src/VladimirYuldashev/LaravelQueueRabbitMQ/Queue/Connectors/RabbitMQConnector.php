@@ -40,5 +40,4 @@ class RabbitMQConnector implements ConnectorInterface
     {
         return $this->connection;
     }
-
 }

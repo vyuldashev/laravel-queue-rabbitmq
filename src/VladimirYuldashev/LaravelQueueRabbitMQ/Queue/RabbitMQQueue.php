@@ -168,8 +168,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             if ($message instanceof AMQPMessage) {
                 return new RabbitMQJob($this->container, $this, $this->channel, $queue, $message);
             }
-        }
-        catch(ErrorException $exception) {
+        } catch (ErrorException $exception) {
             $this->reportConnectionError('pop', $exception);
         }
 
@@ -328,5 +327,4 @@ class RabbitMQQueue extends Queue implements QueueContract
         // Sleep so that we don't flood the log file
         sleep($this->sleepOnError);
     }
-
 }

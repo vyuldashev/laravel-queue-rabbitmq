@@ -14,7 +14,6 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQJob extends Job implements JobContract
 {
-
     use DetectsDeadlocks;
 
     /**
@@ -42,8 +41,7 @@ class RabbitMQJob extends Job implements JobContract
         AMQPChannel $channel,
         $queue,
         AMQPMessage $message
-    )
-    {
+    ) {
         $this->container = $container;
         $this->connection = $connection;
         $this->channel = $channel;
@@ -211,5 +209,4 @@ class RabbitMQJob extends Job implements JobContract
             throw $exception;
         }
     }
-
 }
