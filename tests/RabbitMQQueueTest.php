@@ -83,7 +83,7 @@ class RabbitMQQueueTest extends TestCase
 
         $correlationId = $this->queue->push($job, $data);
 
-        $this->assertEquals(13, strlen($correlationId));
+        $this->assertEquals(23, strlen($correlationId));
     }
 
     public function test_later()
@@ -120,7 +120,7 @@ class RabbitMQQueueTest extends TestCase
 
         $correlationId = $this->queue->later($delay, $job, $data);
 
-        $this->assertEquals(13, strlen($correlationId));
+        $this->assertEquals(23, strlen($correlationId));
     }
 
     public function test_pop()
