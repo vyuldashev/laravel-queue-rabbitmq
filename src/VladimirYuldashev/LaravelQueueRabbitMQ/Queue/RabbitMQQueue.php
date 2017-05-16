@@ -165,7 +165,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             $message = $this->channel->basic_get($queue);
 
             if ($message instanceof AMQPMessage) {
-                return new RabbitMQJob($this->container, $this, $this->channel, $queue, $message);
+                return new RabbitMQJob($this->container, $this, $this->channel, $queue, $message, $this->connectionName);
             }
         } catch (ErrorException $exception) {
             $this->reportConnectionError('pop', $exception);
