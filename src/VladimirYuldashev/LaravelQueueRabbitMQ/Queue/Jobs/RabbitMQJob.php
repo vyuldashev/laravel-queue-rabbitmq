@@ -35,19 +35,22 @@ class RabbitMQJob extends Job implements JobContract
      * @param \PhpAmqpLib\Channel\AMQPChannel                             $channel
      * @param string                                                      $queue
      * @param \PhpAmqpLib\Message\AMQPMessage                             $message
+     * @param string                                                      $connectionName
      */
     public function __construct(
         Container $container,
         RabbitMQQueue $connection,
         AMQPChannel $channel,
         $queue,
-        AMQPMessage $message
+        AMQPMessage $message,
+        $connectionName
     ) {
         $this->container = $container;
         $this->connection = $connection;
         $this->channel = $channel;
         $this->queue = $queue;
         $this->message = $message;
+        $this->connectionName = $connectionName;
     }
 
     /**
