@@ -40,6 +40,8 @@ return [
         'auto_delete' => env('RABBITMQ_EXCHANGE_AUTODELETE', false),
     ],
 
-    'sleep_on_error' => env('RABBITMQ_ERROR_SLEEP', 5), // the number of seconds to sleep if there's an error communicating with rabbitmq
+    // the number of seconds to sleep if there's an error communicating with rabbitmq
+    // if set to false, it'll throw an exception rather than doing the sleep for X seconds
+    'sleep_on_error' => env('RABBITMQ_ERROR_SLEEP', 5),
 
 ];

@@ -324,10 +324,17 @@ class RabbitMQQueue extends Queue implements QueueContract
     /**
      * @param string    $action
      * @param Exception $e
+     * @throws Exception
      */
     protected function reportConnectionError($action, Exception $e)
     {
         Log::error('AMQP error while attempting '.$action.': '.$e->getMessage());
+
+        // If it's set to false, throw an error rather than waiting
+        if ($this->sleepOnError === false) {
+            throw new \Exception('Error writing data to the connection with RabbitMQ');
+        }
+
         // Sleep so that we don't flood the log file
         sleep($this->sleepOnError);
     }
