@@ -21,7 +21,7 @@ class RabbitMQConnectorSSL implements ConnectorInterface
     public function connect(array $config)
     {
         // Remove null values from the SSL config
-        foreach($config['ssl_params'] as $idx => $option) {
+        foreach ($config['ssl_params'] as $idx => $option) {
             if ($option === null || empty($option)) {
                 unset($config['ssl_params'][$idx]);
             }
