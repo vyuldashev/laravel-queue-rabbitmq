@@ -332,7 +332,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         // If it's set to false, throw an error rather than waiting
         if ($this->sleepOnError === false) {
-            throw new \Exception('Error writing data to the connection with RabbitMQ');
+            throw new \RuntimeException('Error writing data to the connection with RabbitMQ');
         }
 
         // Sleep so that we don't flood the log file
