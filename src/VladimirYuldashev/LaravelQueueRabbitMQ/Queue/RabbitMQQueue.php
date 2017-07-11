@@ -71,7 +71,9 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     public function size($queue = null)
     {
-        // TODO: Implement size() method.
+        list(, $messageCount) = $this->channel->queue_declare($this->getQueueName($queue), true);
+
+        return $messageCount;
     }
 
     /**
