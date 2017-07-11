@@ -34,9 +34,14 @@ You can also find full examples in src/examples folder.
 
 Once you completed the configuration you can use Laravel Queue API. If you used other queue drivers you do not need to change anything else. If you do not know how to use Queue API, please refer to the official Laravel documentation: http://laravel.com/docs/queues
 
-#### PHPUnit
+#### Testing
 
-Unit tests will be provided soon.
+Run the tests with:
+
+``` bash
+vendor/bin/phpunit
+```
+
 
 #### Contribution
 
