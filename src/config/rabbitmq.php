@@ -44,4 +44,13 @@ return [
     // if set to false, it'll throw an exception rather than doing the sleep for X seconds
     'sleep_on_error' => env('RABBITMQ_ERROR_SLEEP', 5),
 
+    // Optional SSL params
+    'ssl_params' => [
+        'ssl_on'        => env('RABBITMQ_SSL', false),
+        'cafile'        => env('SSL_CAFILE', null),
+        'local_cert'    => env('SSL_LOCALCERT', null),
+        'verify_peer'   => env('SSL_VERIFY_PEER', true),
+        'passphrase'    => env('SSL_PASSPHRASE', null),
+    ]
+
 ];

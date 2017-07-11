@@ -26,6 +26,17 @@ RabbitMQ Queue driver for Laravel
 		RABBITMQ_LOGIN=guest
 		RABBITMQ_PASSWORD=guest
 		RABBITMQ_QUEUE=queue_name
+		
+4. Optionally: if you want to to use SSL add these properties to `.env` with proper values:
+        
+        RABBITMQ_SSL=true
+        
+        SSL_CAFILE=/path/to/your/ca/cacert.pem
+        SSL_LOCALCERT=
+        SSL_PASSPHRASE=
+        SSL_KEY=
+ 
+Using an SSL connection will also require to configure your RabbitMQ to enable SSL first!
 
 
 You can also find full examples in src/examples folder.
