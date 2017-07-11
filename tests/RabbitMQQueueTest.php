@@ -48,7 +48,18 @@ class RabbitMQQueueTest extends TestCase
 
     public function test_size()
     {
-        $this->queue->size();
+        $messageCount = 5;
+        $consumerCount = 1;
+
+        $this->channel->shouldReceive('queue_declare')->with(
+            $this->config['queue'],
+            true
+        )->once()
+            ->andReturn([$this->config['queue'], $messageCount, $consumerCount]);
+
+        $size = $this->queue->size();
+
+        $this->assertEquals($messageCount, $size);
     }
 
     public function test_push()
