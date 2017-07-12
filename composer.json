@@ -20,8 +20,8 @@
     "mockery/mockery": "^0.9.5"
   },
   "autoload": {
-    "psr-0": {
-      "VladimirYuldashev\\LaravelQueueRabbitMQ": "src/"
+    "psr-4": {
+      "VladimirYuldashev\\LaravelQueueRabbitMQ\\": "src/"
     }
   },
   "minimum-stability": "dev",
