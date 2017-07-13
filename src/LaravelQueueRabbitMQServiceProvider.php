@@ -16,7 +16,7 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__ . '/../../config/rabbitmq.php', 'queue.connections.rabbitmq'
+            __DIR__ . '/../config/rabbitmq.php', 'queue.connections.rabbitmq'
         );
     }
 
