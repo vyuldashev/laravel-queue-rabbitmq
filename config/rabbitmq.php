@@ -1,7 +1,9 @@
 <?php
 
 /**
- * default configuration for laravel-queue-rabbitmq merged with project config to base key 'queue'.
+ * This is an example of queue connection configuration.
+ * It will be merged into config/queue.php.
+ * You need to set proper values in `.env`
  */
 return [
 
@@ -14,14 +16,24 @@ return [
     'login'    => env('RABBITMQ_LOGIN', 'guest'),
     'password' => env('RABBITMQ_PASSWORD', 'guest'),
 
+    /*
+     * The name of default queue.
+     */
     'queue' => env('RABBITMQ_QUEUE'),
-    // name of the default queue,
 
+    /*
+     * Determine if exchange should be created if it does not exist.
+     */
     'exchange_declare' => env('RABBITMQ_EXCHANGE_DECLARE', true),
-    // create the exchange if not exists
-    'queue_declare_bind' => env('RABBITMQ_QUEUE_DECLARE_BIND', true),
-    // create the queue if not exists and bind to the exchange
 
+    /*
+     * Determine if queue should be created and binded to the exchange if it does not exist.
+     */
+    'queue_declare_bind' => env('RABBITMQ_QUEUE_DECLARE_BIND', true),
+
+    /*
+     * Read more about possible values at https://www.rabbitmq.com/tutorials/amqp-concepts.html
+     */
     'queue_params' => [
         'passive'     => env('RABBITMQ_QUEUE_PASSIVE', false),
         'durable'     => env('RABBITMQ_QUEUE_DURABLE', true),
@@ -31,15 +43,15 @@ return [
     'exchange_params' => [
         'name' => env('RABBITMQ_EXCHANGE_NAME', null),
         'type' => env('RABBITMQ_EXCHANGE_TYPE', 'direct'),
-        // more info at http://www.rabbitmq.com/tutorials/amqp-concepts.html
         'passive' => env('RABBITMQ_EXCHANGE_PASSIVE', false),
         'durable' => env('RABBITMQ_EXCHANGE_DURABLE', true),
-        // the exchange will survive server restarts
         'auto_delete' => env('RABBITMQ_EXCHANGE_AUTODELETE', false),
     ],
 
-    // the number of seconds to sleep if there's an error communicating with rabbitmq
-    // if set to false, it'll throw an exception rather than doing the sleep for X seconds
+    /*
+     * Determine the number of seconds to sleep if there's an error communicating with rabbitmq
+     * If set to false, it'll throw an exception rather than doing the sleep for X seconds.
+     */
     'sleep_on_error' => env('RABBITMQ_ERROR_SLEEP', 5),
 
 ];
