@@ -3,7 +3,7 @@
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors;
 
 use Illuminate\Queue\Connectors\ConnectorInterface;
-use PhpAmqpLib\Connection\AMQPConnection;
+use PhpAmqpLib\Connection\AMQPStreamConnection as AMQPConnection;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQConnector implements ConnectorInterface
