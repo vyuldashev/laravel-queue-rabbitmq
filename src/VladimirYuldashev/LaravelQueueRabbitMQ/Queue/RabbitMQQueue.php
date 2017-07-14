@@ -149,7 +149,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 
         // if the current queue has been already declared, skip this
         if (!in_array($name, $this->declaredQueues)) {
-            array_push($this->declaredQueues, $name);
+            $this->declaredQueues[]= $name;
         } else {
             return $name;
         }
@@ -193,7 +193,7 @@ class RabbitMQQueue extends Queue implements QueueInterface
 
         // if the current delayed queue has been already declared, skip this
         if (!in_array($name, $this->declaredDelayedQueues)) {
-            array_push($this->declaredDelayedQueues, $name);
+            $this->declaredDelayedQueues[]= $name;
         } else {
             return $name;
         }
