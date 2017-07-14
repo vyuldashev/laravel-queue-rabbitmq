@@ -2,8 +2,8 @@
 
 return [
 
-	'providers' => [
-			'VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider',
-	],
+    'providers' => [
+            'VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider',
+    ],
 
 ];
