@@ -6,7 +6,7 @@ use DateTime;
 use Illuminate\Queue\Queue;
 use Illuminate\Queue\QueueInterface;
 use PhpAmqpLib\Channel\AMQPChannel;
-use PhpAmqpLib\Connection\AMQPConnection;
+use PhpAmqpLib\Connection\AMQPStreamConnection as AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
@@ -18,6 +18,8 @@ class RabbitMQQueue extends Queue implements QueueInterface
 	protected $channel;
 
 	protected $defaultQueue;
+    protected $declaredQueues = [];
+    protected $declaredDelayedQueues = [];
 	protected $configQueue;
 	protected $configExchange;
 
@@ -138,10 +140,19 @@ class RabbitMQQueue extends Queue implements QueueInterface
 
 	/**
 	 * @param string $name
+     *
+     * @return string
 	 */
 	public function declareQueue($name)
 	{
 		$name = $this->getQueueName($name);
+
+        // if the current queue has been already declared, skip this
+        if (!in_array($name, $this->declaredQueues)) {
+            $this->declaredQueues[]= $name;
+        } else {
+            return $name;
+        }
 
 		// declare queue
 		$this->channel->queue_declare(
@@ -163,6 +174,9 @@ class RabbitMQQueue extends Queue implements QueueInterface
 
 		// bind queue to the exchange
 		$this->channel->queue_bind($name, $name, $name);
+
+		return $name;
+
 	}
 
 	/**
@@ -176,6 +190,13 @@ class RabbitMQQueue extends Queue implements QueueInterface
 		$delay = $this->getSeconds($delay);
 		$destination = $this->getQueueName($destination);
 		$name = $this->getQueueName($destination) . '_deferred_' . $delay;
+
+        // if the current delayed queue has been already declared, skip this
+        if (!in_array($name, $this->declaredDelayedQueues)) {
+            $this->declaredDelayedQueues[]= $name;
+        } else {
+            return $name;
+        }
 
 		// declare exchange
 		$this->channel->exchange_declare(
