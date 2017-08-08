@@ -31,6 +31,7 @@ class RabbitMQQueueTest extends TestCase
                 'durable'     => true,
                 'exclusive'   => false,
                 'auto_delete' => false,
+                'arguments'   => false,
             ],
             'exchange_params' => [
                 'name'        => 'exchange_name',
@@ -80,7 +81,9 @@ class RabbitMQQueueTest extends TestCase
             $this->config['queue_params']['passive'],
             $this->config['queue_params']['durable'],
             $this->config['queue_params']['exclusive'],
-            $this->config['queue_params']['auto_delete']
+            $this->config['queue_params']['auto_delete'],
+            false,
+            $this->config['queue_params']['arguments']
         )->once();
 
         $this->channel->shouldReceive('queue_bind')->with(
@@ -150,7 +153,9 @@ class RabbitMQQueueTest extends TestCase
             $this->config['queue_params']['passive'],
             $this->config['queue_params']['durable'],
             $this->config['queue_params']['exclusive'],
-            $this->config['queue_params']['auto_delete']
+            $this->config['queue_params']['auto_delete'],
+            false,
+            $this->config['queue_params']['arguments']
         )->once();
 
         $this->channel->shouldReceive('queue_bind')->with(

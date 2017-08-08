@@ -229,7 +229,9 @@ class RabbitMQQueue extends Queue implements QueueContract
                 $this->configQueue['passive'],
                 $this->configQueue['durable'],
                 $this->configQueue['exclusive'],
-                $this->configQueue['auto_delete']
+                $this->configQueue['auto_delete'],
+                false,
+                $this->configQueue['arguments']
             );
 
             // bind queue to the exchange
@@ -268,6 +270,12 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         // declare queue
         if (!in_array($name, $this->declaredQueues, true)) {
+            $queueArguments = array_merge([
+                    'x-dead-letter-exchange'    => $destinationExchange,
+                    'x-dead-letter-routing-key' => $destination,
+                    'x-message-ttl'             => $delay * 1000,
+                ], (array)$this->configQueue['arguments']);
+            
             $this->channel->queue_declare(
                 $name,
                 $this->configQueue['passive'],
@@ -275,11 +283,7 @@ class RabbitMQQueue extends Queue implements QueueContract
                 $this->configQueue['exclusive'],
                 $this->configQueue['auto_delete'],
                 false,
-                new AMQPTable([
-                    'x-dead-letter-exchange'    => $destinationExchange,
-                    'x-dead-letter-routing-key' => $destination,
-                    'x-message-ttl'             => $delay * 1000,
-                ])
+                new AMQPTable($queueArguments)
             );
         }
 
