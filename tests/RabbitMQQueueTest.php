@@ -4,6 +4,7 @@ use Illuminate\Container\Container;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
+use PhpAmqpLib\Wire\AMQPTable;
 use PHPUnit\Framework\TestCase;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
@@ -31,7 +32,7 @@ class RabbitMQQueueTest extends TestCase
                 'durable'     => true,
                 'exclusive'   => false,
                 'auto_delete' => false,
-                'arguments'   => false,
+                'arguments'   => [],
             ],
             'exchange_params' => [
                 'name'        => 'exchange_name',
@@ -83,7 +84,7 @@ class RabbitMQQueueTest extends TestCase
             $this->config['queue_params']['exclusive'],
             $this->config['queue_params']['auto_delete'],
             false,
-            $this->config['queue_params']['arguments']
+            Mockery::any()
         )->once();
 
         $this->channel->shouldReceive('queue_bind')->with(
@@ -155,7 +156,7 @@ class RabbitMQQueueTest extends TestCase
             $this->config['queue_params']['exclusive'],
             $this->config['queue_params']['auto_delete'],
             false,
-            $this->config['queue_params']['arguments']
+            Mockery::any()
         )->once();
 
         $this->channel->shouldReceive('queue_bind')->with(

@@ -25,7 +25,7 @@ class RabbitMQConnectorTest extends TestCase
                 'durable'     => true,
                 'exclusive'   => false,
                 'auto_delete' => false,
-                'arguments'   => false,
+                'arguments'   => [],
             ],
             'exchange_params' => [
                 'name'        => null,
