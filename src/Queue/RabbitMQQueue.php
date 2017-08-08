@@ -231,7 +231,7 @@ class RabbitMQQueue extends Queue implements QueueContract
                 $this->configQueue['exclusive'],
                 $this->configQueue['auto_delete'],
                 false,
-                $this->configQueue['arguments']
+                new AMQPTable($this->configQueue['arguments'])
             );
 
             // bind queue to the exchange
