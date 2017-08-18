@@ -12,21 +12,18 @@ RabbitMQ Queue driver for Laravel
 
 	`composer require vladimir-yuldashev/laravel-queue-rabbitmq:5.5`
 
-2. Add LaravelQueueRabbitMQServiceProvider to `providers` array in `config/app.php`:
+2. Add these properties to `.env` with proper values:
 
-	`VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider::class,`
+```
+QUEUE_DRIVER=rabbitmq
 
-3. Add these properties to `.env` with proper values:
-
-		QUEUE_DRIVER=rabbitmq
-
-		RABBITMQ_HOST=127.0.0.1
-		RABBITMQ_PORT=5672
-		RABBITMQ_VHOST=/
-		RABBITMQ_LOGIN=guest
-		RABBITMQ_PASSWORD=guest
-		RABBITMQ_QUEUE=queue_name
-
+RABBITMQ_HOST=127.0.0.1
+RABBITMQ_PORT=5672
+RABBITMQ_VHOST=/
+RABBITMQ_LOGIN=guest
+RABBITMQ_PASSWORD=guest
+RABBITMQ_QUEUE=queue_name
+```
 
 You can also find full examples in src/examples folder.
 
