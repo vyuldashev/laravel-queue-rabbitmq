@@ -32,7 +32,7 @@ class RabbitMQJob extends Job implements JobContract
         AMQPChannel $channel,
         string $queue,
         AMQPMessage $message,
-        string $connectionName
+        string $connectionName = null
     ) {
         $this->container = $container;
         $this->connection = $connection;
@@ -101,32 +101,20 @@ class RabbitMQJob extends Job implements JobContract
         return $this->message->body;
     }
 
-    /**
-     * Delete the job from the queue.
-     *
-     * @return void
-     */
+    /** @inheritdoc */
     public function delete()
     {
         parent::delete();
         $this->channel->basic_ack($this->message->get('delivery_tag'));
     }
 
-    /**
-     * Release the job back into the queue.
-     *
-     * @param int $delay
-     *
-     * @throws Exception
-     *
-     * @return void
-     */
+    /** @inheritdoc */
     public function release($delay = 0)
     {
         parent::release($delay);
 
         $this->delete();
-        $this->setAttempts($this->attempts() + 1);
+        $this->connection->setAttempts($this->attempts() + 1);
 
         $body = $this->payload();
 
@@ -146,18 +134,6 @@ class RabbitMQJob extends Job implements JobContract
         } else {
             $this->connection->push($job, $data, $this->getQueue());
         }
-    }
-
-    /**
-     * Sets the count of attempts at processing this job.
-     *
-     * @param int $count
-     *
-     * @return void
-     */
-    private function setAttempts(int $count)
-    {
-        $this->connection->setAttempts($count);
     }
 
     /**

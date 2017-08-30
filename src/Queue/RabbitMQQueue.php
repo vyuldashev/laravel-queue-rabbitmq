@@ -53,13 +53,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->channel = $this->getChannel();
     }
 
-    /**
-     * Get the size of the queue.
-     *
-     * @param string $queue
-     *
-     * @return int
-     */
+    /** @inheritdoc */
     public function size($queue = null): int
     {
         list(, $messageCount) = $this->channel->queue_declare($this->getQueueName($queue), true);
@@ -67,29 +61,13 @@ class RabbitMQQueue extends Queue implements QueueContract
         return $messageCount;
     }
 
-    /**
-     * Push a new job onto the queue.
-     *
-     * @param string $job
-     * @param mixed $data
-     * @param string $queue
-     *
-     * @return bool
-     */
-    public function push($job, $data = '', $queue = null): bool
+    /** @inheritdoc */
+    public function push($job, $data = '', $queue = null)
     {
         return $this->pushRaw($this->createPayload($job, $data), $queue, []);
     }
 
-    /**
-     * Push a raw payload onto the queue.
-     *
-     * @param string $payload
-     * @param string $queue
-     * @param array $options
-     *
-     * @return mixed
-     */
+    /** @inheritdoc */
     public function pushRaw($payload, $queue = null, array $options = [])
     {
         try {
@@ -126,28 +104,13 @@ class RabbitMQQueue extends Queue implements QueueContract
         }
     }
 
-    /**
-     * Push a new job onto the queue after a delay.
-     *
-     * @param \DateTime|int $delay
-     * @param string $job
-     * @param mixed $data
-     * @param string $queue
-     *
-     * @return mixed
-     */
+    /** @inheritdoc */
     public function later($delay, $job, $data = '', $queue = null)
     {
         return $this->pushRaw($this->createPayload($job, $data), $queue, ['delay' => $this->secondsUntil($delay)]);
     }
 
-    /**
-     * Pop the next job off of the queue.
-     *
-     * @param string|null $queue
-     *
-     * @return \Illuminate\Queue\Jobs\Job|null
-     */
+    /** @inheritdoc */
     public function pop($queue = null)
     {
         $queue = $this->getQueueName($queue);
@@ -177,11 +140,40 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * @param string $queue
+     * Sets the attempts member variable to be used in message generation.
+     *
+     * @param int $count
+     *
+     * @return void
+     */
+    public function setAttempts(int $count)
+    {
+        $this->retryAfter = $count;
+    }
+
+    /**
+     * Retrieves the correlation id, or a unique id.
      *
      * @return string
      */
-    private function getQueueName($queue): string
+    public function getCorrelationId(): string
+    {
+        return $this->correlationId ?: uniqid('', true);
+    }
+
+    /**
+     * Sets the correlation id for a message to be published.
+     *
+     * @param string $id
+     *
+     * @return void
+     */
+    public function setCorrelationId(string $id)
+    {
+        $this->correlationId = $id;
+    }
+
+    private function getQueueName(string $queue = null): string
     {
         return $queue ?: $this->defaultQueue;
     }
@@ -272,40 +264,6 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->channel->queue_bind($name, $exchange, $name);
 
         return [$name, $exchange];
-    }
-
-    /**
-     * Sets the attempts member variable to be used in message generation.
-     *
-     * @param int $count
-     *
-     * @return void
-     */
-    public function setAttempts(int $count)
-    {
-        $this->retryAfter = $count;
-    }
-
-    /**
-     * Sets the correlation id for a message to be published.
-     *
-     * @param string $id
-     *
-     * @return void
-     */
-    public function setCorrelationId(string $id)
-    {
-        $this->correlationId = $id;
-    }
-
-    /**
-     * Retrieves the correlation id, or a unique id.
-     *
-     * @return string
-     */
-    public function getCorrelationId(): string
-    {
-        return $this->correlationId ?: uniqid('', true);
     }
 
     /**
