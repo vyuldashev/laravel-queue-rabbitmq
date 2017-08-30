@@ -25,6 +25,6 @@
         </whitelist>
     </filter>
     <logging>
-        <log type="coverage-html" target="tests/coverage" charset="UTF-8" yui="true" highlight="true"/>
+        <log type="coverage-html" target="build/coverage" charset="UTF-8" yui="true" highlight="true"/>
     </logging>
 </phpunit>

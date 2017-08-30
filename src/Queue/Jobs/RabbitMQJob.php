@@ -24,26 +24,15 @@ class RabbitMQJob extends Job implements JobContract
 
     protected $connection;
     protected $channel;
-    protected $queue;
     protected $message;
 
-    /**
-     * Creates a new instance of RabbitMQJob.
-     *
-     * @param \Illuminate\Container\Container                             $container
-     * @param \VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue $connection
-     * @param \PhpAmqpLib\Channel\AMQPChannel                             $channel
-     * @param string                                                      $queue
-     * @param \PhpAmqpLib\Message\AMQPMessage                             $message
-     * @param string                                                      $connectionName
-     */
     public function __construct(
         Container $container,
         RabbitMQQueue $connection,
         AMQPChannel $channel,
-        $queue,
+        string $queue,
         AMQPMessage $message,
-        $connectionName
+        string $connectionName
     ) {
         $this->container = $container;
         $this->connection = $connection;
@@ -88,7 +77,7 @@ class RabbitMQJob extends Job implements JobContract
      *
      * @return int
      */
-    public function attempts()
+    public function attempts(): int
     {
         if ($this->message->has('application_headers') === true) {
             $headers = $this->message->get('application_headers')->getNativeData();
@@ -107,7 +96,7 @@ class RabbitMQJob extends Job implements JobContract
      *
      * @return string
      */
-    public function getRawBody()
+    public function getRawBody(): string
     {
         return $this->message->body;
     }
@@ -166,7 +155,7 @@ class RabbitMQJob extends Job implements JobContract
      *
      * @return void
      */
-    private function setAttempts($count)
+    private function setAttempts(int $count)
     {
         $this->connection->setAttempts($count);
     }
@@ -176,7 +165,7 @@ class RabbitMQJob extends Job implements JobContract
      *
      * @return string
      */
-    public function getJobId()
+    public function getJobId(): string
     {
         return $this->message->get('correlation_id');
     }
@@ -205,6 +194,7 @@ class RabbitMQJob extends Job implements JobContract
     private function unserialize(array $body)
     {
         try {
+            /** @noinspection UnserializeExploitsInspection */
             return unserialize($body['data']['command']);
         } catch (Exception $exception) {
             if (

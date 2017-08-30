@@ -1,21 +1,27 @@
 <?php
 
 use Illuminate\Container\Container;
+use Mockery\Mock;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
-use PhpAmqpLib\Wire\AMQPTable;
 use PHPUnit\Framework\TestCase;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
-/**
- * @property \Mockery\MockInterface connection
- * @property \Mockery\MockInterface channel
- * @property array config
- * @property RabbitMQQueue queue
- */
 class RabbitMQQueueTest extends TestCase
 {
+    /** @var Mock|mixed */
+    private $connection;
+
+    /** @var Mock */
+    private $channel;
+
+    /** @var array */
+    private $config;
+
+    /** @var RabbitMQQueue */
+    private $queue;
+
     public function setUp()
     {
         parent::setUp();
@@ -26,29 +32,29 @@ class RabbitMQQueueTest extends TestCase
         $this->connection->shouldReceive('channel')->andReturn($this->channel);
 
         $this->config = [
-            'queue'        => str_random(),
+            'queue' => str_random(),
             'queue_params' => [
-                'passive'     => false,
-                'durable'     => true,
-                'exclusive'   => false,
+                'passive' => false,
+                'durable' => true,
+                'exclusive' => false,
                 'auto_delete' => false,
-                'arguments'   => null,
+                'arguments' => null,
             ],
             'exchange_params' => [
-                'name'        => 'exchange_name',
-                'type'        => 'direct',
-                'passive'     => false,
-                'durable'     => true,
+                'name' => 'exchange_name',
+                'type' => 'direct',
+                'passive' => false,
+                'durable' => true,
                 'auto_delete' => false,
             ],
-            'exchange_declare'   => true,
+            'exchange_declare' => true,
             'queue_declare_bind' => true,
         ];
 
         $this->queue = new RabbitMQQueue($this->connection, $this->config);
     }
 
-    public function test_size()
+    public function testSize()
     {
         $messageCount = 5;
         $consumerCount = 1;
@@ -64,7 +70,7 @@ class RabbitMQQueueTest extends TestCase
         $this->assertEquals($messageCount, $size);
     }
 
-    public function test_push()
+    public function testPush()
     {
         $job = new TestJob();
         $data = [];
@@ -100,11 +106,11 @@ class RabbitMQQueueTest extends TestCase
         $this->assertEquals(23, strlen($correlationId));
     }
 
-    public function test_later()
+    public function testLater()
     {
         $job = new TestJob();
         $data = [];
-        $delay = mt_rand(10, 60);
+        $delay = random_int(10, 60);
 
         $this->channel->shouldReceive('exchange_declare')->with(
             $this->config['exchange_params']['name'],
@@ -125,9 +131,9 @@ class RabbitMQQueueTest extends TestCase
 
         // delayed queue
         $this->channel->shouldReceive('queue_bind')->with(
-            $this->config['queue'].'_deferred_'.$delay,
+            $this->config['queue'] . '_deferred_' . $delay,
             $this->config['exchange_params']['name'],
-            $this->config['queue'].'_deferred_'.$delay
+            $this->config['queue'] . '_deferred_' . $delay
         )->once();
 
         $this->channel->shouldReceive('basic_publish')->once();
@@ -137,7 +143,7 @@ class RabbitMQQueueTest extends TestCase
         $this->assertEquals(23, strlen($correlationId));
     }
 
-    public function test_pop()
+    public function testPop()
     {
         $message = Mockery::mock(AMQPMessage::class);
 
@@ -167,18 +173,21 @@ class RabbitMQQueueTest extends TestCase
 
         $this->channel->shouldReceive('basic_get')->with($this->config['queue'])->andReturn($message)->once();
 
-        $this->queue->setContainer(Mockery::mock(Container::class));
+        /** @var Mock|mixed $container */
+        $container = Mockery::mock(Container::class);
+
+        $this->queue->setContainer($container);
         $this->queue->pop();
     }
 
-    public function test_setAttempts()
+    public function testSetAttempts()
     {
         $count = mt_rand();
 
         $this->queue->setAttempts($count);
     }
 
-    public function test_setCorrelationId()
+    public function testSetCorrelationId()
     {
         $id = str_random();
 

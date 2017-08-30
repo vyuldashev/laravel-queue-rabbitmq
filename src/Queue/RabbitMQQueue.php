@@ -2,7 +2,6 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
-use DateTime;
 use ErrorException;
 use Exception;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
@@ -12,6 +11,7 @@ use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
+use RuntimeException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 class RabbitMQQueue extends Queue implements QueueContract
@@ -25,41 +25,30 @@ class RabbitMQQueue extends Queue implements QueueContract
     protected $channel;
 
     protected $declareExchange;
-    protected $declaredExchanges = [];
     protected $declareBindQueue;
     protected $sleepOnError;
-
-    protected $declaredQueues = [];
 
     protected $defaultQueue;
     protected $configQueue;
     protected $configQueueArguments;
     protected $configExchange;
 
-    /**
-     * @var int
-     */
-    private $retryAfter;
+    private $declaredExchanges = [];
+    private $declaredQueues = [];
 
-    /**
-     * @var string
-     */
+    private $retryAfter;
     private $correlationId;
 
-    /**
-     * @param AMQPStreamConnection $amqpConnection
-     * @param array                $config
-     */
-    public function __construct(AMQPStreamConnection $amqpConnection, $config)
+    public function __construct(AMQPStreamConnection $connection, array $config)
     {
-        $this->connection = $amqpConnection;
+        $this->connection = $connection;
         $this->defaultQueue = $config['queue'];
         $this->configQueue = $config['queue_params'];
         $this->configQueueArguments = json_decode($this->configQueue['arguments'], 1) ?: [];
         $this->configExchange = $config['exchange_params'];
         $this->declareExchange = $config['exchange_declare'];
         $this->declareBindQueue = $config['queue_declare_bind'];
-        $this->sleepOnError = isset($config['sleep_on_error']) ? $config['sleep_on_error'] : 5;
+        $this->sleepOnError = $config['sleep_on_error'] ?? 5;
 
         $this->channel = $this->getChannel();
     }
@@ -71,7 +60,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @return int
      */
-    public function size($queue = null)
+    public function size($queue = null): int
     {
         list(, $messageCount) = $this->channel->queue_declare($this->getQueueName($queue), true);
 
@@ -82,12 +71,12 @@ class RabbitMQQueue extends Queue implements QueueContract
      * Push a new job onto the queue.
      *
      * @param string $job
-     * @param mixed  $data
+     * @param mixed $data
      * @param string $queue
      *
      * @return bool
      */
-    public function push($job, $data = '', $queue = null)
+    public function push($job, $data = '', $queue = null): bool
     {
         return $this->pushRaw($this->createPayload($job, $data), $queue, []);
     }
@@ -97,7 +86,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @param string $payload
      * @param string $queue
-     * @param array  $options
+     * @param array $options
      *
      * @return mixed
      */
@@ -112,7 +101,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             }
 
             $headers = [
-                'Content-Type'  => 'application/json',
+                'Content-Type' => 'application/json',
                 'delivery_mode' => 2,
             ];
 
@@ -132,6 +121,8 @@ class RabbitMQQueue extends Queue implements QueueContract
             return $correlationId;
         } catch (ErrorException $exception) {
             $this->reportConnectionError('pushRaw', $exception);
+
+            return null;
         }
     }
 
@@ -139,9 +130,9 @@ class RabbitMQQueue extends Queue implements QueueContract
      * Push a new job onto the queue after a delay.
      *
      * @param \DateTime|int $delay
-     * @param string        $job
-     * @param mixed         $data
-     * @param string        $queue
+     * @param string $job
+     * @param mixed $data
+     * @param string $queue
      *
      * @return mixed
      */
@@ -181,6 +172,8 @@ class RabbitMQQueue extends Queue implements QueueContract
         } catch (ErrorException $exception) {
             $this->reportConnectionError('pop', $exception);
         }
+
+        return null;
     }
 
     /**
@@ -188,25 +181,17 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @return string
      */
-    private function getQueueName($queue)
+    private function getQueueName($queue): string
     {
         return $queue ?: $this->defaultQueue;
     }
 
-    /**
-     * @return AMQPChannel
-     */
-    private function getChannel()
+    private function getChannel(): AMQPChannel
     {
         return $this->connection->channel();
     }
 
-    /**
-     * @param $name
-     *
-     * @return array
-     */
-    private function declareQueue($name)
+    private function declareQueue(string $name): array
     {
         $name = $this->getQueueName($name);
         $exchange = $this->configExchange['name'] ?: $name;
@@ -245,18 +230,12 @@ class RabbitMQQueue extends Queue implements QueueContract
         return [$name, $exchange];
     }
 
-    /**
-     * @param string       $destination
-     * @param DateTime|int $delay
-     *
-     * @return array
-     */
-    private function declareDelayedQueue($destination, $delay)
+    private function declareDelayedQueue(string $destination, $delay): array
     {
         $delay = $this->secondsUntil($delay);
         $destination = $this->getQueueName($destination);
         $destinationExchange = $this->configExchange['name'] ?: $destination;
-        $name = $this->getQueueName($destination).'_deferred_'.$delay;
+        $name = $this->getQueueName($destination) . '_deferred_' . $delay;
         $exchange = $this->configExchange['name'] ?: $destination;
 
         // declare exchange
@@ -273,11 +252,11 @@ class RabbitMQQueue extends Queue implements QueueContract
         // declare queue
         if (!in_array($name, $this->declaredQueues, true)) {
             $queueArguments = array_merge([
-                    'x-dead-letter-exchange'    => $destinationExchange,
-                    'x-dead-letter-routing-key' => $destination,
-                    'x-message-ttl'             => $delay * 1000,
-                ], (array)$this->configQueueArguments);
-            
+                'x-dead-letter-exchange' => $destinationExchange,
+                'x-dead-letter-routing-key' => $destination,
+                'x-message-ttl' => $delay * 1000,
+            ], (array)$this->configQueueArguments);
+
             $this->channel->queue_declare(
                 $name,
                 $this->configQueue['passive'],
@@ -302,7 +281,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @return void
      */
-    public function setAttempts($count)
+    public function setAttempts(int $count)
     {
         $this->retryAfter = $count;
     }
@@ -314,7 +293,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @return void
      */
-    public function setCorrelationId($id)
+    public function setCorrelationId(string $id)
     {
         $this->correlationId = $id;
     }
@@ -324,23 +303,23 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @return string
      */
-    public function getCorrelationId()
+    public function getCorrelationId(): string
     {
         return $this->correlationId ?: uniqid('', true);
     }
 
     /**
-     * @param string    $action
+     * @param string $action
      * @param Exception $e
      * @throws Exception
      */
     protected function reportConnectionError($action, Exception $e)
     {
-        Log::error('AMQP error while attempting '.$action.': '.$e->getMessage());
+        Log::error('AMQP error while attempting ' . $action . ': ' . $e->getMessage());
 
         // If it's set to false, throw an error rather than waiting
         if ($this->sleepOnError === false) {
-            throw new \RuntimeException('Error writing data to the connection with RabbitMQ');
+            throw new RuntimeException('Error writing data to the connection with RabbitMQ');
         }
 
         // Sleep so that we don't flood the log file

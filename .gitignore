@@ -1,5 +1,5 @@
 /.idea
-/tests/coverage
+/build
 /vendor
 composer.lock
 .phpstorm.meta.php

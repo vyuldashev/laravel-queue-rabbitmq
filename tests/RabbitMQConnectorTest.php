@@ -7,7 +7,7 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQConnectorTest extends TestCase
 {
-    public function test_connect()
+    public function testConnect()
     {
         $config = [
             'host'     => getenv('HOST'),
