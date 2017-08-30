@@ -1,5 +1,7 @@
 language: php
 
+sudo: false
+
 php:
   - 7.0
   - 7.1
@@ -8,7 +10,6 @@ services:
   - rabbitmq
 
 before_script:
-  - composer self-update
-  - composer install --no-interaction
+  - COMPOSER_DISCARD_CHANGES=1 composer update --prefer-dist --no-interaction --no-suggest
 script:
-  - phpunit --no-coverage
+  - composer test
