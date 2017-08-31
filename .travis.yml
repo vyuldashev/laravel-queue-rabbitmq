@@ -6,10 +6,25 @@ php:
   - 7.0
   - 7.1
 
+env:
+  - RABBITMQ_CONFIG_FILE="/tmp/rabbitmq.config" SSL_CAFILE="/tmp/rootCA.pem
+
 services:
   - rabbitmq
 
 before_script:
   - COMPOSER_DISCARD_CHANGES=1 composer update --prefer-dist --no-interaction --no-suggest
+  - sed -i 's/<env name="SSL_CAFILE" value="\/path_to_your_ca_file"\/>/<env name="SSL_CAFILE" value="\/tmp\/rootCA.pem"\/>/g' phpunit.xml.dist
+  - openssl genrsa -out /tmp/rootCA.key 2048
+  - openssl req -x509 -new -nodes -key /tmp/rootCA.key -sha256 -days 1024 -out /tmp/rootCA.pem  -subj "/C=US/ST=Arizona/L=Scottsdale/O=Example Company Inc./CN=127.0.0.1"
+  - openssl genrsa -out /tmp/device.key 2048
+  - openssl req -new -key /tmp/device.key -out /tmp/device.csr -subj "/C=US/ST=Arizona/L=Scottsdale/O=Example Company Inc./CN=127.0.0.1"
+  - openssl x509 -req -in /tmp/device.csr -CA /tmp/rootCA.pem -CAkey /tmp/rootCA.key -CAcreateserial -out /tmp/device.crt -days 500 -sha256
+  - sudo service rabbitmq-server stop
+  - echo "[{rabbit,[{ssl_listeners, [5671]},{ssl_options,[{cacertfile,\"/tmp/rootCA.pem\"},{certfile,\"/tmp/rootCA.pem\"},{keyfile,\"/tmp/rootCA.key\"},{verify,verify_none},{fail_if_no_peer_cert,false}]}]}]." > /tmp/rabbitmq.config
+  - cp /tmp/rabbitmq.config /tmp/rabbitmq.config.config
+  - sudo rabbitmq-server &
+  - sleep 10
+
 script:
   - composer test
