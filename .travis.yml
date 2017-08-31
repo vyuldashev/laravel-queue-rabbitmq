@@ -5,7 +5,8 @@ php:
   - 7.1
 
 env:
-  - RABBITMQ_CONFIG_FILE="/tmp/rabbitmq.config" SSL_CAFILE="/tmp/rootCA.pem
+  - RABBITMQ_CONFIG_FILE="/tmp/rabbitmq.config"
+  - SSL_CAFILE="/tmp/rootCA.pem
 
 services:
   - rabbitmq
