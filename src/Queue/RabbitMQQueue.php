@@ -29,8 +29,8 @@ class RabbitMQQueue extends Queue implements QueueContract
     protected $sleepOnError;
 
     protected $defaultQueue;
-    protected $configQueue;
-    protected $configQueueArguments;
+    protected $queueParameters;
+    protected $queueArguments;
     protected $configExchange;
 
     private $declaredExchanges = [];
@@ -43,8 +43,8 @@ class RabbitMQQueue extends Queue implements QueueContract
     {
         $this->connection = $connection;
         $this->defaultQueue = $config['queue'];
-        $this->configQueue = $config['queue_params'];
-        $this->configQueueArguments = json_decode($this->configQueue['arguments'], 1) ?: [];
+        $this->queueParameters = $config['queue_params'];
+        $this->queueArguments = isset($this->queueParameters['arguments']) ? json_decode($this->queueParameters['arguments'], true) : [];
         $this->configExchange = $config['exchange_params'];
         $this->declareExchange = $config['exchange_declare'];
         $this->declareBindQueue = $config['queue_declare_bind'];
@@ -205,12 +205,12 @@ class RabbitMQQueue extends Queue implements QueueContract
             // declare queue
             $this->channel->queue_declare(
                 $name,
-                $this->configQueue['passive'],
-                $this->configQueue['durable'],
-                $this->configQueue['exclusive'],
-                $this->configQueue['auto_delete'],
+                $this->queueParameters['passive'],
+                $this->queueParameters['durable'],
+                $this->queueParameters['exclusive'],
+                $this->queueParameters['auto_delete'],
                 false,
-                new AMQPTable($this->configQueueArguments)
+                new AMQPTable($this->queueArguments)
             );
 
             // bind queue to the exchange
@@ -247,14 +247,14 @@ class RabbitMQQueue extends Queue implements QueueContract
                 'x-dead-letter-exchange' => $destinationExchange,
                 'x-dead-letter-routing-key' => $destination,
                 'x-message-ttl' => $delay * 1000,
-            ], (array)$this->configQueueArguments);
+            ], (array)$this->queueArguments);
 
             $this->channel->queue_declare(
                 $name,
-                $this->configQueue['passive'],
-                $this->configQueue['durable'],
-                $this->configQueue['exclusive'],
-                $this->configQueue['auto_delete'],
+                $this->queueParameters['passive'],
+                $this->queueParameters['durable'],
+                $this->queueParameters['exclusive'],
+                $this->queueParameters['auto_delete'],
                 false,
                 new AMQPTable($queueArguments)
             );

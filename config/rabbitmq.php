@@ -39,10 +39,10 @@ return [
         'durable'     => env('RABBITMQ_QUEUE_DURABLE', true),
         'exclusive'   => env('RABBITMQ_QUEUE_EXCLUSIVE', false),
         'auto_delete' => env('RABBITMQ_QUEUE_AUTODELETE', false),
-        'arguments'   => env('RABBITMQ_QUEUE_ARGUMENTS', null),
+        'arguments'   => env('RABBITMQ_QUEUE_ARGUMENTS'),
     ],
     'exchange_params' => [
-        'name' => env('RABBITMQ_EXCHANGE_NAME', null),
+        'name' => env('RABBITMQ_EXCHANGE_NAME'),
         'type' => env('RABBITMQ_EXCHANGE_TYPE', 'direct'),
         'passive' => env('RABBITMQ_EXCHANGE_PASSIVE', false),
         'durable' => env('RABBITMQ_EXCHANGE_DURABLE', true),
