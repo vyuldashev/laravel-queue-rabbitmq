@@ -30,11 +30,10 @@ RABBITMQ_QUEUE=queue_name
 3. Optionally: if you want to to use an SSL connection, add these properties to the `.env` with proper values:
 ```
 RABBITMQ_SSL=true
-
-SSL_CAFILE=/path/to/your/ca/cacert.pem
-SSL_LOCALCERT=
-SSL_PASSPHRASE=
-SSL_KEY=
+RABBITMQ_SSL_CAFILE=/path_to_your_ca_file
+RABBITMQ_SSL_LOCALCERT=
+RABBITMQ_SSL_PASSPHRASE=
+RABBITMQ_SSL_KEY=
 ```
 
 Using an SSL connection will also require to configure your RabbitMQ to enable SSL. More details can be founds here: https://www.rabbitmq.com/ssl.html

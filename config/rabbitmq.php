@@ -60,10 +60,10 @@ return [
      */
     'ssl_params' => [
         'ssl_on'        => env('RABBITMQ_SSL', false),
-        'cafile'        => env('SSL_CAFILE', null),
-        'local_cert'    => env('SSL_LOCALCERT', null),
-        'verify_peer'   => env('SSL_VERIFY_PEER', true),
-        'passphrase'    => env('SSL_PASSPHRASE', null),
+        'cafile'        => env('RABBITMQ_SSL_CAFILE', null),
+        'local_cert'    => env('RABBITMQ_SSL_LOCALCERT', null),
+        'verify_peer'   => env('RABBITMQ_SSL_VERIFY_PEER', true),
+        'passphrase'    => env('RABBITMQ_SSL_PASSPHRASE', null),
     ]
 
 ];
