@@ -14,7 +14,7 @@ services:
 
 before_script:
   - COMPOSER_DISCARD_CHANGES=1 composer update --prefer-dist --no-interaction --no-suggest
-  - sed -i 's/<env name="SSL_CAFILE" value="\/path_to_your_ca_file"\/>/<env name="SSL_CAFILE" value="\/tmp\/rootCA.pem"\/>/g' phpunit.xml.dist
+  - sed -i 's/<env name="RABBITMQ_SSL_CAFILE" value="\/path_to_your_ca_file"\/>/<env name="SSL_CAFILE" value="\/tmp\/rootCA.pem"\/>/g' phpunit.xml.dist
   - openssl genrsa -out /tmp/rootCA.key 2048
   - openssl req -x509 -new -nodes -key /tmp/rootCA.key -sha256 -days 1024 -out /tmp/rootCA.pem  -subj "/C=US/ST=Arizona/L=Scottsdale/O=Example Company Inc./CN=127.0.0.1"
   - openssl genrsa -out /tmp/device.key 2048
