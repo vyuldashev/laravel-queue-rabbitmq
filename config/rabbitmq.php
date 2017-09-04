@@ -55,4 +55,15 @@ return [
      */
     'sleep_on_error' => env('RABBITMQ_ERROR_SLEEP', 5),
 
+    /*
+     * Optional SSL params if an SSL connection is used
+     */
+    'ssl_params' => [
+        'ssl_on'        => env('RABBITMQ_SSL', false),
+        'cafile'        => env('RABBITMQ_SSL_CAFILE', null),
+        'local_cert'    => env('RABBITMQ_SSL_LOCALCERT', null),
+        'verify_peer'   => env('RABBITMQ_SSL_VERIFY_PEER', true),
+        'passphrase'    => env('RABBITMQ_SSL_PASSPHRASE', null),
+    ]
+
 ];
