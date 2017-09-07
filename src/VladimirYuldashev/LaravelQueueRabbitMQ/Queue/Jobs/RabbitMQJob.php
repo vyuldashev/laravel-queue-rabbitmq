@@ -122,7 +122,7 @@ class RabbitMQJob extends Job implements JobContract
      * Release the job back into the queue.
      *
      * @param int $delay
-     * @return void
+     * @return string
      * @throws Exception
      */
     public function release($delay = 0)
@@ -146,9 +146,9 @@ class RabbitMQJob extends Job implements JobContract
         $data = $body['data'];
 
         if ($delay > 0) {
-            $this->connection->later($delay, $job, $data, $this->getQueue());
+            return $this->connection->later($delay, $job, $data, $this->getQueue());
         } else {
-            $this->connection->push($job, $data, $this->getQueue());
+            return $this->connection->push($job, $data, $this->getQueue());
         }
     }
 
