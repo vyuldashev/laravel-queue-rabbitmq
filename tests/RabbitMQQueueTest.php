@@ -39,6 +39,7 @@ class RabbitMQQueueTest extends TestCase
                 'exclusive' => false,
                 'auto_delete' => false,
                 'arguments' => null,
+                'no_ack' => false,
             ],
             'exchange_params' => [
                 'name' => 'exchange_name',
