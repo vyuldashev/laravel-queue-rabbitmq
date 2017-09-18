@@ -159,7 +159,10 @@ class RabbitMQQueueTest extends TestCase
             $this->config['queue']
         )->once();
 
-        $this->channel->shouldReceive('basic_get')->with($this->config['queue'])->andReturn($message)->once();
+        $this->channel->shouldReceive('basic_get')->with(
+            $this->config['queue'],
+            $this->config['queue_params']['no_ack']
+        )->andReturn($message)->once();
 
         $this->queue->setContainer(Mockery::mock(Container::class));
         $this->queue->pop();
