@@ -120,7 +120,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             $this->declareQueue($queue);
 
             // get envelope
-            $message = $this->channel->basic_get($queue);
+            $message = $this->channel->basic_get($queue, $this->queueParameters['no_ack']);
 
             if ($message instanceof AMQPMessage) {
                 return new RabbitMQJob(
