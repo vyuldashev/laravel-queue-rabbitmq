@@ -44,8 +44,8 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->connection = $connection;
         $this->defaultQueue = $config['queue'];
         $this->queueParameters = $config['queue_params'];
-        $this->queueParameters['no_ack'] = isset($this->queueParameters['no_ack']) 
-            ? $this->queueParameters['no_ack'] 
+        $this->queueParameters['no_ack'] = isset($this->queueParameters['no_ack'])
+            ? $this->queueParameters['no_ack']
             : false;
         $this->queueArguments = isset($this->queueParameters['arguments']) ? json_decode($this->queueParameters['arguments'], true) : [];
         $this->configExchange = $config['exchange_params'];
