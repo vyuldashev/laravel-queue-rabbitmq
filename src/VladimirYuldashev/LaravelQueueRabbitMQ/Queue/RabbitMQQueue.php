@@ -54,6 +54,9 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->connection = $amqpConnection;
         $this->defaultQueue = $config['queue'];
         $this->configQueue = $config['queue_params'];
+        $this->configQueue['no_ack'] = isset($config['queue_params']['no_ack'])
+            ? $config['queue_params']['no_ack']
+            : false;
         $this->configExchange = $config['exchange_params'];
         $this->declareExchange = $config['exchange_declare'];
         $this->declareBindQueue = $config['queue_declare_bind'];
