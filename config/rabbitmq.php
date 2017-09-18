@@ -40,6 +40,7 @@ return [
         'exclusive'   => env('RABBITMQ_QUEUE_EXCLUSIVE', false),
         'auto_delete' => env('RABBITMQ_QUEUE_AUTODELETE', false),
         'arguments'   => env('RABBITMQ_QUEUE_ARGUMENTS'),
+        'no_ack'      => env('RABBITMQ_QUEUE_NOACK', false)
     ],
     'exchange_params' => [
         'name' => env('RABBITMQ_EXCHANGE_NAME'),
