@@ -31,8 +31,8 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
     {
         /** @var QueueManager $queue */
         $queue = $this->app['queue'];
-        
-        if ($this->app['config']['rabbitmq']['ssl_params']['ssl_on'] === true) {
+
+        if ($this->app['config']['queue']['connections']['rabbitmq']['ssl_params']['ssl_on'] === true) {
             $connector = new RabbitMQConnectorSSL();
         } else {
             $connector = new RabbitMQConnector();
