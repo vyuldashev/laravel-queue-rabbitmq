@@ -56,6 +56,12 @@ return [
     'sleep_on_error' => env('RABBITMQ_ERROR_SLEEP', 5),
 
     /*
+     * Optional php-amqplib param, AMQPSocketConnection could gain better performance.
+     * If set to false, AMQPStreamConnection will be used (default).
+     */
+    'connection_method_socket' => env('RABBITMQ_CONNECTION_SOCKET', false),
+
+    /*
      * Optional SSL params if an SSL connection is used
      */
     'ssl_params' => [

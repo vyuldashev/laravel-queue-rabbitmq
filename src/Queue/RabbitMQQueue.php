@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Queue\Queue;
 use Log;
 use PhpAmqpLib\Channel\AMQPChannel;
-use PhpAmqpLib\Connection\AMQPStreamConnection;
+use PhpAmqpLib\Connection\AbstractConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
 use RuntimeException;
@@ -39,7 +39,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     private $retryAfter;
     private $correlationId;
 
-    public function __construct(AMQPStreamConnection $connection, array $config)
+    public function __construct(AbstractConnection $connection, array $config)
     {
         $this->connection = $connection;
         $this->defaultQueue = $config['queue'];
