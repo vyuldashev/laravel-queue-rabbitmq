@@ -19,10 +19,12 @@
         </testsuite>
     </testsuites>
     <php>
-        <env name="HOST" value="127.0.0.1"/>
+        <env name="HOST" value="homestead"/>
         <env name="PORT" value="5672"/>
         <env name="PORT_SSL" value="5671"/>
-        <env name="RABBITMQ_SSL_CAFILE" value="/path_to_your_ca_file"/>
+        <env name="RABBITMQ_SSL_CAFILE" value="/home/vagrant/dev/testca/cacert.pem"/>
+        <env name="RABBITMQ_SSL_LOCALCERT" value="/home/vagrant/dev/client/cert.pem"/>
+        <env name="RABBITMQ_SSL_KEY" value="/home/vagrant/dev/client/key.pem"/>
     </php>
     <filter>
         <whitelist>

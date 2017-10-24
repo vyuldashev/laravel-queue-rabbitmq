@@ -2,11 +2,10 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors;
 
-use Illuminate\Queue\Connectors\ConnectorInterface;
 use PhpAmqpLib\Connection\AMQPSSLConnection;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
-class RabbitMQConnectorSSL implements ConnectorInterface
+class RabbitMQConnectorSSL implements RabbitMQConnectorInterface
 {
     /** @var AMQPSSLConnection */
     private $connection;
@@ -38,7 +37,7 @@ class RabbitMQConnectorSSL implements ConnectorInterface
         );
 
         return new RabbitMQQueue(
-            $this->connection,
+            $this,
             $config
         );
     }
@@ -46,5 +45,10 @@ class RabbitMQConnectorSSL implements ConnectorInterface
     public function connection()
     {
         return $this->connection;
+    }
+
+    public function reconnect()
+    {
+        $this->connection->reconnect();
     }
 }

@@ -7,6 +7,8 @@ use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use PHPUnit\Framework\TestCase;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnectorInterface;
 
 class RabbitMQQueueTest extends TestCase
 {
@@ -28,7 +30,9 @@ class RabbitMQQueueTest extends TestCase
 
         $this->connection = Mockery::mock(AMQPStreamConnection::class);
         $this->channel = Mockery::mock(AMQPChannel::class);
+        $this->connector = Mockery::mock(RabbitMQConenctor::class, RabbitMQConnectorInterface::class);
 
+        $this->connector->shouldReceive('connection')->andReturn($this->connection);
         $this->connection->shouldReceive('channel')->andReturn($this->channel);
 
         $this->config = [
@@ -51,7 +55,7 @@ class RabbitMQQueueTest extends TestCase
             'queue_declare_bind' => true,
         ];
 
-        $this->queue = new RabbitMQQueue($this->connection, $this->config);
+        $this->queue = new RabbitMQQueue($this->connector, $this->config);
     }
 
     public function testSize()
