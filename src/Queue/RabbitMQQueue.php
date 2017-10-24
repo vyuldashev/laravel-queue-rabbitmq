@@ -140,7 +140,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             $this->channel->close();
             $this->connector->reconnect();
             $this->connection = $this->connector->connection();
-            $this->getChannel();
+            $this->channel = $this->getChannel();
         }
 
         return null;
