@@ -19,7 +19,7 @@
         </testsuite>
     </testsuites>
     <php>
-        <env name="HOST" value="homestead"/>
+        <env name="HOST" value="127.0.0.1"/>
         <env name="PORT" value="5672"/>
         <env name="PORT_SSL" value="5671"/>
         <env name="RABBITMQ_SSL_CAFILE" value="/home/vagrant/dev/testca/cacert.pem"/>
