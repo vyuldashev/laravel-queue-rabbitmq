@@ -2,14 +2,15 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors;
 
-use Illuminate\Queue\Connectors\ConnectorInterface;
 use PhpAmqpLib\Connection\AMQPSSLConnection;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
-class RabbitMQConnectorSSL implements ConnectorInterface
+class RabbitMQConnectorSSL implements RabbitMQConnectorInterface
 {
     /** @var AMQPSSLConnection */
     private $connection;
+
+    private $config;
 
     /**
      * Establish a queue connection.
@@ -27,16 +28,20 @@ class RabbitMQConnectorSSL implements ConnectorInterface
             }
         }
 
-        // Create connection with AMQP
-        $this->connection = new AMQPSSLConnection(
-            $config['host'],
-            $config['port'],
-            $config['login'],
-            $config['password'],
-            $config['vhost'],
-            $config['ssl_params']
-        );
+        $this->config = $config;
 
+        // // Create connection with AMQP
+        // $this->connection = new AMQPSSLConnection(
+        //     $this->config['host'],
+        //     $this->config['port'],
+        //     $this->config['login'],
+        //     $this->config['password'],
+        //     $this->config['vhost'],
+        //     $this->config['ssl_params']
+        // );
+
+        $this->createConnection();
+        
         return new RabbitMQQueue(
             $this->connection,
             $config
@@ -46,5 +51,24 @@ class RabbitMQConnectorSSL implements ConnectorInterface
     public function connection()
     {
         return $this->connection;
+    }
+
+    public function reconnect()
+    {
+        $this->connection->close();
+        $this->createConnection();
+    }
+
+    private function createConnection()
+    {
+        // Create connection with AMQP
+        $this->connection = new AMQPSSLConnection(
+            $this->config['host'],
+            $this->config['port'],
+            $this->config['login'],
+            $this->config['password'],
+            $this->config['vhost'],
+            $this->config['ssl_params']
+        );
     }
 }

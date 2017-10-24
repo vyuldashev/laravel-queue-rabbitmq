@@ -13,6 +13,7 @@ use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
 use RuntimeException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnectorInterface;
 
 class RabbitMQQueue extends Queue implements QueueContract
 {
@@ -21,6 +22,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     const ATTEMPT_COUNT_HEADERS_KEY = 'attempts_count';
 
+    protected $connector;
     protected $connection;
     protected $channel;
 
@@ -39,9 +41,10 @@ class RabbitMQQueue extends Queue implements QueueContract
     private $retryAfter;
     private $correlationId;
 
-    public function __construct(AMQPStreamConnection $connection, array $config)
+    public function __construct(RabbitMQConnectorInterface $connector, array $config)
     {
-        $this->connection = $connection;
+        $this->connector = $connector;
+        $this->connection = $connector->connection();
         $this->defaultQueue = $config['queue'];
         $this->queueParameters = $config['queue_params'];
         $this->queueArguments = isset($this->queueParameters['arguments']) ? json_decode($this->queueParameters['arguments'], true) : [];
@@ -134,6 +137,10 @@ class RabbitMQQueue extends Queue implements QueueContract
             }
         } catch (ErrorException $exception) {
             $this->reportConnectionError('pop', $exception);
+            $this->channel->close();
+            $this->connector->reconnect();
+            $this->connection = $this->connector->connection();
+            $this->getChannel();
         }
 
         return null;
