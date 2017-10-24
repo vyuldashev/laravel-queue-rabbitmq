@@ -22,8 +22,14 @@ class RabbitMQConnector implements RabbitMQConnectorInterface
      */
     public function connect(array $config): Queue
     {
-        $this->config = $config;
-        $this->createConnection();
+        // create connection with AMQP
+        $this->connection = new AMQPStreamConnection(
+            $config['host'],
+            $config['port'],
+            $config['login'],
+            $config['password'],
+            $config['vhost']
+        );
 
         return new RabbitMQQueue(
             $this,
@@ -39,18 +45,6 @@ class RabbitMQConnector implements RabbitMQConnectorInterface
     public function reconnect()
     {
         $this->connection->close();
-        $this->createConnection();
-    }
-
-    private function createConnection()
-    {
-        // create connection with AMQP
-        $this->connection = new AMQPStreamConnection(
-            $this->config['host'],
-            $this->config['port'],
-            $this->config['login'],
-            $this->config['password'],
-            $this->config['vhost']
-        );
+        $this->connection->reconnect();
     }
 }
