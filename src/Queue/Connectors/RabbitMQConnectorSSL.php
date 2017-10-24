@@ -10,8 +10,6 @@ class RabbitMQConnectorSSL implements RabbitMQConnectorInterface
     /** @var AMQPSSLConnection */
     private $connection;
 
-    private $config;
-
     /**
      * Establish a queue connection.
      *
@@ -28,19 +26,15 @@ class RabbitMQConnectorSSL implements RabbitMQConnectorInterface
             }
         }
 
-        $this->config = $config;
-
-        // // Create connection with AMQP
-        // $this->connection = new AMQPSSLConnection(
-        //     $this->config['host'],
-        //     $this->config['port'],
-        //     $this->config['login'],
-        //     $this->config['password'],
-        //     $this->config['vhost'],
-        //     $this->config['ssl_params']
-        // );
-
-        $this->createConnection();
+        // Create connection with AMQP
+        $this->connection = new AMQPSSLConnection(
+            $config['host'],
+            $config['port'],
+            $config['login'],
+            $config['password'],
+            $config['vhost'],
+            $config['ssl_params']
+        );
 
         return new RabbitMQQueue(
             $this,
@@ -55,20 +49,6 @@ class RabbitMQConnectorSSL implements RabbitMQConnectorInterface
 
     public function reconnect()
     {
-        $this->connection->close();
-        $this->createConnection();
-    }
-
-    private function createConnection()
-    {
-        // Create connection with AMQP
-        $this->connection = new AMQPSSLConnection(
-            $this->config['host'],
-            $this->config['port'],
-            $this->config['login'],
-            $this->config['password'],
-            $this->config['vhost'],
-            $this->config['ssl_params']
-        );
+        $this->connection->reconnect();
     }
 }

@@ -135,9 +135,9 @@ class RabbitMQQueue extends Queue implements QueueContract
                     $this->connectionName
                 );
             }
-        } catch (ErrorException $exception) {
+        } catch (Exception $exception) {
             $this->reportConnectionError('pop', $exception);
-            $this->channel->close();
+
             $this->connector->reconnect();
             $this->connection = $this->connector->connection();
             $this->channel = $this->getChannel();
