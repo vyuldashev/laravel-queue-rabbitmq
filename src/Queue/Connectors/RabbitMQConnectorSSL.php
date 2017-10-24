@@ -41,9 +41,9 @@ class RabbitMQConnectorSSL implements RabbitMQConnectorInterface
         // );
 
         $this->createConnection();
-        
+
         return new RabbitMQQueue(
-            $this->connection,
+            $this,
             $config
         );
     }

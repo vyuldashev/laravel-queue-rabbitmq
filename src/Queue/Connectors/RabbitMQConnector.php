@@ -24,9 +24,9 @@ class RabbitMQConnector implements RabbitMQConnectorInterface
     {
         $this->config = $config;
         $this->createConnection();
-        
+
         return new RabbitMQQueue(
-            $this->connection,
+            $this,
             $config
         );
     }
