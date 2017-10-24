@@ -64,6 +64,7 @@ return [
         'local_cert'    => env('RABBITMQ_SSL_LOCALCERT', null),
         'verify_peer'   => env('RABBITMQ_SSL_VERIFY_PEER', true),
         'passphrase'    => env('RABBITMQ_SSL_PASSPHRASE', null),
+        'local_pk'      => env('RABBITMQ_SSL_KEY', null),
     ]
 
 ];

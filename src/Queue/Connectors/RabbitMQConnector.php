@@ -3,14 +3,15 @@
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors;
 
 use Illuminate\Contracts\Queue\Queue;
-use Illuminate\Queue\Connectors\ConnectorInterface;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
-class RabbitMQConnector implements ConnectorInterface
+class RabbitMQConnector implements RabbitMQConnectorInterface
 {
     /** @var AMQPStreamConnection */
     private $connection;
+
+    private $config;
 
     /**
      * Establish a queue connection.
@@ -31,7 +32,7 @@ class RabbitMQConnector implements ConnectorInterface
         );
 
         return new RabbitMQQueue(
-            $this->connection,
+            $this,
             $config
         );
     }
@@ -39,5 +40,11 @@ class RabbitMQConnector implements ConnectorInterface
     public function connection()
     {
         return $this->connection;
+    }
+
+    public function reconnect()
+    {
+        $this->connection->close();
+        $this->connection->reconnect();
     }
 }
