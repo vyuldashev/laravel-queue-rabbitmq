@@ -35,7 +35,9 @@ class RabbitMQConnectorSSLTest extends TestCase
                 'auto_delete' => false,
             ],
             'ssl_params' => [
-                'cafile'        => getenv('RABBITMQ_SSL_CAFILE')
+                'cafile'        => getenv('RABBITMQ_SSL_CAFILE'),
+                'local_cert'    => getenv('RABBITMQ_SSL_LOCALCERT'),
+                'local_pk'      => getenv('RABBITMQ_SSL_KEY')
             ]
         ];
 
