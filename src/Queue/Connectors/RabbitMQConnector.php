@@ -2,16 +2,14 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors;
 
+use Enqueue\AmqpLib\AmqpConnectionFactory;
+use Enqueue\AmqpTools\RabbitMqDlxDelayStrategy;
 use Illuminate\Contracts\Queue\Queue;
 use Illuminate\Queue\Connectors\ConnectorInterface;
-use PhpAmqpLib\Connection\AMQPStreamConnection;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQConnector implements ConnectorInterface
 {
-    /** @var AMQPStreamConnection */
-    private $connection;
-
     /**
      * Establish a queue connection.
      *
@@ -21,23 +19,19 @@ class RabbitMQConnector implements ConnectorInterface
      */
     public function connect(array $config): Queue
     {
-        // create connection with AMQP
-        $this->connection = new AMQPStreamConnection(
-            $config['host'],
-            $config['port'],
-            $config['login'],
-            $config['password'],
-            $config['vhost']
-        );
+        $factory = new AmqpConnectionFactory([
+            'host' => $config['host'],
+            'port' => $config['port'],
+            'user' => $config['login'],
+            'pass' => $config['password'],
+            'vhost' => $config['vhost'],
+        ]);
+
+        $factory->setDelayStrategy(new RabbitMqDlxDelayStrategy());
 
         return new RabbitMQQueue(
-            $this->connection,
+            $factory->createContext(),
             $config
         );
-    }
-
-    public function connection()
-    {
-        return $this->connection;
     }
 }

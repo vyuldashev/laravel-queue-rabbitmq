@@ -9,8 +9,8 @@ use Illuminate\Database\DetectsDeadlocks;
 use Illuminate\Queue\Jobs\Job;
 use Illuminate\Queue\Jobs\JobName;
 use Illuminate\Support\Str;
-use PhpAmqpLib\Channel\AMQPChannel;
-use PhpAmqpLib\Message\AMQPMessage;
+use Interop\Amqp\AmqpConsumer;
+use Interop\Amqp\AmqpMessage;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQJob extends Job implements JobContract
@@ -23,20 +23,20 @@ class RabbitMQJob extends Job implements JobContract
     const ATTEMPT_COUNT_HEADERS_KEY = 'attempts_count';
 
     protected $connection;
-    protected $channel;
+    protected $consumer;
     protected $message;
 
     public function __construct(
         Container $container,
         RabbitMQQueue $connection,
-        AMQPChannel $channel,
+        AmqpConsumer $consumer,
         string $queue,
-        AMQPMessage $message,
+        AmqpMessage $message,
         string $connectionName = null
     ) {
         $this->container = $container;
         $this->connection = $connection;
-        $this->channel = $channel;
+        $this->consumer = $consumer;
         $this->queue = $queue;
         $this->message = $message;
         $this->connectionName = $connectionName;
@@ -79,16 +79,10 @@ class RabbitMQJob extends Job implements JobContract
      */
     public function attempts(): int
     {
-        if ($this->message->has('application_headers') === true) {
-            $headers = $this->message->get('application_headers')->getNativeData();
-
-            if (isset($headers[self::ATTEMPT_COUNT_HEADERS_KEY]) === true) {
-                return $headers[self::ATTEMPT_COUNT_HEADERS_KEY];
-            }
-        }
-
         // set default job attempts to 1 so that jobs can run without retry
-        return 1;
+        $defaultAttempts = 1;
+
+        return $this->message->getProperty(self::ATTEMPT_COUNT_HEADERS_KEY, $defaultAttempts);
     }
 
     /**
@@ -98,14 +92,15 @@ class RabbitMQJob extends Job implements JobContract
      */
     public function getRawBody(): string
     {
-        return $this->message->body;
+        return $this->message->getBody();
     }
 
     /** @inheritdoc */
     public function delete()
     {
         parent::delete();
-        $this->channel->basic_ack($this->message->get('delivery_tag'));
+
+        $this->consumer->acknowledge($this->message);
     }
 
     /** @inheritdoc */
@@ -143,7 +138,7 @@ class RabbitMQJob extends Job implements JobContract
      */
     public function getJobId(): string
     {
-        return $this->message->get('correlation_id');
+        return $this->message->getCorrelationId();
     }
 
     /**
