@@ -9,6 +9,16 @@ return [
 
     'driver' => 'rabbitmq',
 
+    'dsn' => env('RABBITMQ_DSN', null),
+
+    /*
+     * Could be one a class that implements \Interop\Amqp\AmqpConnectionFactory for example:
+     *  - \EnqueueAmqpExt\AmqpConnectionFactory if you install enqueue/amqp-ext
+     *  - \EnqueueAmqpLib\AmqpConnectionFactory if you install enqueue/amqp-lib
+     *  - \EnqueueAmqpBunny\AmqpConnectionFactory if you install enqueue/amqp-bunny
+     */
+    'factory_class' => \Enqueue\AmqpLib\AmqpConnectionFactory::class,
+
     'host' => env('RABBITMQ_HOST', '127.0.0.1'),
     'port' => env('RABBITMQ_PORT', 5672),
 
