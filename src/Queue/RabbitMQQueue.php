@@ -205,16 +205,17 @@ class RabbitMQQueue extends Queue implements QueueContract
         if ($this->declareBindQueue && !in_array($queueName, $this->declaredQueues, true)) {
             $queue = $this->context->createQueue($queueName);
 
-            if ($this->configExchange['passive']) {
+
+            if ($this->queueParameters['passive']) {
                 $queue->addFlag(AmqpQueue::FLAG_PASSIVE);
             }
-            if ($this->configExchange['durable']) {
+            if ($this->queueParameters['durable']) {
                 $queue->addFlag(AmqpQueue::FLAG_DURABLE);
             }
-            if ($this->configExchange['exclusive']) {
+            if ($this->queueParameters['exclusive']) {
                 $queue->addFlag(AmqpQueue::FLAG_EXCLUSIVE);
             }
-            if ($this->configExchange['auto_delete']) {
+            if ($this->queueParameters['auto_delete']) {
                 $queue->addFlag(AmqpQueue::FLAG_AUTODELETE);
             }
 
