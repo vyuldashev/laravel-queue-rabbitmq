@@ -24,6 +24,11 @@
       "VladimirYuldashev\\LaravelQueueRabbitMQ\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "VladimirYuldashev\\LaravelQueueRabbitMQ\\Tests\\": "tests/"
+    }
+  },
   "extra": {
     "laravel": {
       "providers": [

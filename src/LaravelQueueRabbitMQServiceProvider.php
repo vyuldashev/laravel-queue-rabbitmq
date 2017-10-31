@@ -31,7 +31,7 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
         $queue = $this->app['queue'];
         
         $queue->addConnector('rabbitmq', function () {
-            return new RabbitMQConnector();
+            return new RabbitMQConnector($this->app['events']);
         });
     }
 }

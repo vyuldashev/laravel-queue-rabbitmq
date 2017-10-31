@@ -2,8 +2,9 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors;
 
-use Enqueue\AmqpLib\AmqpConnectionFactory;
+use Enqueue\AmqpTools\DelayStrategyAware;
 use Enqueue\AmqpTools\RabbitMqDlxDelayStrategy;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Queue\Queue;
 use Illuminate\Queue\Connectors\ConnectorInterface;
 use Illuminate\Queue\Events\WorkerStopping;
@@ -13,6 +14,16 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 class RabbitMQConnector implements ConnectorInterface
 {
     /**
+     * @var Dispatcher
+     */
+    private $dispatcher;
+
+    public function __construct(Dispatcher $dispatcher)
+    {
+        $this->dispatcher = $dispatcher;
+    }
+
+    /**
      * Establish a queue connection.
      *
      * @param array $config
@@ -21,11 +32,14 @@ class RabbitMQConnector implements ConnectorInterface
      */
     public function connect(array $config): Queue
     {
+        if (false == array_key_exists('factory_class', $config)) {
+            throw new \LogicException('The factory_class option is missing though it is required.');
+        }
+
         $factoryClass = $config['factory_class'];
         if (false == class_exists($factoryClass) || false == (new \ReflectionClass($factoryClass))->implementsInterface(InteropAmqpConnectionFactory::class)) {
             throw new \LogicException(sprintf('The factory_class option has to be valid class that implements "%s"', InteropAmqpConnectionFactory::class));
         }
-
 
         $factory = new $factoryClass([
             'dsn' => $config['dsn'],
@@ -43,10 +57,13 @@ class RabbitMQConnector implements ConnectorInterface
             // TODO: add passphrase
         ]);
 
-        $factory->setDelayStrategy(new RabbitMqDlxDelayStrategy());
+        if ($factory instanceof DelayStrategyAware) {
+            $factory->setDelayStrategy(new RabbitMqDlxDelayStrategy());
+        }
+
         $context = $factory->createContext();
 
-        \Event::listen(WorkerStopping::class, function () use($context) {
+        $this->dispatcher->listen(WorkerStopping::class, function () use($context) {
             $context->close();
         });
 
