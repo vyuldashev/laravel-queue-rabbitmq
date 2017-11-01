@@ -121,7 +121,7 @@ class RabbitMQQueueTest extends TestCase
             ->expects($this->once())
             ->method('send')
             ->with($this->identicalTo($topic), $this->isInstanceOf(AmqpMessage::class))
-            ->willReturnCallback(function($actualTopic, AmqpMessage $message) use ($expectedQueueName, $expectedBody, $topic) {
+            ->willReturnCallback(function ($actualTopic, AmqpMessage $message) use ($expectedQueueName, $expectedBody, $topic) {
                 $this->assertSame($topic, $actualTopic);
                 $this->assertSame($expectedBody, $message->getBody());
                 $this->assertSame($expectedQueueName, $message->getRoutingKey());
@@ -178,7 +178,7 @@ class RabbitMQQueueTest extends TestCase
             ->expects($this->once())
             ->method('send')
             ->with($this->identicalTo($topic), $this->isInstanceOf(AmqpMessage::class))
-            ->willReturnCallback(function($actualTopic, AmqpMessage $message) use ($expectedAttempts) {
+            ->willReturnCallback(function ($actualTopic, AmqpMessage $message) use ($expectedAttempts) {
                 $this->assertSame($expectedAttempts, $message->getProperty(RabbitMQQueue::ATTEMPT_COUNT_HEADERS_KEY));
             })
         ;
@@ -270,7 +270,7 @@ class RabbitMQQueueTest extends TestCase
         $producer
             ->expects($this->once())
             ->method('send')
-            ->willReturnCallback(function() {
+            ->willReturnCallback(function () {
                 throw new \LogicException('Something went wrong while sending a message');
             })
         ;
@@ -398,7 +398,7 @@ class RabbitMQQueueTest extends TestCase
         $consumer
             ->expects($this->once())
             ->method('receiveNoWait')
-            ->willReturnCallback(function() {
+            ->willReturnCallback(function () {
                 throw new \LogicException('Something went wrong while receiving a message');
             })
         ;

@@ -65,7 +65,7 @@ class RabbitMQConnector implements ConnectorInterface
 
         $context = $factory->createContext();
 
-        $this->dispatcher->listen(WorkerStopping::class, function () use($context) {
+        $this->dispatcher->listen(WorkerStopping::class, function () use ($context) {
             $context->close();
         });
 
