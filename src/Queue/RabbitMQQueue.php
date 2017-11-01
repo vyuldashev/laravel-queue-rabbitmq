@@ -72,11 +72,14 @@ class RabbitMQQueue extends Queue implements QueueContract
     public function pushRaw($payload, $queueName = null, array $options = [])
     {
         try {
-            /** @var AmqpTopic $topic */
-            list(, $topic) = $this->declareEverything($queueName);
+            /**
+             * @var AmqpTopic $topic
+             * @var AmqpQueue $queue
+             */
+            list($queue, $topic) = $this->declareEverything($queueName);
 
             $message = $this->context->createMessage($payload);
-            $message->setRoutingKey($queueName);
+            $message->setRoutingKey($queue->getQueueName());
             $message->setCorrelationId($this->getCorrelationId());
             $message->setContentType('application/json');
             $message->setDeliveryMode(AmqpMessage::DELIVERY_MODE_PERSISTENT);
@@ -116,14 +119,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             $consumer = $this->context->createConsumer($queue);
 
             if ($message = $consumer->receiveNoWait()) {
-                return new RabbitMQJob(
-                    $this->container,
-                    $this,
-                    $consumer,
-                    $queueName,
-                    $message,
-                    $this->connectionName
-                );
+                return new RabbitMQJob($this->container, $this, $consumer, $message);
             }
         } catch (\Exception $exception) {
             $this->reportConnectionError('pop', $exception);
@@ -179,7 +175,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @return array [Interop\Amqp\AmqpQueue, Interop\Amqp\AmqpTopic]
      */
-    private function declareEverything(string $queueName): array
+    private function declareEverything(string $queueName = null): array
     {
         $queueName = $queueName ?: $this->defaultQueue;
         $exchangeName = $this->configExchange['name'] ?: $queueName;
@@ -224,7 +220,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         }
 
         if ($this->declareBindQueue) {
-            $this->context->bind(new AmqpBind($queue, $topic, $queueName));
+            $this->context->bind(new AmqpBind($queue, $topic, $queue->getQueueName()));
         }
 
         return [$queue, $topic];
