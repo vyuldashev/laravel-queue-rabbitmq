@@ -46,7 +46,7 @@ class LaravelQueueRabbitMQServiceProviderTest extends TestCase
             ->expects($this->once())
             ->method('addConnector')
             ->with('rabbitmq', $this->isInstanceOf(\Closure::class))
-            ->willReturnCallback(function($driver, \Closure $resolver) use ($dispatcherMock) {
+            ->willReturnCallback(function ($driver, \Closure $resolver) use ($dispatcherMock) {
                 $connector = $resolver();
 
                 $this->assertInstanceOf(RabbitMQConnector::class, $connector);

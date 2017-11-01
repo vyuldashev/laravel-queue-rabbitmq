@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\Queue;
 use Illuminate\Queue\Connectors\ConnectorInterface;
 use Illuminate\Queue\Events\WorkerStopping;
 use Interop\Amqp\AmqpConnectionFactory as InteropAmqpConnectionFactory;
+use Interop\Amqp\AmqpConnectionFactory;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQConnector implements ConnectorInterface
@@ -41,6 +42,7 @@ class RabbitMQConnector implements ConnectorInterface
             throw new \LogicException(sprintf('The factory_class option has to be valid class that implements "%s"', InteropAmqpConnectionFactory::class));
         }
 
+        /** @var AmqpConnectionFactory $factory */
         $factory = new $factoryClass([
             'dsn' => $config['dsn'],
             'host' => $config['host'],
@@ -63,7 +65,7 @@ class RabbitMQConnector implements ConnectorInterface
 
         $context = $factory->createContext();
 
-        $this->dispatcher->listen(WorkerStopping::class, function () use($context) {
+        $this->dispatcher->listen(WorkerStopping::class, function () use ($context) {
             $context->close();
         });
 
