@@ -37,6 +37,11 @@ return [
     'exchange_declare' => env('RABBITMQ_EXCHANGE_DECLARE', true),
 
     /*
+     * Determine if queue should be created if it does not exist.
+     */
+    'queue_declare' => env('RABBITMQ_QUEUE_DECLARE', true),
+
+    /*
      * Determine if queue should be created and binded to the exchange if it does not exist.
      */
     'queue_declare_bind' => env('RABBITMQ_QUEUE_DECLARE_BIND', true),

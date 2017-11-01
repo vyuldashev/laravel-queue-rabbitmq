@@ -9,7 +9,7 @@ use Interop\Amqp\AmqpMessage;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpTopic;
 use Interop\Amqp\Impl\AmqpBind;
-use Log;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
@@ -20,12 +20,8 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     const ATTEMPT_COUNT_HEADERS_KEY = 'attempts_count';
 
-    /**
-     * @var AmqpContext
-     */
-    protected $context;
-
     protected $declareExchange;
+    protected $declareQueue;
     protected $declareBindQueue;
     protected $sleepOnError;
 
@@ -37,6 +33,10 @@ class RabbitMQQueue extends Queue implements QueueContract
     private $declaredExchanges = [];
     private $declaredQueues = [];
 
+    /**
+     * @var AmqpContext
+     */
+    private $context;
     private $retryAfter;
     private $correlationId;
 
@@ -48,6 +48,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->queueArguments = isset($this->queueParameters['arguments']) ? json_decode($this->queueParameters['arguments'], true) : [];
         $this->configExchange = $config['exchange_params'];
         $this->declareExchange = $config['exchange_declare'];
+        $this->declareQueue = $config['queue_declare'];
         $this->declareBindQueue = $config['queue_declare_bind'];
         $this->sleepOnError = $config['sleep_on_error'] ?? 5;
     }
@@ -55,8 +56,8 @@ class RabbitMQQueue extends Queue implements QueueContract
     /** @inheritdoc */
     public function size($queueName = null): int
     {
-        $queue = $this->context->createQueue($this->getQueueName($queueName));
-        $queue->addFlag(AmqpQueue::FLAG_PASSIVE);
+        /** @var AmqpQueue $queue */
+        list($queue) = $this->declareEverything($queueName);
 
         return $this->context->declareQueue($queue);
     }
@@ -71,10 +72,8 @@ class RabbitMQQueue extends Queue implements QueueContract
     public function pushRaw($payload, $queueName = null, array $options = [])
     {
         try {
-            $queueName = $this->getQueueName($queueName);
-            list($queueName, $exchangeName) = $this->declareQueue($queueName);
-
-            $topic = $this->context->createTopic($exchangeName);
+            /** @var AmqpTopic $topic */
+            list(, $topic) = $this->declareEverything($queueName);
 
             $message = $this->context->createMessage($payload);
             $message->setRoutingKey($queueName);
@@ -110,19 +109,13 @@ class RabbitMQQueue extends Queue implements QueueContract
     /** @inheritdoc */
     public function pop($queueName = null)
     {
-        $queueName = $this->getQueueName($queueName);
-
         try {
-            // declare queue if not exists
-            $this->declareQueue($queueName);
+            /** @var AmqpQueue $queue */
+            list($queue) = $this->declareEverything($queueName);
 
-
-            $queue = $this->context->createQueue($queueName);
             $consumer = $this->context->createConsumer($queue);
 
-            $message = $consumer->receiveNoWait();
-
-            if ($message) {
+            if ($message = $consumer->receiveNoWait()) {
                 return new RabbitMQJob(
                     $this->container,
                     $this,
@@ -173,67 +166,68 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->correlationId = $id;
     }
 
-    private function getQueueName(string $queue = null): string
+    /**
+     * @return AmqpContext
+     */
+    public function getContext(): AmqpContext
     {
-        return $queue ?: $this->defaultQueue;
+        return $this->context;
     }
 
-    private function declareQueue(string $queueName): array
+    /**
+     * @param string $queueName
+     *
+     * @return array [Interop\Amqp\AmqpQueue, Interop\Amqp\AmqpTopic]
+     */
+    private function declareEverything(string $queueName): array
     {
-        $queueName = $this->getQueueName($queueName);
+        $queueName = $queueName ?: $this->defaultQueue;
         $exchangeName = $this->configExchange['name'] ?: $queueName;
 
+        $topic = $this->context->createTopic($exchangeName);
+        $topic->setType($this->configExchange['type']);
+        if ($this->configExchange['passive']) {
+            $topic->addFlag(AmqpTopic::FLAG_PASSIVE);
+        }
+        if ($this->configExchange['durable']) {
+            $topic->addFlag(AmqpTopic::FLAG_DURABLE);
+        }
+        if ($this->configExchange['auto_delete']) {
+            $topic->addFlag(AmqpTopic::FLAG_AUTODELETE);
+        }
+
         if ($this->declareExchange && !in_array($exchangeName, $this->declaredExchanges, true)) {
-            $topic = $this->context->createTopic($exchangeName);
-            $topic->setType($this->configExchange['type']);
-
-            if ($this->configExchange['passive']) {
-                $topic->addFlag(AmqpTopic::FLAG_PASSIVE);
-            }
-            if ($this->configExchange['durable']) {
-                $topic->addFlag(AmqpTopic::FLAG_DURABLE);
-            }
-            if ($this->configExchange['auto_delete']) {
-                $topic->addFlag(AmqpTopic::FLAG_AUTODELETE);
-            }
-
             $this->context->declareTopic($topic);
 
             $this->declaredExchanges[] = $exchangeName;
         }
 
-        if ($this->declareBindQueue && !in_array($queueName, $this->declaredQueues, true)) {
-            $queue = $this->context->createQueue($queueName);
+        $queue = $this->context->createQueue($queueName);
+        $queue->setArguments($this->queueArguments);
+        if ($this->queueParameters['passive']) {
+            $queue->addFlag(AmqpQueue::FLAG_PASSIVE);
+        }
+        if ($this->queueParameters['durable']) {
+            $queue->addFlag(AmqpQueue::FLAG_DURABLE);
+        }
+        if ($this->queueParameters['exclusive']) {
+            $queue->addFlag(AmqpQueue::FLAG_EXCLUSIVE);
+        }
+        if ($this->queueParameters['auto_delete']) {
+            $queue->addFlag(AmqpQueue::FLAG_AUTODELETE);
+        }
 
-
-            if ($this->queueParameters['passive']) {
-                $queue->addFlag(AmqpQueue::FLAG_PASSIVE);
-            }
-            if ($this->queueParameters['durable']) {
-                $queue->addFlag(AmqpQueue::FLAG_DURABLE);
-            }
-            if ($this->queueParameters['exclusive']) {
-                $queue->addFlag(AmqpQueue::FLAG_EXCLUSIVE);
-            }
-            if ($this->queueParameters['auto_delete']) {
-                $queue->addFlag(AmqpQueue::FLAG_AUTODELETE);
-            }
-
-            $queue->setArguments($this->queueArguments);
-
+        if ($this->declareQueue && !in_array($queueName, $this->declaredQueues, true)) {
             $this->context->declareQueue($queue);
-
-
-            $this->context->bind(new AmqpBind(
-                $queue,
-                $this->context->createTopic($exchangeName),
-                $queueName)
-            );
 
             $this->declaredQueues[] = $queueName;
         }
 
-        return [$queueName, $exchangeName];
+        if ($this->declareBindQueue) {
+            $this->context->bind(new AmqpBind($queue, $topic, $queueName));
+        }
+
+        return [$queue, $topic];
     }
 
     /**
@@ -243,11 +237,14 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     protected function reportConnectionError($action, \Exception $e)
     {
-        Log::error('AMQP error while attempting ' . $action . ': ' . $e->getMessage());
+        /** @var LoggerInterface $logger */
+        $logger = $this->container['log'];
+
+        $logger->error('AMQP error while attempting ' . $action . ': ' . $e->getMessage());
 
         // If it's set to false, throw an error rather than waiting
         if ($this->sleepOnError === false) {
-            throw new RuntimeException('Error writing data to the connection with RabbitMQ');
+            throw new RuntimeException('Error writing data to the connection with RabbitMQ', null, $e);
         }
 
         // Sleep so that we don't flood the log file

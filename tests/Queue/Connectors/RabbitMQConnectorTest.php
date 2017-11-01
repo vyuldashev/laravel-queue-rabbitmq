@@ -164,6 +164,7 @@ class RabbitMQConnectorTest extends TestCase
             ],
             'queue' => 'aQueueName',
             'exchange_declare' => false,
+            'queue_declare' => false,
             'queue_declare_bind' => false,
             'queue_params' => [
                 'passive'     => false,
