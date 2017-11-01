@@ -102,7 +102,7 @@ class RabbitMQConnectorTest extends TestCase
         $connector = new RabbitMQConnector($this->createMock(Dispatcher::class));
 
         $called = false;
-        DelayStrategyAwareAmqpConnectionFactorySpy::$spy = function($actualStrategy) use (&$called) {
+        DelayStrategyAwareAmqpConnectionFactorySpy::$spy = function ($actualStrategy) use (&$called) {
             $this->assertInstanceOf(RabbitMqDlxDelayStrategy::class, $actualStrategy);
 
             $called = true;
@@ -129,7 +129,7 @@ class RabbitMQConnectorTest extends TestCase
             ->expects($this->once())
             ->method('listen')
             ->with(WorkerStopping::class, $this->isInstanceOf(\Closure::class))
-            ->willReturnCallback(function($eventName, \Closure $listener) {
+            ->willReturnCallback(function ($eventName, \Closure $listener) {
 
                 $listener();
             })
