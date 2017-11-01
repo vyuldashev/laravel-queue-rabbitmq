@@ -130,7 +130,6 @@ class RabbitMQConnectorTest extends TestCase
             ->method('listen')
             ->with(WorkerStopping::class, $this->isInstanceOf(\Closure::class))
             ->willReturnCallback(function ($eventName, \Closure $listener) {
-
                 $listener();
             })
         ;
