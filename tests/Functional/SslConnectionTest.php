@@ -44,6 +44,7 @@ class SslConnectionTest extends TestCase
                 'auto_delete' => false,
             ],
             'ssl_params' => [
+                'ssl_on'        => true,
                 'cafile'        => getenv('RABBITMQ_SSL_CAFILE'),
                 'local_cert'    => null,
                 'verify_peer'   => false,
