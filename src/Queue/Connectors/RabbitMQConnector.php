@@ -54,9 +54,8 @@ class RabbitMQConnector implements ConnectorInterface
             'ssl_verify' => $config['ssl_params']['verify_peer'],
             'ssl_cacert' => $config['ssl_params']['cafile'],
             'ssl_cert' => $config['ssl_params']['local_cert'],
-
-            // TODO 'ssl_key' not supported
-            // TODO: add passphrase
+            'ssl_key' => $config['ssl_params']['local_key'],
+            'ssl_passphrase' => $config['ssl_params']['passphrase'],
         ]);
 
         if ($factory instanceof DelayStrategyAware) {

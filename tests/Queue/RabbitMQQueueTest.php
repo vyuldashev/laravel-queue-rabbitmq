@@ -473,7 +473,8 @@ class RabbitMQQueueTest extends TestCase
                 'ssl_on' => 'aSslOn',
                 'verify_peer' => 'aVerifyPeer',
                 'cafile' => 'aCafile',
-                'local_cert' => 'aLocalCert'
+                'local_cert' => 'aLocalCert',
+                'local_key'  => 'aLocalKey',
             ],
             'queue' => 'aQueueName',
             'exchange_declare' => false,

@@ -13,7 +13,7 @@
     "illuminate/database": "5.5.*",
     "illuminate/support": "5.5.*",
     "illuminate/queue": "5.5.*",
-    "enqueue/amqp-lib": "dev-ssl-filter-out-null-options as 0.8.4"
+    "enqueue/amqp-lib": "0.8.5"
   },
   "require-dev": {
     "phpunit/phpunit": "~6.0",
@@ -41,11 +41,5 @@
     "test": "vendor/bin/phpunit"
   },
   "minimum-stability": "dev",
-  "prefer-stable": true,
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "git@github.com:formapro-forks/amqp-lib.git"
-    }
-  ]
+  "prefer-stable": true
 }

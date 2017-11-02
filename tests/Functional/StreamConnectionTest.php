@@ -45,6 +45,7 @@ class StreamConnectionTest extends TestCase
                 'ssl_on'        => false,
                 'cafile'        => null,
                 'local_cert'    => null,
+                'local_key'     => null,
                 'verify_peer'   => true,
                 'passphrase'    => null,
             ]

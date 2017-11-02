@@ -47,6 +47,7 @@ class SslConnectionTest extends TestCase
                 'ssl_on'        => true,
                 'cafile'        => getenv('RABBITMQ_SSL_CAFILE'),
                 'local_cert'    => null,
+                'local_key'     => null,
                 'verify_peer'   => false,
                 'passphrase'    => null,
             ]

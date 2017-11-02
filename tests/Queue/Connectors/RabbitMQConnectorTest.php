@@ -72,6 +72,8 @@ class RabbitMQConnectorTest extends TestCase
                 'ssl_verify' => 'theVerifyPeer',
                 'ssl_cacert' => 'theCafile',
                 'ssl_cert' => 'theLocalCert',
+                'ssl_key' => 'theLocalKey',
+                'ssl_passphrase' => 'thePassPhrase',
             ], $config);
         };
 
@@ -160,7 +162,9 @@ class RabbitMQConnectorTest extends TestCase
                 'ssl_on' => 'theSslOn',
                 'verify_peer' => 'theVerifyPeer',
                 'cafile' => 'theCafile',
-                'local_cert' => 'theLocalCert'
+                'local_cert' => 'theLocalCert',
+                'local_key'  => 'theLocalKey',
+                'passphrase'  => 'thePassPhrase',
             ],
             'queue' => 'aQueueName',
             'exchange_declare' => false,
