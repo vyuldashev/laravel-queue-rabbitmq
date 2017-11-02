@@ -7,6 +7,7 @@ use Illuminate\Container\Container;
 use Illuminate\Events\Dispatcher;
 use Interop\Amqp\AmqpTopic;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\NullLogger;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
@@ -53,7 +54,7 @@ class SendAndReceiveDelayedMessageTest extends TestCase
         $connector = new RabbitMQConnector(new Dispatcher());
         /** @var RabbitMQQueue $queue */
         $queue = $connector->connect($config);
-        $queue->setContainer(new Container());
+        $queue->setContainer($this->createDummyContainer());
 
         // we need it to declare exchange\queue on RabbitMQ side.
         $queue->pushRaw('something');
@@ -76,5 +77,13 @@ class SendAndReceiveDelayedMessageTest extends TestCase
         $this->assertSame($expectedPayload, $job->getRawBody());
 
         $job->delete();
+    }
+
+    private function createDummyContainer()
+    {
+        $container = new Container();
+        $container['log'] = new NullLogger();
+
+        return $container;
     }
 }
