@@ -36,6 +36,7 @@ class RabbitMQJob extends Job implements JobContract
         $this->connection = $connection;
         $this->consumer = $consumer;
         $this->message = $message;
+        $this->queue = $consumer->getQueue()->getQueueName();
     }
 
     /**
