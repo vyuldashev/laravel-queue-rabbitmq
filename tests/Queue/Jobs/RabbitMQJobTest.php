@@ -53,7 +53,7 @@ class RabbitMQJobTest extends TestCase
     {
         $mock =  $this->createMock(AmqpConsumer::class);
 
-        if (!$queueName !== '')
+        if ($queueName !== '')
         {
             $mock->expects($this->once())
                 ->method('getQueue')
