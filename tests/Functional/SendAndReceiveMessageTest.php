@@ -12,6 +12,9 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
+/**
+ * @group functional
+ */
 class SendAndReceiveMessageTest extends TestCase
 {
     public function test()

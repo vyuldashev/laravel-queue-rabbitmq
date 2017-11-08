@@ -363,6 +363,11 @@ class RabbitMQQueueTest extends TestCase
             ->method('receiveNoWait')
             ->willReturn($message)
         ;
+        $consumer
+            ->expects($this->once())
+            ->method('getQueue')
+            ->willReturn($queue)
+        ;
 
         $context = $this->createAmqpContext();
         $context

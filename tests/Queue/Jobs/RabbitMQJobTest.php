@@ -38,29 +38,36 @@ class RabbitMQJobTest extends TestCase
 
     public function testCouldBeConstructedWithExpectedArguments()
     {
-        new RabbitMQJob(
+        $queue = $this->createMock(\Interop\Amqp\AmqpQueue::class);
+        $queue
+            ->expects($this->once())
+            ->method('getQueueName')
+            ->willReturn('theQueueName')
+        ;
+
+        $consumerMock = $this->createConsumerMock();
+        $consumerMock
+            ->expects($this->once())
+            ->method('getQueue')
+            ->willReturn($queue)
+        ;
+
+        $job = new RabbitMQJob(
             new Container(),
             $this->createRabbitMQQueueMock(),
-            $this->createConsumerMock(),
+            $consumerMock,
             new AmqpMessage()
         );
+
+        $this->assertAttributeSame('theQueueName', 'queue', $job);
     }
 
     /**
      * @return AmqpConsumer|\PHPUnit_Framework_MockObject_MockObject|AmqpConsumer
      */
-    private function createConsumerMock(string $queueName = 'test')
+    private function createConsumerMock()
     {
-        $mock =  $this->createMock(AmqpConsumer::class);
-
-        if ($queueName !== '')
-        {
-            $mock->expects($this->once())
-                ->method('getQueue')
-                ->willReturn(new AmqpQueue($queueName));
-        }
-
-        return $mock;
+        return $this->createMock(AmqpConsumer::class);
     }
 
     /**

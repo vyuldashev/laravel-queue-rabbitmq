@@ -11,6 +11,9 @@ use PHPUnit\Framework\TestCase;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
+/**
+ * @group functional
+ */
 class StreamConnectionTest extends TestCase
 {
     public function testConnectorEstablishSecureConnectionWithRabbitMQBroker()
