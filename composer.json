@@ -13,15 +13,21 @@
     "illuminate/database": "5.5.*",
     "illuminate/support": "5.5.*",
     "illuminate/queue": "5.5.*",
-    "php-amqplib/php-amqplib": "2.6.*"
+    "enqueue/amqp-lib": "0.8.5"
   },
   "require-dev": {
     "phpunit/phpunit": "~6.0",
+    "illuminate/events": "5.5.*",
     "mockery/mockery": "^0.9.5"
   },
   "autoload": {
     "psr-4": {
       "VladimirYuldashev\\LaravelQueueRabbitMQ\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "VladimirYuldashev\\LaravelQueueRabbitMQ\\Tests\\": "tests/"
     }
   },
   "extra": {

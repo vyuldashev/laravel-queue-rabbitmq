@@ -11,7 +11,7 @@ RabbitMQ Queue driver for Laravel
 1. Install this package via composer using:
 
 ```
-composer require vladimir-yuldashev/laravel-queue-rabbitmq:5.5
+composer require vladimir-yuldashev/laravel-queue-rabbitmq:^6
 ```
 
 2. Add these properties to `.env` with proper values:
@@ -19,11 +19,7 @@ composer require vladimir-yuldashev/laravel-queue-rabbitmq:5.5
 ```
 QUEUE_DRIVER=rabbitmq
 
-RABBITMQ_HOST=127.0.0.1
-RABBITMQ_PORT=5672
-RABBITMQ_VHOST=/
-RABBITMQ_LOGIN=guest
-RABBITMQ_PASSWORD=guest
+RABBITMQ_DSN=amqp://guest:guest@127.0.0.1:5672/%2F
 RABBITMQ_QUEUE=queue_name
 ```
 

@@ -9,6 +9,16 @@ return [
 
     'driver' => 'rabbitmq',
 
+    'dsn' => env('RABBITMQ_DSN', null),
+
+    /*
+     * Could be one a class that implements \Interop\Amqp\AmqpConnectionFactory for example:
+     *  - \EnqueueAmqpExt\AmqpConnectionFactory if you install enqueue/amqp-ext
+     *  - \EnqueueAmqpLib\AmqpConnectionFactory if you install enqueue/amqp-lib
+     *  - \EnqueueAmqpBunny\AmqpConnectionFactory if you install enqueue/amqp-bunny
+     */
+    'factory_class' => \Enqueue\AmqpLib\AmqpConnectionFactory::class,
+
     'host' => env('RABBITMQ_HOST', '127.0.0.1'),
     'port' => env('RABBITMQ_PORT', 5672),
 
@@ -27,6 +37,11 @@ return [
     'exchange_declare' => env('RABBITMQ_EXCHANGE_DECLARE', true),
 
     /*
+     * Determine if queue should be created if it does not exist.
+     */
+    'queue_declare' => env('RABBITMQ_QUEUE_DECLARE', true),
+
+    /*
      * Determine if queue should be created and binded to the exchange if it does not exist.
      */
     'queue_declare_bind' => env('RABBITMQ_QUEUE_DECLARE_BIND', true),
@@ -43,7 +58,7 @@ return [
     ],
     'exchange_params' => [
         'name' => env('RABBITMQ_EXCHANGE_NAME'),
-        'type' => env('RABBITMQ_EXCHANGE_TYPE', 'direct'),
+        'type' => env('RABBITMQ_EXCHANGE_TYPE', \Interop\Amqp\AmqpTopic::TYPE_DIRECT),
         'passive' => env('RABBITMQ_EXCHANGE_PASSIVE', false),
         'durable' => env('RABBITMQ_EXCHANGE_DURABLE', true),
         'auto_delete' => env('RABBITMQ_EXCHANGE_AUTODELETE', false),
@@ -62,6 +77,7 @@ return [
         'ssl_on'        => env('RABBITMQ_SSL', false),
         'cafile'        => env('RABBITMQ_SSL_CAFILE', null),
         'local_cert'    => env('RABBITMQ_SSL_LOCALCERT', null),
+        'local_key'     => env('RABBITMQ_SSL_LOCALKEY', null),
         'verify_peer'   => env('RABBITMQ_SSL_VERIFY_PEER', true),
         'passphrase'    => env('RABBITMQ_SSL_PASSPHRASE', null),
     ]
