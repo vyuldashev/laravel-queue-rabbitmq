@@ -8,6 +8,7 @@ use Illuminate\Database\DetectsDeadlocks;
 use Illuminate\Queue\Jobs\Job;
 use Interop\Amqp\AmqpConsumer;
 use Interop\Amqp\Impl\AmqpMessage;
+use Interop\Amqp\Impl\AmqpQueue;
 use PHPUnit\Framework\TestCase;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
@@ -48,9 +49,18 @@ class RabbitMQJobTest extends TestCase
     /**
      * @return AmqpConsumer|\PHPUnit_Framework_MockObject_MockObject|AmqpConsumer
      */
-    private function createConsumerMock()
+    private function createConsumerMock(string $queueName = 'test')
     {
-        return $this->createMock(AmqpConsumer::class);
+        $mock =  $this->createMock(AmqpConsumer::class);
+
+        if ($queueName !== '')
+        {
+            $mock->expects($this->once())
+                ->method('getQueue')
+                ->willReturn(new AmqpQueue($queueName));
+        }
+
+        return $mock;
     }
 
     /**
