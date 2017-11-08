@@ -11,7 +11,7 @@ RabbitMQ Queue driver for Laravel
 1. Install this package via composer using:
 
 ```
-composer require vladimir-yuldashev/laravel-queue-rabbitmq:^6
+composer require vladimir-yuldashev/laravel-queue-rabbitmq
 ```
 
 2. Add these properties to `.env` with proper values:
