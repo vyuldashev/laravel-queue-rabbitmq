@@ -10,6 +10,7 @@ use Illuminate\Queue\Connectors\ConnectorInterface;
 use Illuminate\Queue\Events\WorkerStopping;
 use Interop\Amqp\AmqpConnectionFactory as InteropAmqpConnectionFactory;
 use Interop\Amqp\AmqpConnectionFactory;
+use Interop\Amqp\AmqpContext;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQConnector implements ConnectorInterface
@@ -33,12 +34,12 @@ class RabbitMQConnector implements ConnectorInterface
      */
     public function connect(array $config): Queue
     {
-        if (false == array_key_exists('factory_class', $config)) {
+        if (false === array_key_exists('factory_class', $config)) {
             throw new \LogicException('The factory_class option is missing though it is required.');
         }
 
         $factoryClass = $config['factory_class'];
-        if (false == class_exists($factoryClass) || false == (new \ReflectionClass($factoryClass))->implementsInterface(InteropAmqpConnectionFactory::class)) {
+        if (false === class_exists($factoryClass) || false === (new \ReflectionClass($factoryClass))->implementsInterface(InteropAmqpConnectionFactory::class)) {
             throw new \LogicException(sprintf('The factory_class option has to be valid class that implements "%s"', InteropAmqpConnectionFactory::class));
         }
 
@@ -62,6 +63,7 @@ class RabbitMQConnector implements ConnectorInterface
             $factory->setDelayStrategy(new RabbitMqDlxDelayStrategy());
         }
 
+        /** @var AmqpContext $context */
         $context = $factory->createContext();
 
         $this->dispatcher->listen(WorkerStopping::class, function () use ($context) {
