@@ -13,7 +13,8 @@
     "illuminate/database": "5.5.*",
     "illuminate/support": "5.5.*",
     "illuminate/queue": "5.5.*",
-    "enqueue/amqp-lib": "0.8.5"
+    "enqueue/amqp-lib": "0.8.5",
+    "queue-interop/amqp-interop": "^0.7"
   },
   "require-dev": {
     "phpunit/phpunit": "~6.0",

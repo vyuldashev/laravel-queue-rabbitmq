@@ -18,8 +18,15 @@ composer require vladimir-yuldashev/laravel-queue-rabbitmq
 
 ```
 QUEUE_DRIVER=rabbitmq
+RABBITMQ_QUEUE=queue_name
 
-RABBITMQ_DSN=amqp://guest:guest@127.0.0.1:5672/%2F
+RABBITMQ_DSN=amqp: # same as amqp://guest:guest@127.0.0.1:5672/%2F
+# or 
+RABBITMQ_HOST=127.0.0.1
+RABBITMQ_PORT=5672
+RABBITMQ_VHOST=/
+RABBITMQ_LOGIN=guest
+RABBITMQ_PASSWORD=guest
 RABBITMQ_QUEUE=queue_name
 ```
 
@@ -33,6 +40,34 @@ RABBITMQ_SSL_KEY=
 ```
 
 Using an SSL connection will also require to configure your RabbitMQ to enable SSL. More details can be founds here: https://www.rabbitmq.com/ssl.html
+
+4. Other AMQP transports
+
+The package uses [enqueue/amqp-lib](https://github.com/php-enqueue/enqueue-dev/blob/master/docs/transport/amqp_lib.md) transport which is based on [php-amqplib](https://github.com/php-amqplib/php-amqplib). 
+There is possibility to use any [amqp interop](https://github.com/queue-interop/queue-interop#amqp-interop) compatible transport, for example `enqueue/amqp-ext` or `enqueue/amqp-bunny`.
+Here's an example on how one can change the transport to `enqueue/amqp-bunny`.
+
+First, install the package:
+
+```bash
+$ composer require enqueue/amqp-bunny:^0.8
+```
+  
+and change the factory class:
+
+```php
+<?php
+// config/queue.php
+
+return [
+    'connections' => [
+        'rabbitmq' => [
+            'driver' => 'rabbitmq',
+            'factory_class' => \Enqueue\AmqpBunny\AmqpConnectionFactory::class,
+        ],
+    ],
+];
+```
 
 #### Usage
 
