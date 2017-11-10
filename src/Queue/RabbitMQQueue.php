@@ -20,15 +20,10 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     const ATTEMPT_COUNT_HEADERS_KEY = 'attempts_count';
 
-    protected $declareExchange;
-    protected $declareQueue;
-    protected $declareBindQueue;
     protected $sleepOnError;
 
-    protected $defaultQueue;
-    protected $queueParameters;
-    protected $queueArguments;
-    protected $configExchange;
+    protected $queueOptions;
+    protected $exchangeOptions;
 
     private $declaredExchanges = [];
     private $declaredQueues = [];
@@ -43,13 +38,12 @@ class RabbitMQQueue extends Queue implements QueueContract
     public function __construct(AmqpContext $context, array $config)
     {
         $this->context = $context;
-        $this->defaultQueue = $config['queue'];
-        $this->queueParameters = $config['queue_params'];
-        $this->queueArguments = isset($this->queueParameters['arguments']) ? json_decode($this->queueParameters['arguments'], true) : [];
-        $this->configExchange = $config['exchange_params'];
-        $this->declareExchange = $config['exchange_declare'];
-        $this->declareQueue = $config['queue_declare'];
-        $this->declareBindQueue = $config['queue_declare_bind'];
+
+        $this->queueOptions = $config['options']['queue'];
+        $this->queueOptions['arguments'] = isset($this->queueOptions['arguments']) ? json_decode($this->queueOptions['arguments'], true) : [];
+
+        $this->exchangeOptions = $config['options']['exchange'];
+
         $this->sleepOnError = $config['sleep_on_error'] ?? 5;
     }
 
@@ -177,49 +171,49 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     private function declareEverything(string $queueName = null): array
     {
-        $queueName = $queueName ?: $this->defaultQueue;
-        $exchangeName = $this->configExchange['name'] ?: $queueName;
+        $queueName = $queueName ?: $this->queueOptions['name'];
+        $exchangeName = $this->exchangeOptions['name'] ?: $queueName;
 
         $topic = $this->context->createTopic($exchangeName);
-        $topic->setType($this->configExchange['type']);
-        if ($this->configExchange['passive']) {
+        $topic->setType($this->exchangeOptions['type']);
+        if ($this->exchangeOptions['passive']) {
             $topic->addFlag(AmqpTopic::FLAG_PASSIVE);
         }
-        if ($this->configExchange['durable']) {
+        if ($this->exchangeOptions['durable']) {
             $topic->addFlag(AmqpTopic::FLAG_DURABLE);
         }
-        if ($this->configExchange['auto_delete']) {
+        if ($this->exchangeOptions['auto_delete']) {
             $topic->addFlag(AmqpTopic::FLAG_AUTODELETE);
         }
 
-        if ($this->declareExchange && !in_array($exchangeName, $this->declaredExchanges, true)) {
+        if ($this->exchangeOptions['declare'] && !in_array($exchangeName, $this->declaredExchanges, true)) {
             $this->context->declareTopic($topic);
 
             $this->declaredExchanges[] = $exchangeName;
         }
 
         $queue = $this->context->createQueue($queueName);
-        $queue->setArguments($this->queueArguments);
-        if ($this->queueParameters['passive']) {
+        $queue->setArguments($this->queueOptions['arguments']);
+        if ($this->queueOptions['passive']) {
             $queue->addFlag(AmqpQueue::FLAG_PASSIVE);
         }
-        if ($this->queueParameters['durable']) {
+        if ($this->queueOptions['durable']) {
             $queue->addFlag(AmqpQueue::FLAG_DURABLE);
         }
-        if ($this->queueParameters['exclusive']) {
+        if ($this->queueOptions['exclusive']) {
             $queue->addFlag(AmqpQueue::FLAG_EXCLUSIVE);
         }
-        if ($this->queueParameters['auto_delete']) {
+        if ($this->queueOptions['auto_delete']) {
             $queue->addFlag(AmqpQueue::FLAG_AUTODELETE);
         }
 
-        if ($this->declareQueue && !in_array($queueName, $this->declaredQueues, true)) {
+        if ($this->queueOptions['declare'] && !in_array($queueName, $this->declaredQueues, true)) {
             $this->context->declareQueue($queue);
 
             $this->declaredQueues[] = $queueName;
         }
 
-        if ($this->declareBindQueue) {
+        if ($this->queueOptions['bind']) {
             $this->context->bind(new AmqpBind($queue, $topic, $queue->getQueueName()));
         }
 

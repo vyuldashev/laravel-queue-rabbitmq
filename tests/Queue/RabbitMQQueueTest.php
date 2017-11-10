@@ -481,23 +481,26 @@ class RabbitMQQueueTest extends TestCase
                 'local_cert' => 'aLocalCert',
                 'local_key'  => 'aLocalKey',
             ],
-            'queue' => 'aQueueName',
-            'exchange_declare' => false,
-            'queue_declare' => false,
-            'queue_declare_bind' => false,
-            'queue_params' => [
-                'passive'     => false,
-                'durable'     => true,
-                'exclusive'   => false,
-                'auto_delete' => false,
-                'arguments'   => '[]',
-            ],
-            'exchange_params' => [
-                'name' => 'anExchangeName',
-                'type' => 'direct',
-                'passive' => false,
-                'durable' => true,
-                'auto_delete' => false,
+            'options' => [
+                'exchange' => [
+                    'name' => 'anExchangeName',
+                    'declare' => false,
+                    'type' => \Interop\Amqp\AmqpTopic::TYPE_DIRECT,
+                    'passive' => false,
+                    'durable' => true,
+                    'auto_delete' => false,
+                ],
+
+                'queue' => [
+                    'name' => 'aQueueName',
+                    'declare' => false,
+                    'bind' => false,
+                    'passive' => false,
+                    'durable' => true,
+                    'exclusive' => false,
+                    'auto_delete' => false,
+                    'arguments' => '[]',
+                ],
             ],
             'sleep_on_error' => false,
         ];
