@@ -30,7 +30,7 @@ class SendAndReceiveMessageTest extends TestCase
             'options' => [
                 'exchange' => [
                     'name' => null,
-                    'declare' => false,
+                    'declare' => true,
                     'type' => \Interop\Amqp\AmqpTopic::TYPE_DIRECT,
                     'passive' => false,
                     'durable' => true,
@@ -39,8 +39,8 @@ class SendAndReceiveMessageTest extends TestCase
 
                 'queue' => [
                     'name' => 'aQueueName',
-                    'declare' => false,
-                    'bind' => false,
+                    'declare' => true,
+                    'bind' => true,
                     'passive' => false,
                     'durable' => true,
                     'exclusive' => false,
