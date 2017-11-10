@@ -37,7 +37,7 @@ class SslConnectionTest extends TestCase
                 ],
 
                 'queue' => [
-                    'name' => 'queue_name',
+                    'name' => 'default',
                     'declare' => true,
                     'bind' => true,
                     'passive' => false,

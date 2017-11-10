@@ -38,7 +38,7 @@ class SendAndReceiveMessageTest extends TestCase
                 ],
 
                 'queue' => [
-                    'name' => 'queue_name',
+                    'name' => 'default',
                     'declare' => true,
                     'bind' => true,
                     'passive' => false,
@@ -66,7 +66,7 @@ class SendAndReceiveMessageTest extends TestCase
         // we need it to declare exchange\queue on RabbitMQ side.
         $queue->pushRaw('something');
 
-        $queue->getContext()->purgeQueue($queue->getContext()->createQueue('queue_name'));
+        $queue->getContext()->purgeQueue($queue->getContext()->createQueue('default'));
 
         $expectedPayload = __METHOD__.microtime(true);
 
