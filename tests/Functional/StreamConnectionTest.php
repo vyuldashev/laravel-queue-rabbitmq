@@ -37,7 +37,7 @@ class StreamConnectionTest extends TestCase
                 ],
 
                 'queue' => [
-                    'name' => 'aQueueName',
+                    'name' => 'queue_name',
                     'declare' => true,
                     'bind' => true,
                     'passive' => false,
