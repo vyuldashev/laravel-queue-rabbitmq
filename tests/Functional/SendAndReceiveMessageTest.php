@@ -27,23 +27,26 @@ class SendAndReceiveMessageTest extends TestCase
             'login'    => 'guest',
             'password' => 'guest',
             'vhost'    => '/',
-            'queue'              => 'queue_name',
-            'exchange_declare'   => true,
-            'queue_declare'   => true,
-            'queue_declare_bind' => true,
-            'queue_params' => [
-                'passive'     => false,
-                'durable'     => true,
-                'exclusive'   => false,
-                'auto_delete' => false,
-                'arguments'   => null,
-            ],
-            'exchange_params' => [
-                'name'        => null,
-                'type'        => AmqpTopic::TYPE_DIRECT,
-                'passive'     => false,
-                'durable'     => true,
-                'auto_delete' => false,
+            'options' => [
+                'exchange' => [
+                    'name' => null,
+                    'declare' => true,
+                    'type' => \Interop\Amqp\AmqpTopic::TYPE_DIRECT,
+                    'passive' => false,
+                    'durable' => true,
+                    'auto_delete' => false,
+                ],
+
+                'queue' => [
+                    'name' => 'default',
+                    'declare' => true,
+                    'bind' => true,
+                    'passive' => false,
+                    'durable' => true,
+                    'exclusive' => false,
+                    'auto_delete' => false,
+                    'arguments' => '[]',
+                ],
             ],
             'ssl_params' => [
                 'ssl_on'        => false,
@@ -63,7 +66,7 @@ class SendAndReceiveMessageTest extends TestCase
         // we need it to declare exchange\queue on RabbitMQ side.
         $queue->pushRaw('something');
 
-        $queue->getContext()->purgeQueue($queue->getContext()->createQueue('queue_name'));
+        $queue->getContext()->purgeQueue($queue->getContext()->createQueue('default'));
 
         $expectedPayload = __METHOD__.microtime(true);
 

@@ -26,25 +26,26 @@ class SslConnectionTest extends TestCase
             'login'    => 'guest',
             'password' => 'guest',
             'vhost'    => '/',
+            'options' => [
+                'exchange' => [
+                    'name' => null,
+                    'declare' => true,
+                    'type' => \Interop\Amqp\AmqpTopic::TYPE_DIRECT,
+                    'passive' => false,
+                    'durable' => true,
+                    'auto_delete' => false,
+                ],
 
-            'queue'              => 'queue_name',
-            'exchange_declare'   => true,
-            'queue_declare'   => true,
-            'queue_declare_bind' => true,
-
-            'queue_params' => [
-                'passive'     => false,
-                'durable'     => true,
-                'exclusive'   => false,
-                'auto_delete' => false,
-                'arguments'   => null,
-            ],
-            'exchange_params' => [
-                'name'        => null,
-                'type'        => AmqpTopic::TYPE_DIRECT,
-                'passive'     => false,
-                'durable'     => true,
-                'auto_delete' => false,
+                'queue' => [
+                    'name' => 'default',
+                    'declare' => true,
+                    'bind' => true,
+                    'passive' => false,
+                    'durable' => true,
+                    'exclusive' => false,
+                    'auto_delete' => false,
+                    'arguments' => '[]',
+                ],
             ],
             'ssl_params' => [
                 'ssl_on'        => true,
