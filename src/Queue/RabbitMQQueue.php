@@ -173,6 +173,17 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->correlationId = $id;
     }
 
+    /**
+     * Restarts the connection
+     *
+     * @return void
+     */
+    public function reconnect()
+    {
+        $this->connection->reconnect();
+        $this->channel = $this->getChannel();
+    }
+
     private function getQueueName(string $queue = null): string
     {
         return $queue ?: $this->defaultQueue;

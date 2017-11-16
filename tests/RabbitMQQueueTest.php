@@ -193,4 +193,11 @@ class RabbitMQQueueTest extends TestCase
 
         $this->queue->setCorrelationId($id);
     }
+
+    public function testReconnect()
+    {
+        $this->connection->shouldReceive('reconnect');
+        $this->connection->shouldReceive('channel')->andReturn(Mockery::mock(AMQPChannel::class));
+        $this->queue->reconnect();
+    }
 }
