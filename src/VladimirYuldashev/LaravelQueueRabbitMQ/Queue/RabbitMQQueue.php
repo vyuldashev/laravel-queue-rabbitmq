@@ -310,7 +310,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     {
         Log::error('AMQP error while attempting ' . $action . ': ' . $e->getMessage());
 
-        if ($this->sleepOnError === false 
+        if ($this->sleepOnError === false
             && in_array($action, $this->sleepOnErrorActions)
         ) {
             throw new Exception($e->getMessage());
