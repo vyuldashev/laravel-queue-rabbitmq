@@ -34,6 +34,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     protected $configQueue;
     protected $configExchange;
     protected $sleepOnError;
+    protected $sleepOnErrorActions;
 
     /**
      * @var int
@@ -58,6 +59,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->declareExchange = $config['exchange_declare'];
         $this->declareBindQueue = $config['queue_declare_bind'];
         $this->sleepOnError = isset($config['sleep_on_error']) ? $config['sleep_on_error'] : 5;
+        $this->sleepOnErrorActions = isset($config['sleep_on_error_actions']) ? $config['sleep_on_error_actions'] : [];
 
         $this->channel = $this->getChannel();
     }
@@ -307,8 +309,14 @@ class RabbitMQQueue extends Queue implements QueueContract
     private function reportConnectionError($action, Exception $e)
     {
         Log::error('AMQP error while attempting ' . $action . ': ' . $e->getMessage());
+
+        if ($this->sleepOnError === false
+            && in_array($action, $this->sleepOnErrorActions)
+        ) {
+            throw new Exception($e->getMessage());
+        }
+        
         // Sleep so that we don't flood the log file
         sleep($this->sleepOnError);
     }
-
 }

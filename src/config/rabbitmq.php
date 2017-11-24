@@ -36,4 +36,6 @@ return [
 
     'sleep_on_error' => env('RABBITMQ_ERROR_SLEEP', 5), // the number of seconds to sleep if there's an error communicating with rabbitmq
 
+    'sleep_on_error_actions' => ['pop'],  // 当sleep_on_error设置为false时，指定的action，按抛出异常
+
 ];
