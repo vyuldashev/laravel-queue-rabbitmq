@@ -319,5 +319,4 @@ class RabbitMQQueue extends Queue implements QueueContract
         // Sleep so that we don't flood the log file
         sleep($this->sleepOnError);
     }
-
 }
