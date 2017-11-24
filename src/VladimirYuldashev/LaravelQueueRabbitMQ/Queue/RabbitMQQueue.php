@@ -313,7 +313,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         if ($this->sleepOnError === false 
             && in_array($action, $this->sleepOnErrorActions)
         ) {
-            throw new Exception($e->getMessage(), null, $e);
+            throw new Exception($e->getMessage());
         }
         
         // Sleep so that we don't flood the log file
