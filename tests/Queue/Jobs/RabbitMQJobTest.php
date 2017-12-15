@@ -52,14 +52,22 @@ class RabbitMQJobTest extends TestCase
             ->willReturn($queue)
         ;
 
+        $connectionMock = $this->createRabbitMQQueueMock();
+        $connectionMock
+            ->expects($this->any())
+            ->method('getConnectionName')
+            ->willReturn('theConnectionName')
+        ;
+        
         $job = new RabbitMQJob(
             new Container(),
-            $this->createRabbitMQQueueMock(),
+            $connectionMock,
             $consumerMock,
             new AmqpMessage()
         );
 
         $this->assertAttributeSame('theQueueName', 'queue', $job);
+        $this->assertSame('theConnectionName', $job->getConnectionName());
     }
 
     /**
