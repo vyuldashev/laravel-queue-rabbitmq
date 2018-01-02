@@ -107,7 +107,6 @@ class RabbitMQJob extends Job implements JobContract
         parent::release($delay);
 
         $this->delete();
-        $this->connection->setAttempts($this->attempts() + 1);
 
         $body = $this->payload();
 
@@ -122,11 +121,7 @@ class RabbitMQJob extends Job implements JobContract
 
         $data = $body['data'];
 
-        if ($delay > 0) {
-            $this->connection->later($delay, $job, $data, $this->getQueue());
-        } else {
-            $this->connection->push($job, $data, $this->getQueue());
-        }
+        $this->connection->release($delay, $job, $data, $this->getQueue(), $this->attempts() + 1);
     }
 
     /**

@@ -34,15 +34,6 @@ class RabbitMQQueueTest extends TestCase
         new RabbitMQQueue($this->createAmqpContext(), $this->createDummyConfig());
     }
 
-    public function testShouldAllowSetAttempts()
-    {
-        $queue = new RabbitMQQueue($this->createAmqpContext(), $this->createDummyConfig());
-
-        $queue->setAttempts(123);
-
-        $this->assertAttributeSame(123, 'retryAfter', $queue);
-    }
-
     public function testShouldGenerateNewCorrelationIdIfNotSet()
     {
         $queue = new RabbitMQQueue($this->createAmqpContext(), $this->createDummyConfig());
@@ -128,7 +119,7 @@ class RabbitMQQueueTest extends TestCase
                 $this->assertSame('application/json', $message->getContentType());
                 $this->assertSame(AmqpMessage::DELIVERY_MODE_PERSISTENT, $message->getDeliveryMode());
                 $this->assertNotEmpty($message->getCorrelationId());
-                $this->assertNull($message->getProperty(RabbitMQQueue::ATTEMPT_COUNT_HEADERS_KEY));
+                $this->assertNull($message->getProperty(RabbitMQJob::ATTEMPT_COUNT_HEADERS_KEY));
             })
         ;
         $producer
@@ -167,7 +158,7 @@ class RabbitMQQueueTest extends TestCase
         $queue->pushRaw('thePayload', $expectedQueueName);
     }
 
-    public function testShouldSetAttemptCountHeaderIfNotNull()
+    public function testShouldSetAttemptCountPropIfNotNull()
     {
         $expectedAttempts = 54321;
 
@@ -179,7 +170,7 @@ class RabbitMQQueueTest extends TestCase
             ->method('send')
             ->with($this->identicalTo($topic), $this->isInstanceOf(AmqpMessage::class))
             ->willReturnCallback(function ($actualTopic, AmqpMessage $message) use ($expectedAttempts) {
-                $this->assertSame($expectedAttempts, $message->getProperty(RabbitMQQueue::ATTEMPT_COUNT_HEADERS_KEY));
+                $this->assertSame($expectedAttempts, $message->getProperty(RabbitMQJob::ATTEMPT_COUNT_HEADERS_KEY));
             })
         ;
         $producer
@@ -212,9 +203,8 @@ class RabbitMQQueueTest extends TestCase
 
         $queue = new RabbitMQQueue($context, $this->createDummyConfig());
         $queue->setContainer($this->createDummyContainer());
-        $queue->setAttempts($expectedAttempts);
 
-        $queue->pushRaw('thePayload', 'aQueue');
+        $queue->pushRaw('thePayload', 'aQueue', ['attempts' => $expectedAttempts]);
     }
 
     public function testShouldSetDeliveryDelayIfDelayOptionPresent()
