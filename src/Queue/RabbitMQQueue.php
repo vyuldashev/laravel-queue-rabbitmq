@@ -15,11 +15,6 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 class RabbitMQQueue extends Queue implements QueueContract
 {
-    /**
-     * Used for retry logic, to set the retries on the message metadata instead of the message body.
-     */
-    const ATTEMPT_COUNT_HEADERS_KEY = 'attempts_count';
-
     protected $sleepOnError;
 
     protected $queueOptions;
@@ -32,7 +27,6 @@ class RabbitMQQueue extends Queue implements QueueContract
      * @var AmqpContext
      */
     private $context;
-    private $retryAfter;
     private $correlationId;
 
     public function __construct(AmqpContext $context, array $config)
@@ -78,8 +72,8 @@ class RabbitMQQueue extends Queue implements QueueContract
             $message->setContentType('application/json');
             $message->setDeliveryMode(AmqpMessage::DELIVERY_MODE_PERSISTENT);
 
-            if ($this->retryAfter !== null) {
-                $message->setProperty(self::ATTEMPT_COUNT_HEADERS_KEY, $this->retryAfter);
+            if (isset($options['attempts'])) {
+                $message->setProperty(RabbitMQJob::ATTEMPT_COUNT_HEADERS_KEY, $options['attempts']);
             }
 
             $producer = $this->context->createProducer();
@@ -103,6 +97,24 @@ class RabbitMQQueue extends Queue implements QueueContract
         return $this->pushRaw($this->createPayload($job, $data), $queue, ['delay' => $this->secondsUntil($delay)]);
     }
 
+    /**
+     * Release a reserved job back onto the queue.
+     *
+     * @param  \DateTimeInterface|\DateInterval|int  $delay
+     * @param  string|object  $job
+     * @param  mixed   $data
+     * @param  string  $queue
+     * @param  int  $attempts
+     * @return mixed
+     */
+    public function release($delay, $job, $data, $queue, $attempts = 0)
+    {
+        return $this->pushRaw($this->createPayload($job, $data), $queue, [
+            'delay' => $this->secondsUntil($delay),
+            'attempts' => $attempts
+        ]);
+    }
+
     /** @inheritdoc */
     public function pop($queueName = null)
     {
@@ -120,18 +132,6 @@ class RabbitMQQueue extends Queue implements QueueContract
         }
 
         return null;
-    }
-
-    /**
-     * Sets the attempts member variable to be used in message generation.
-     *
-     * @param int $count
-     *
-     * @return void
-     */
-    public function setAttempts(int $count)
-    {
-        $this->retryAfter = $count;
     }
 
     /**
