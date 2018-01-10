@@ -44,6 +44,7 @@ return [
             'passive' => env('RABBITMQ_EXCHANGE_PASSIVE', false),
             'durable' => env('RABBITMQ_EXCHANGE_DURABLE', true),
             'auto_delete' => env('RABBITMQ_EXCHANGE_AUTODELETE', false),
+            'arguments' => env('RABBITMQ_EXCHANGE_ARGUMENTS'),
         ],
 
         'queue' => [
@@ -71,9 +72,7 @@ return [
             'exclusive' => env('RABBITMQ_QUEUE_EXCLUSIVE', false),
             'auto_delete' => env('RABBITMQ_QUEUE_AUTODELETE', false),
             'arguments' => env('RABBITMQ_QUEUE_ARGUMENTS'),
-
         ],
-
     ],
 
     /*
