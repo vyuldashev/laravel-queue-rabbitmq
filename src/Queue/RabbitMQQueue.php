@@ -34,9 +34,12 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->context = $context;
 
         $this->queueOptions = $config['options']['queue'];
-        $this->queueOptions['arguments'] = isset($this->queueOptions['arguments']) ? json_decode($this->queueOptions['arguments'], true) : [];
+        $this->queueOptions['arguments'] = isset($this->queueOptions['arguments']) ?
+            json_decode($this->queueOptions['arguments'], true) : [];
 
         $this->exchangeOptions = $config['options']['exchange'];
+        $this->exchangeOptions['arguments'] = isset($this->exchangeOptions['arguments']) ?
+            json_decode($this->exchangeOptions['arguments'], true) : [];
 
         $this->sleepOnError = $config['sleep_on_error'] ?? 5;
     }
@@ -176,6 +179,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         $topic = $this->context->createTopic($exchangeName);
         $topic->setType($this->exchangeOptions['type']);
+        $topic->setArguments($this->exchangeOptions['arguments']);
         if ($this->exchangeOptions['passive']) {
             $topic->addFlag(AmqpTopic::FLAG_PASSIVE);
         }
