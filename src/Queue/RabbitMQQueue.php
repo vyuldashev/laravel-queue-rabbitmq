@@ -24,6 +24,9 @@ class RabbitMQQueue extends Queue implements QueueContract
     private $declaredExchanges = [];
     private $declaredQueues = [];
 
+    private $declarationsCache = [];
+    private $consumerCache = [];
+
     /**
      * @var AmqpContext
      */
@@ -42,7 +45,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->exchangeOptions['arguments'] = isset($this->exchangeOptions['arguments']) ?
             json_decode($this->exchangeOptions['arguments'], true) : [];
 
-        $this->receiveConfig = $config['receive'] ?? ;
+        $this->receiveConfig = $config['receive'] ?? [];
 
         $this->sleepOnError = $config['sleep_on_error'] ?? 5;
     }
@@ -51,7 +54,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     public function size($queueName = null): int
     {
         /** @var AmqpQueue $queue */
-        list($queue) = $this->declareEverything($queueName);
+        list($queue) = $this->declareEverythingOnce($queueName);
 
         return $this->context->declareQueue($queue);
     }
@@ -70,7 +73,7 @@ class RabbitMQQueue extends Queue implements QueueContract
              * @var AmqpTopic $topic
              * @var AmqpQueue $queue
              */
-            list($queue, $topic) = $this->declareEverything($queueName);
+            list($queue, $topic) = $this->declareEverythingOnce($queueName);
 
             $message = $this->context->createMessage($payload);
             $message->setRoutingKey($queue->getQueueName());
@@ -126,9 +129,10 @@ class RabbitMQQueue extends Queue implements QueueContract
     {
         try {
             /** @var AmqpQueue $queue */
-            list($queue) = $this->declareEverything($queueName);
+            list($queue) = $this->declareEverythingOnce($queueName);
 
-            $consumer = $this->context->createConsumer($queue);
+            // create the consumer once and cache it
+            $consumer = $this->createConsumerOnce($queue);
 
             if (isset($this->receiveConfig['method']) AND $this->receiveConfig['method'] == 'basic_consume') {
                 $message = $consumer->receive($this->receiveConfig['timeout']);
@@ -174,6 +178,20 @@ class RabbitMQQueue extends Queue implements QueueContract
     public function getContext(): AmqpContext
     {
         return $this->context;
+    }
+
+    /**
+     * @param string $queueName
+     *
+     * @return array [Interop\Amqp\AmqpQueue, Interop\Amqp\AmqpTopic]
+     */
+    private function declareEverythingOnce(string $queueName = null): array
+    {
+        $queueName = $queueName ?: $this->queueOptions['name'];
+        if (!isset($this->declarationsCache[$queueName])) {
+            $this->declarationsCache[$queueName] = $this->declareEverything($queueName);
+        }
+        return $this->declarationsCache[$queueName];
     }
 
     /**
@@ -233,6 +251,15 @@ class RabbitMQQueue extends Queue implements QueueContract
         return [$queue, $topic];
     }
 
+    protected function createConsumerOnce($queue)
+    {
+        $cache_key = spl_object_hash($queue);
+        if (!isset($this->consumerCache[$cache_key])) {
+            $this->consumerCache[$cache_key] = $this->context->createConsumer($queue);
+        }
+        return $this->consumerCache[$cache_key];
+    }
+
     /**
      * @param string $action
      * @param \Exception $e
@@ -253,4 +280,5 @@ class RabbitMQQueue extends Queue implements QueueContract
         // Sleep so that we don't flood the log file
         sleep($this->sleepOnError);
     }
+
 }
