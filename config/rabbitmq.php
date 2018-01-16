@@ -93,4 +93,15 @@ return [
         'passphrase' => env('RABBITMQ_SSL_PASSPHRASE', null),
     ],
 
+    'receive' => [
+        /**
+         * Use basic_consume by default which will block and not poll
+         */
+        'method' => env('RABBITMQ_RECEIVE_METHOD', 'basic_consume'),
+
+        /**
+         * The timeout (in milliseconds) to block and wait for a message
+         */
+        'timeout' => env('RABBITMQ_RECEIVE_TIMEOUT', 5000),
+    ],
 ];

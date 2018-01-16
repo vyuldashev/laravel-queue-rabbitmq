@@ -57,6 +57,7 @@ class RabbitMQConnector implements ConnectorInterface
             'ssl_cert' => $config['ssl_params']['local_cert'],
             'ssl_key' => $config['ssl_params']['local_key'],
             'ssl_passphrase' => $config['ssl_params']['passphrase'],
+            'receive_method' => isset($config['receive']) ? $config['receive']['method'] : 'basic_get',
         ]);
 
         if ($factory instanceof DelayStrategyAware) {

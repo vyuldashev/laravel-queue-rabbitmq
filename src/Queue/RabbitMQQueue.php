@@ -19,6 +19,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
     protected $queueOptions;
     protected $exchangeOptions;
+    protected $receiveConfig;
 
     private $declaredExchanges = [];
     private $declaredQueues = [];
@@ -40,6 +41,8 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->exchangeOptions = $config['options']['exchange'];
         $this->exchangeOptions['arguments'] = isset($this->exchangeOptions['arguments']) ?
             json_decode($this->exchangeOptions['arguments'], true) : [];
+
+        $this->receiveConfig = $config['receive'] ?? ;
 
         $this->sleepOnError = $config['sleep_on_error'] ?? 5;
     }
@@ -127,7 +130,13 @@ class RabbitMQQueue extends Queue implements QueueContract
 
             $consumer = $this->context->createConsumer($queue);
 
-            if ($message = $consumer->receiveNoWait()) {
+            if (isset($this->receiveConfig['method']) AND $this->receiveConfig['method'] == 'basic_consume') {
+                $message = $consumer->receive($this->receiveConfig['timeout']);
+            } else {
+                $message = $consumer->receiveNoWait();
+            }
+
+            if ($message) {
                 return new RabbitMQJob($this->container, $this, $consumer, $message);
             }
         } catch (\Exception $exception) {
