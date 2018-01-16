@@ -134,7 +134,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             // create the consumer once and cache it
             $consumer = $this->createConsumerOnce($queue);
 
-            if (isset($this->receiveConfig['method']) AND $this->receiveConfig['method'] == 'basic_consume') {
+            if (isset($this->receiveConfig['method']) and $this->receiveConfig['method'] == 'basic_consume') {
                 $message = $consumer->receive($this->receiveConfig['timeout']);
             } else {
                 $message = $consumer->receiveNoWait();
@@ -280,5 +280,4 @@ class RabbitMQQueue extends Queue implements QueueContract
         // Sleep so that we don't flood the log file
         sleep($this->sleepOnError);
     }
-
 }
