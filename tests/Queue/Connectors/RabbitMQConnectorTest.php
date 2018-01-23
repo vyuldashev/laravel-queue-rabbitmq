@@ -74,6 +74,7 @@ class RabbitMQConnectorTest extends TestCase
                 'ssl_cert' => 'theLocalCert',
                 'ssl_key' => 'theLocalKey',
                 'ssl_passphrase' => 'thePassPhrase',
+                'receive_method' => 'basic_get',
             ], $config);
         };
 
