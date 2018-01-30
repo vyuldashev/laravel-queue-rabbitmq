@@ -53,11 +53,14 @@ First, install the package:
 $ composer require enqueue/amqp-bunny:^0.8
 ```
   
-and change the factory class:
+and config your project:
 
 ```php
 <?php
-// config/queue.php
+/**
+ * If in Lumen, copy vendor/laravel/lumen-framework/config/queue.php to config/queue.php firstly
+ * config/queue.php
+ */
 
 return [
     'connections' => [
@@ -67,6 +70,19 @@ return [
         ],
     ],
 ];
+```
+registering Providers:
+
+```php
+<?php
+// in Laravel, config/app.php
+'providers' => [
+	...,
+	\VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider::class
+]
+
+// in Lumen, bootstrap/app.php
+$app->register(\VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider::class);
 ```
 
 #### Usage
