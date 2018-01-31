@@ -5,6 +5,7 @@ language: php
 php:
   - 7.0
   - 7.1
+  - 7.2
 
 env:
   - RABBITMQ_CONFIG_FILE="/tmp/rabbitmq.config" SSL_CAFILE="/tmp/rootCA.pem

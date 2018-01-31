@@ -10,15 +10,15 @@
   ],
   "require": {
     "php": ">=7.0",
-    "illuminate/database": "5.5.*",
-    "illuminate/support": "5.5.*",
-    "illuminate/queue": "5.5.*",
-    "enqueue/amqp-lib": "0.8.5",
+    "illuminate/database": "5.6.*",
+    "illuminate/support": "5.6.*",
+    "illuminate/queue": "5.6.*",
+    "enqueue/amqp-lib": "0.8.15",
     "queue-interop/amqp-interop": "^0.7"
   },
   "require-dev": {
     "phpunit/phpunit": "~6.0",
-    "illuminate/events": "5.5.*",
+    "illuminate/events": "5.6.*",
     "mockery/mockery": "~1.0"
   },
   "autoload": {
