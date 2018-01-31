@@ -18,6 +18,8 @@ class SslConnectionTest extends TestCase
 {
     public function testConnectorEstablishSecureConnectionWithRabbitMQBroker()
     {
+        $this->markTestIncomplete();
+
         $config = [
             'factory_class' => AmqpConnectionFactory::class,
             'dsn'      => null,
