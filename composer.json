@@ -13,7 +13,7 @@
     "illuminate/database": "5.6.*",
     "illuminate/support": "5.6.*",
     "illuminate/queue": "5.6.*",
-    "enqueue/amqp-lib": "0.8.15",
+    "enqueue/amqp-lib": "0.8.*",
     "queue-interop/amqp-interop": "^0.7"
   },
   "require-dev": {
