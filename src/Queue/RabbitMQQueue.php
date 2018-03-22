@@ -215,10 +215,10 @@ class RabbitMQQueue extends Queue implements QueueContract
             $this->context->declareQueue($queue);
 
             $this->declaredQueues[] = $queueName;
-        }
 
-        if ($this->queueOptions['bind']) {
-            $this->context->bind(new AmqpBind($queue, $topic, $queue->getQueueName()));
+            if ($this->queueOptions['bind']) {
+                $this->context->bind(new AmqpBind($queue, $topic, $queue->getQueueName()));
+            }
         }
 
         return [$queue, $topic];
