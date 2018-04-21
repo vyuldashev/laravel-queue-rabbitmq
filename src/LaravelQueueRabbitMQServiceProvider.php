@@ -9,24 +9,16 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
 {
     /**
-     * Register the service provider.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        $this->mergeConfigFrom(
-            __DIR__ . '/../config/rabbitmq.php', 'queue.connections.rabbitmq'
-        );
-    }
-
-    /**
      * Register the application's event listeners.
      *
      * @return void
      */
     public function boot()
     {
+        $path = realpath(__DIR__.'/../config/rabbitmq.php');
+        $this->publishes([$path => config_path('rabbitmq.php')], 'config');
+        $this->mergeConfigFrom($path, 'queue.connections.rabbitmq');
+        
         /** @var QueueManager $queue */
         $queue = $this->app['queue'];
         
