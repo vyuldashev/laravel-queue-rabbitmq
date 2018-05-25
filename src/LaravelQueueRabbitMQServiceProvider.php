@@ -9,29 +9,39 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
 {
     /**
-     * Register the service provider.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        $this->mergeConfigFrom(
-            __DIR__ . '/../config/rabbitmq.php', 'queue.connections.rabbitmq'
-        );
-    }
-
-    /**
-     * Register the application's event listeners.
+     * Add rabbitmq configuration and register connector.
      *
      * @return void
      */
     public function boot()
     {
-        /** @var QueueManager $queue */
-        $queue = $this->app['queue'];
-        
-        $queue->addConnector('rabbitmq', function () {
-            return new RabbitMQConnector($this->app['events']);
-        });
+        $configPath = __DIR__ . '/../config/rabbitmq.php';
+
+        $this->mergeConfigFrom($configPath, 'queue.connections.rabbitmq');
+
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                $configPath => $this->app->configPath('rabbitmq.php')
+            ], 'config');
+        }
+
+        $this->addRabbitMQConnector();
+    }
+
+
+    /**
+     * Add rabbitMQ connector when queue manager is resolved.
+     */
+    private function addRabbitMQConnector()
+    {
+        $callback = function (QueueManager $queueManager) {
+            $queueManager->addConnector('rabbitmq', function () {
+                return new RabbitMQConnector($this->app['events']);
+            });
+        };
+
+        $this->app->resolved('queue')
+            ? $callback($this->app['queue'])
+            : $this->app->afterResolving('queue', $callback);
     }
 }
