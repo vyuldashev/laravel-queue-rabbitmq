@@ -17,6 +17,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 {
     protected $sleepOnError;
 
+    protected $queueName;
     protected $queueOptions;
     protected $exchangeOptions;
 
@@ -33,6 +34,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     {
         $this->context = $context;
 
+        $this->queueName = $config['queue'] ?? $config['options']['queue']['name'];
         $this->queueOptions = $config['options']['queue'];
         $this->queueOptions['arguments'] = isset($this->queueOptions['arguments']) ?
             json_decode($this->queueOptions['arguments'], true) : [];
@@ -182,7 +184,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     private function declareEverything(string $queueName = null): array
     {
-        $queueName = $queueName ?: $this->queueOptions['name'];
+        $queueName = $queueName ?: $this->queueName;
         $exchangeName = $this->exchangeOptions['name'] ?: $queueName;
 
         $topic = $this->context->createTopic($exchangeName);

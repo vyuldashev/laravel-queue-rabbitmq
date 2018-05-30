@@ -26,6 +26,8 @@ return [
     'login' => env('RABBITMQ_LOGIN', 'guest'),
     'password' => env('RABBITMQ_PASSWORD', 'guest'),
 
+    'queue' => env('RABBITMQ_QUEUE', 'default'),
+
     'options' => [
 
         'exchange' => [
@@ -48,11 +50,6 @@ return [
         ],
 
         'queue' => [
-
-            /*
-            * The name of default queue.
-            */
-            'name' => env('RABBITMQ_QUEUE', 'default'),
 
             /*
             * Determine if queue should be created if it does not exist.
