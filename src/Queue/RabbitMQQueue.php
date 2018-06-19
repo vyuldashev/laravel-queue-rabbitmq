@@ -3,6 +3,7 @@
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
 use Illuminate\Contracts\Queue\Queue as QueueContract;
+use Illuminate\Contracts\Queue\Job as JobContract;
 use Illuminate\Queue\Queue;
 use Interop\Amqp\AmqpContext;
 use Interop\Amqp\AmqpMessage;
@@ -44,6 +45,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             json_decode($this->exchangeOptions['arguments'], true) : [];
 
         $this->sleepOnError = $config['sleep_on_error'] ?? 5;
+        $this->jobClass = $config['job_class'] ?? RabbitMQJob::class;
     }
 
     /** @inheritdoc */
@@ -76,11 +78,11 @@ class RabbitMQQueue extends Queue implements QueueContract
             $message->setCorrelationId($this->getCorrelationId());
             $message->setContentType('application/json');
             $message->setDeliveryMode(AmqpMessage::DELIVERY_MODE_PERSISTENT);
-            
+
             if (isset($options['headers'])) {
                 $message->setHeaders($options['headers']);
             }
-            
+
             if (isset($options['properties'])) {
                 $message->setProperties($options['properties']);
             }
@@ -138,7 +140,8 @@ class RabbitMQQueue extends Queue implements QueueContract
             $consumer = $this->context->createConsumer($queue);
 
             if ($message = $consumer->receiveNoWait()) {
-                return new RabbitMQJob($this->container, $this, $consumer, $message);
+                $jobClass = $this->getJobClass();
+                return new $jobClass($this->container, $this, $consumer, $message);
             }
         } catch (\Exception $exception) {
             $this->reportConnectionError('pop', $exception);
@@ -253,5 +256,17 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         // Sleep so that we don't flood the log file
         sleep($this->sleepOnError);
+    }
+
+    /**
+     *  @return string
+     */
+    protected function getJobClass()
+    {
+        if (false === class_exists($this->jobClass) || false === (new \ReflectionClass($this->jobClass))->implementsInterface(JobContract::class)) {
+            throw new \LogicException(sprintf('The job_class option has to be valid class that implements "%s"', JobContract::class));
+        }
+
+        return $this->jobClass;
     }
 }

@@ -23,7 +23,7 @@ QUEUE_DRIVER=rabbitmq
 RABBITMQ_QUEUE=queue_name
 
 RABBITMQ_DSN=amqp: # same as amqp://guest:guest@127.0.0.1:5672/%2F
-# or 
+# or
 RABBITMQ_HOST=127.0.0.1
 RABBITMQ_PORT=5672
 RABBITMQ_VHOST=/
@@ -49,7 +49,7 @@ Once you completed the configuration you can use Laravel Queue API. If you used 
 
 ## Using other AMQP transports
 
-The package uses [enqueue/amqp-lib](https://github.com/php-enqueue/enqueue-dev/blob/master/docs/transport/amqp_lib.md) transport which is based on [php-amqplib](https://github.com/php-amqplib/php-amqplib). 
+The package uses [enqueue/amqp-lib](https://github.com/php-enqueue/enqueue-dev/blob/master/docs/transport/amqp_lib.md) transport which is based on [php-amqplib](https://github.com/php-amqplib/php-amqplib).
 There is possibility to use any [amqp interop](https://github.com/queue-interop/queue-interop#amqp-interop) compatible transport, for example `enqueue/amqp-ext` or `enqueue/amqp-bunny`.
 Here's an example on how one can change the transport to `enqueue/amqp-bunny`.
 
@@ -58,7 +58,7 @@ First, install desired transport package:
 ```bash
 composer require enqueue/amqp-bunny:^0.8
 ```
-  
+
 Change the factory class in `config/queue.php`:
 
 ```php
@@ -67,6 +67,18 @@ Change the factory class in `config/queue.php`:
         'rabbitmq' => [
             'driver' => 'rabbitmq',
             'factory_class' => Enqueue\AmqpBunny\AmqpConnectionFactory::class,
+        ],
+    ],
+```
+
+Not all messages will be placed on the queue from a Laravel/Lumen source. In this case, it is helpful to write a custom Job class to be used when processing these messages. To do this, create the new class and ensure it implements the `Illuminate\Contracts\Queue\Job` interface. Then, just like with the custom factory class example above, specify this new class in your `config/queue.php` file:
+
+```php
+...
+    'connections' => [
+        'rabbitmq' => [
+            'driver' => 'rabbitmq',
+            'job_class' => My\Custom\Queued\Job::class,
         ],
     ],
 ```
