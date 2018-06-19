@@ -71,7 +71,7 @@ Change the factory class in `config/queue.php`:
     ],
 ```
 
-Not all messages will be placed on the queue from a Laravel/Lumen source. In this case, it is helpful to write a custom Job class to be used when processing these messages. To do this, create the new class and ensure it implements the `Illuminate\Contracts\Queue\Job` interface. The, just like with the custom factory class example above, specify this new class in your `config/queue.php` file:
+Not all messages will be placed on the queue from a Laravel/Lumen source. In this case, it is helpful to write a custom Job class to be used when processing these messages. To do this, create the new class and ensure it implements the `Illuminate\Contracts\Queue\Job` interface. Then, just like with the custom factory class example above, specify this new class in your `config/queue.php` file:
 
 ```php
 ...
