@@ -19,6 +19,12 @@ return [
      */
     'factory_class' => Enqueue\AmqpLib\AmqpConnectionFactory::class,
 
+    /*
+     * You can override the class used to process the payload as it is pulled off the queue
+     * Just be sure that whatever you choose implements the `Illuminate\Contracts\Queue\Job` interface
+     */
+    'job_class' => VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob::class,
+
     'host' => env('RABBITMQ_HOST', '127.0.0.1'),
     'port' => env('RABBITMQ_PORT', 5672),
 
