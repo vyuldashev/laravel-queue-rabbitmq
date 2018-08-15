@@ -99,7 +99,7 @@ class RabbitMQConnectorTest extends TestCase
         $this->assertInstanceOf(RabbitMQQueue::class, $queue);
     }
 
-    public function testShouldSetRabbitMqDlxDelayStrategyIfConnectionFactoryImplementsDelayStrategyAwareInterface()
+    public function testShouldSetRabbitMqDlxDelayStrategyIfConnectionFactoryImplementsDelayStrategyAwareInterfaceAndDelayStrategyClassNotDefinedInConfig()
     {
         $connector = new RabbitMQConnector($this->createMock(Dispatcher::class));
 
@@ -117,6 +117,8 @@ class RabbitMQConnectorTest extends TestCase
 
         $this->assertTrue($called);
     }
+    
+    
 
     public function testShouldCallContextCloseMethodOnWorkerStoppingEvent()
     {
@@ -189,5 +191,25 @@ class RabbitMQConnectorTest extends TestCase
             ],
             'sleep_on_error' => env('RABBITMQ_ERROR_SLEEP', 5),
         ];
+    }
+    
+     public function testThrowsIfDelayStrategyClassIsNotValidClass()
+    {
+        $connector = new RabbitMQConnector($this->createMock(Dispatcher::class));
+        $config['factory_class'] = DelayStrategyAwareAmqpConnectionFactorySpy::class;
+        $config['delay_strategy_class'] = 'invalidClassName';
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('The delay_strategy_class option has to be valid class that implements "Enqueue\AmqpTools\DelayStrategy"');
+        $connector->connect($config);
+    }
+
+    public function testThrowsIfDelayStrategyClassDoesNotImplementDelayStrategyInterface()
+    {
+        $connector = new RabbitMQConnector($this->createMock(Dispatcher::class));
+        $config['factory_class'] = DelayStrategyAwareAmqpConnectionFactorySpy::class;
+        $config['delay_strategy_class'] = \stdClass::class;
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('The delay_strategy_class option has to be valid class that implements "Enqueue\AmqpTools\DelayStrategy"');
+        $connector->connect($config);
     }
 }

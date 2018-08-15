@@ -4,6 +4,7 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors;
 
 use Enqueue\AmqpTools\DelayStrategyAware;
 use Enqueue\AmqpTools\RabbitMqDlxDelayStrategy;
+use Enqueue\AmqpTools\DelayStrategy;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Queue\Queue;
 use Illuminate\Queue\Connectors\ConnectorInterface;
@@ -42,7 +43,15 @@ class RabbitMQConnector implements ConnectorInterface
         if (false === class_exists($factoryClass) || false === (new \ReflectionClass($factoryClass))->implementsInterface(InteropAmqpConnectionFactory::class)) {
             throw new \LogicException(sprintf('The factory_class option has to be valid class that implements "%s"', InteropAmqpConnectionFactory::class));
         }
-
+        
+        $delayStrategyClass = RabbitMqDlxDelayStrategy::class;
+        if (array_key_exists('delay_strategy_class', $config)) {
+             $delayStrategyClass = $config['delay_strategy_class'];
+            if (false === class_exists($delayStrategyClass) || false === (new \ReflectionClass($delayStrategyClass))->implementsInterface(DelayStrategy::class)) {
+                throw new \LogicException(sprintf('The delay_strategy_class option has to be valid class that implements "%s"', DelayStrategy::class));
+            }
+        }
+        
         /** @var AmqpConnectionFactory $factory */
         $factory = new $factoryClass([
             'dsn' => $config['dsn'],
@@ -60,7 +69,7 @@ class RabbitMQConnector implements ConnectorInterface
         ]);
 
         if ($factory instanceof DelayStrategyAware) {
-            $factory->setDelayStrategy(new RabbitMqDlxDelayStrategy());
+            $factory->setDelayStrategy(new $delayStrategyClass());
         }
 
         /** @var AmqpContext $context */

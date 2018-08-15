@@ -18,7 +18,7 @@ return [
      *  - \EnqueueAmqpBunny\AmqpConnectionFactory if you install enqueue/amqp-bunny
      */
     'factory_class' => Enqueue\AmqpLib\AmqpConnectionFactory::class,
-
+    'delay_strategy_class' => Enqueue\AmqpTools\RabbitMqDlxDelayStrategy::class,
     'host' => env('RABBITMQ_HOST', '127.0.0.1'),
     'port' => env('RABBITMQ_PORT', 5672),
 
