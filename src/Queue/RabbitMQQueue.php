@@ -21,14 +21,14 @@ class RabbitMQQueue extends Queue implements QueueContract
     protected $queueOptions;
     protected $exchangeOptions;
 
-    private $declaredExchanges = [];
-    private $declaredQueues = [];
+    protected $declaredExchanges = [];
+    protected $declaredQueues = [];
 
     /**
      * @var AmqpContext
      */
-    private $context;
-    private $correlationId;
+    protected $context;
+    protected $correlationId;
 
     public function __construct(AmqpContext $context, array $config)
     {
@@ -182,7 +182,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @return array [Interop\Amqp\AmqpQueue, Interop\Amqp\AmqpTopic]
      */
-    private function declareEverything(string $queueName = null): array
+    protected function declareEverything(string $queueName = null): array
     {
         $queueName = $queueName ?: $this->queueName;
         $exchangeName = $this->exchangeOptions['name'] ?: $queueName;
