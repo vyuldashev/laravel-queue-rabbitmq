@@ -155,7 +155,7 @@ class RabbitMQJob extends Job implements JobContract
      *
      * @return mixed
      */
-    private function unserialize(array $body)
+    protected function unserialize(array $body)
     {
         try {
             /** @noinspection UnserializeExploitsInspection */
