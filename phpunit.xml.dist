@@ -10,7 +10,6 @@
          processIsolation="false"
          stopOnError="false"
          stopOnFailure="false"
-         syntaxCheck="true"
          verbose="true"
 >
     <testsuites>
@@ -30,6 +29,6 @@
         </whitelist>
     </filter>
     <logging>
-        <log type="coverage-html" target="build/coverage" charset="UTF-8" yui="true" highlight="true"/>
+        <log type="coverage-html" target="build/coverage" />
     </logging>
 </phpunit>
