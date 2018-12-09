@@ -13,8 +13,18 @@ php:
 services:
   - docker
 
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+env:
+  matrix:
+    - COMPOSER_FLAGS="--prefer-lowest"
+    - COMPOSER_FLAGS=""
+
 before_script:
-  - COMPOSER_DISCARD_CHANGES=1 composer update --prefer-dist --no-progress --no-interaction --no-suggest
+  - travis_retry composer self-update
+  - travis_retry composer update ${COMPOSER_FLAGS} --no-interaction --prefer-dist
   - docker run -d -p 5672:5672 rabbitmq:3
 #  - sed -i 's/<env name="RABBITMQ_SSL_CAFILE" value="\/path_to_your_ca_file"\/>/<env name="RABBITMQ_SSL_CAFILE" value="\/tmp\/rootCA.pem"\/>/g' phpunit.xml.dist
 #  - openssl genrsa -out /tmp/rootCA.key 2048
