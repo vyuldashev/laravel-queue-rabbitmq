@@ -2,16 +2,16 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors;
 
-use Enqueue\AmqpTools\DelayStrategyAware;
-use Enqueue\AmqpTools\RabbitMqDlxDelayStrategy;
-use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Contracts\Queue\Queue;
-use Illuminate\Queue\Connectors\ConnectorInterface;
-use Illuminate\Queue\Events\WorkerStopping;
-use Interop\Amqp\AmqpConnectionFactory as InteropAmqpConnectionFactory;
-use Interop\Amqp\AmqpConnectionFactory;
 use Interop\Amqp\AmqpContext;
+use Illuminate\Contracts\Queue\Queue;
+use Interop\Amqp\AmqpConnectionFactory;
+use Enqueue\AmqpTools\DelayStrategyAware;
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Queue\Events\WorkerStopping;
+use Enqueue\AmqpTools\RabbitMqDlxDelayStrategy;
+use Illuminate\Queue\Connectors\ConnectorInterface;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
+use Interop\Amqp\AmqpConnectionFactory as InteropAmqpConnectionFactory;
 
 class RabbitMQConnector implements ConnectorInterface
 {

@@ -2,16 +2,15 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Queue\Jobs;
 
-use Illuminate\Container\Container;
-use Illuminate\Contracts\Queue\Job as JobContract;
-use Illuminate\Database\DetectsDeadlocks;
 use Illuminate\Queue\Jobs\Job;
 use Interop\Amqp\AmqpConsumer;
-use Interop\Amqp\Impl\AmqpMessage;
-use Interop\Amqp\Impl\AmqpQueue;
 use PHPUnit\Framework\TestCase;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
+use Interop\Amqp\Impl\AmqpMessage;
+use Illuminate\Container\Container;
+use Illuminate\Database\DetectsDeadlocks;
+use Illuminate\Contracts\Queue\Job as JobContract;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 class RabbitMQJobTest extends TestCase
 {
@@ -42,23 +41,20 @@ class RabbitMQJobTest extends TestCase
         $queue
             ->expects($this->once())
             ->method('getQueueName')
-            ->willReturn('theQueueName')
-        ;
+            ->willReturn('theQueueName');
 
         $consumerMock = $this->createConsumerMock();
         $consumerMock
             ->expects($this->once())
             ->method('getQueue')
-            ->willReturn($queue)
-        ;
+            ->willReturn($queue);
 
         $connectionMock = $this->createRabbitMQQueueMock();
         $connectionMock
             ->expects($this->any())
             ->method('getConnectionName')
-            ->willReturn('theConnectionName')
-        ;
-        
+            ->willReturn('theConnectionName');
+
         $job = new RabbitMQJob(
             new Container(),
             $connectionMock,
