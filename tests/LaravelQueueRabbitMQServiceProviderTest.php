@@ -2,13 +2,13 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests;
 
-use Illuminate\Container\Container;
-use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Queue\QueueManager;
-use Illuminate\Support\ServiceProvider;
 use PHPUnit\Framework\TestCase;
-use VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider;
+use Illuminate\Queue\QueueManager;
+use Illuminate\Container\Container;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Contracts\Events\Dispatcher;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
+use VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider;
 
 class LaravelQueueRabbitMQServiceProviderTest extends TestCase
 {
@@ -31,8 +31,7 @@ class LaravelQueueRabbitMQServiceProviderTest extends TestCase
         $providerMock
             ->expects($this->once())
             ->method('mergeConfigFrom')
-            ->with($dir.'/../config/rabbitmq.php', 'queue.connections.rabbitmq')
-        ;
+            ->with($dir.'/../config/rabbitmq.php', 'queue.connections.rabbitmq');
 
         $providerMock->register();
     }
@@ -51,8 +50,7 @@ class LaravelQueueRabbitMQServiceProviderTest extends TestCase
 
                 $this->assertInstanceOf(RabbitMQConnector::class, $connector);
                 $this->assertAttributeSame($dispatcherMock, 'dispatcher', $connector);
-            })
-        ;
+            });
 
         $app = Container::getInstance();
         $app['queue'] = $queueMock;

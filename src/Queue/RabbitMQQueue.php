@@ -2,15 +2,15 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
-use Illuminate\Contracts\Queue\Queue as QueueContract;
+use RuntimeException;
 use Illuminate\Queue\Queue;
-use Interop\Amqp\AmqpContext;
-use Interop\Amqp\AmqpMessage;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpTopic;
-use Interop\Amqp\Impl\AmqpBind;
 use Psr\Log\LoggerInterface;
-use RuntimeException;
+use Interop\Amqp\AmqpContext;
+use Interop\Amqp\AmqpMessage;
+use Interop\Amqp\Impl\AmqpBind;
+use Illuminate\Contracts\Queue\Queue as QueueContract;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 class RabbitMQQueue extends Queue implements QueueContract
@@ -46,7 +46,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->sleepOnError = $config['sleep_on_error'] ?? 5;
     }
 
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     public function size($queueName = null): int
     {
         /** @var AmqpQueue $queue */
@@ -55,18 +55,18 @@ class RabbitMQQueue extends Queue implements QueueContract
         return $this->context->declareQueue($queue);
     }
 
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     public function push($job, $data = '', $queue = null)
     {
         return $this->pushRaw($this->createPayload($job, $data), $queue, []);
     }
 
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     public function pushRaw($payload, $queueName = null, array $options = [])
     {
         try {
             /**
-             * @var AmqpTopic $topic
+             * @var AmqpTopic
              * @var AmqpQueue $queue
              */
             [$queue, $topic] = $this->declareEverything($queueName);
@@ -100,11 +100,11 @@ class RabbitMQQueue extends Queue implements QueueContract
         } catch (\Exception $exception) {
             $this->reportConnectionError('pushRaw', $exception);
 
-            return null;
+            return;
         }
     }
 
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     public function later($delay, $job, $data = '', $queue = null)
     {
         return $this->pushRaw($this->createPayload($job, $data), $queue, ['delay' => $this->secondsUntil($delay)]);
@@ -124,11 +124,11 @@ class RabbitMQQueue extends Queue implements QueueContract
     {
         return $this->pushRaw($this->createPayload($job, $data), $queue, [
             'delay' => $this->secondsUntil($delay),
-            'attempts' => $attempts
+            'attempts' => $attempts,
         ]);
     }
 
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     public function pop($queueName = null)
     {
         try {
@@ -143,8 +143,6 @@ class RabbitMQQueue extends Queue implements QueueContract
         } catch (\Throwable $exception) {
             $this->reportConnectionError('pop', $exception);
         }
-
-        return null;
     }
 
     /**
@@ -200,7 +198,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             $topic->addFlag(AmqpTopic::FLAG_AUTODELETE);
         }
 
-        if ($this->exchangeOptions['declare'] && !in_array($exchangeName, $this->declaredExchanges, true)) {
+        if ($this->exchangeOptions['declare'] && ! in_array($exchangeName, $this->declaredExchanges, true)) {
             $this->context->declareTopic($topic);
 
             $this->declaredExchanges[] = $exchangeName;
@@ -221,7 +219,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             $queue->addFlag(AmqpQueue::FLAG_AUTODELETE);
         }
 
-        if ($this->queueOptions['declare'] && !in_array($queueName, $this->declaredQueues, true)) {
+        if ($this->queueOptions['declare'] && ! in_array($queueName, $this->declaredQueues, true)) {
             $this->context->declareQueue($queue);
 
             $this->declaredQueues[] = $queueName;
@@ -244,7 +242,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         /** @var LoggerInterface $logger */
         $logger = $this->container['log'];
 
-        $logger->error('AMQP error while attempting ' . $action . ': ' . $e->getMessage());
+        $logger->error('AMQP error while attempting '.$action.': '.$e->getMessage());
 
         // If it's set to false, throw an error rather than waiting
         if ($this->sleepOnError === false) {

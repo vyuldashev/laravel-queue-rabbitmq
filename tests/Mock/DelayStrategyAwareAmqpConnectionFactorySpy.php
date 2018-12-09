@@ -1,4 +1,5 @@
 <?php
+
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mock;
 
 use Enqueue\AmqpTools\DelayStrategy;

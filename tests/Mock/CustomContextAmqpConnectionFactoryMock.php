@@ -1,4 +1,5 @@
 <?php
+
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mock;
 
 class CustomContextAmqpConnectionFactoryMock implements \Interop\Amqp\AmqpConnectionFactory

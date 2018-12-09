@@ -1,4 +1,5 @@
 <?php
+
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mock;
 
 class AmqpConnectionFactorySpy implements \Interop\Amqp\AmqpConnectionFactory

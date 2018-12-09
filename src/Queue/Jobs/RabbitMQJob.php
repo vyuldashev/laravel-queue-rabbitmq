@@ -3,14 +3,14 @@
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs;
 
 use Exception;
-use Illuminate\Container\Container;
-use Illuminate\Contracts\Queue\Job as JobContract;
-use Illuminate\Database\DetectsDeadlocks;
-use Illuminate\Queue\Jobs\Job;
-use Illuminate\Queue\Jobs\JobName;
 use Illuminate\Support\Str;
-use Interop\Amqp\AmqpConsumer;
 use Interop\Amqp\AmqpMessage;
+use Illuminate\Queue\Jobs\Job;
+use Interop\Amqp\AmqpConsumer;
+use Illuminate\Queue\Jobs\JobName;
+use Illuminate\Container\Container;
+use Illuminate\Database\DetectsDeadlocks;
+use Illuminate\Contracts\Queue\Job as JobContract;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQJob extends Job implements JobContract
@@ -93,7 +93,7 @@ class RabbitMQJob extends Job implements JobContract
         return $this->message->getBody();
     }
 
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     public function delete()
     {
         parent::delete();
@@ -101,7 +101,7 @@ class RabbitMQJob extends Job implements JobContract
         $this->consumer->acknowledge($this->message);
     }
 
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     public function release($delay = 0)
     {
         parent::release($delay);
@@ -158,7 +158,7 @@ class RabbitMQJob extends Job implements JobContract
     protected function unserialize(array $body)
     {
         try {
-            /** @noinspection UnserializeExploitsInspection */
+            /* @noinspection UnserializeExploitsInspection */
             return unserialize($body['data']['command']);
         } catch (Exception $exception) {
             if (

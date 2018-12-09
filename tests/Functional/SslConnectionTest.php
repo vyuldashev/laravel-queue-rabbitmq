@@ -2,14 +2,13 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional;
 
-use Enqueue\AmqpLib\AmqpConnectionFactory;
+use PHPUnit\Framework\TestCase;
 use Enqueue\AmqpLib\AmqpContext;
 use Illuminate\Events\Dispatcher;
-use Interop\Amqp\AmqpTopic;
+use Enqueue\AmqpLib\AmqpConnectionFactory;
 use PhpAmqpLib\Connection\AMQPSSLConnection;
-use PHPUnit\Framework\TestCase;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 
 /**
  * @group functional
@@ -54,7 +53,7 @@ class SslConnectionTest extends TestCase
                 'local_key'     => null,
                 'verify_peer'   => false,
                 'passphrase'    => null,
-            ]
+            ],
         ];
 
         $connector = new RabbitMQConnector(new Dispatcher());

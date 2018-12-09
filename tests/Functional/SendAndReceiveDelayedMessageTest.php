@@ -2,15 +2,14 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional;
 
-use Enqueue\AmqpLib\AmqpConnectionFactory;
-use Illuminate\Container\Container;
-use Illuminate\Events\Dispatcher;
-use Interop\Amqp\AmqpTopic;
-use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
+use PHPUnit\Framework\TestCase;
+use Illuminate\Events\Dispatcher;
+use Illuminate\Container\Container;
+use Enqueue\AmqpLib\AmqpConnectionFactory;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 
 /**
  * @group functional
@@ -55,7 +54,7 @@ class SendAndReceiveDelayedMessageTest extends TestCase
                 'local_key'     => null,
                 'verify_peer'   => true,
                 'passphrase'    => null,
-            ]
+            ],
         ];
 
         $connector = new RabbitMQConnector(new Dispatcher());

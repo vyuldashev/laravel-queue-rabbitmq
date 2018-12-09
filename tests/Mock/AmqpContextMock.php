@@ -1,11 +1,12 @@
 <?php
+
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mock;
 
 use Interop\Amqp\AmqpBind;
-use Interop\Amqp\AmqpConsumer;
-use Interop\Amqp\AmqpContext;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpTopic;
+use Interop\Amqp\AmqpContext;
+use Interop\Amqp\AmqpConsumer;
 use Interop\Queue\PsrDestination;
 
 class AmqpContextMock implements AmqpContext
