@@ -50,7 +50,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     public function size($queueName = null): int
     {
         /** @var AmqpQueue $queue */
-        list($queue) = $this->declareEverything($queueName);
+        [$queue] = $this->declareEverything($queueName);
 
         return $this->context->declareQueue($queue);
     }
@@ -69,18 +69,18 @@ class RabbitMQQueue extends Queue implements QueueContract
              * @var AmqpTopic $topic
              * @var AmqpQueue $queue
              */
-            list($queue, $topic) = $this->declareEverything($queueName);
+            [$queue, $topic] = $this->declareEverything($queueName);
 
             $message = $this->context->createMessage($payload);
             $message->setRoutingKey($queue->getQueueName());
             $message->setCorrelationId($this->getCorrelationId());
             $message->setContentType('application/json');
             $message->setDeliveryMode(AmqpMessage::DELIVERY_MODE_PERSISTENT);
-            
+
             if (isset($options['headers'])) {
                 $message->setHeaders($options['headers']);
             }
-            
+
             if (isset($options['properties'])) {
                 $message->setProperties($options['properties']);
             }
@@ -113,11 +113,11 @@ class RabbitMQQueue extends Queue implements QueueContract
     /**
      * Release a reserved job back onto the queue.
      *
-     * @param  \DateTimeInterface|\DateInterval|int  $delay
-     * @param  string|object  $job
-     * @param  mixed   $data
-     * @param  string  $queue
-     * @param  int  $attempts
+     * @param  \DateTimeInterface|\DateInterval|int $delay
+     * @param  string|object $job
+     * @param  mixed $data
+     * @param  string $queue
+     * @param  int $attempts
      * @return mixed
      */
     public function release($delay, $job, $data, $queue, $attempts = 0)
@@ -133,14 +133,14 @@ class RabbitMQQueue extends Queue implements QueueContract
     {
         try {
             /** @var AmqpQueue $queue */
-            list($queue) = $this->declareEverything($queueName);
+            [$queue] = $this->declareEverything($queueName);
 
             $consumer = $this->context->createConsumer($queue);
 
             if ($message = $consumer->receiveNoWait()) {
                 return new RabbitMQJob($this->container, $this, $consumer, $message);
             }
-        } catch (\Exception $exception) {
+        } catch (\Throwable $exception) {
             $this->reportConnectionError('pop', $exception);
         }
 
@@ -164,7 +164,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @return void
      */
-    public function setCorrelationId(string $id)
+    public function setCorrelationId(string $id): void
     {
         $this->correlationId = $id;
     }
@@ -236,10 +236,10 @@ class RabbitMQQueue extends Queue implements QueueContract
 
     /**
      * @param string $action
-     * @param \Exception $e
+     * @param \Throwable $e
      * @throws \Exception
      */
-    protected function reportConnectionError($action, \Exception $e)
+    protected function reportConnectionError($action, \Throwable $e)
     {
         /** @var LoggerInterface $logger */
         $logger = $this->container['log'];
