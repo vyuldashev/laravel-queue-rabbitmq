@@ -58,7 +58,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     /** {@inheritdoc} */
     public function push($job, $data = '', $queue = null)
     {
-        return $this->pushRaw($this->createPayload($job, $data), $queue, []);
+        return $this->pushRaw($this->createPayload($job, $queue, $data), $queue, []);
     }
 
     /** {@inheritdoc} */
@@ -107,7 +107,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     /** {@inheritdoc} */
     public function later($delay, $job, $data = '', $queue = null)
     {
-        return $this->pushRaw($this->createPayload($job, $data), $queue, ['delay' => $this->secondsUntil($delay)]);
+        return $this->pushRaw($this->createPayload($job, $queue, $data), $queue, ['delay' => $this->secondsUntil($delay)]);
     }
 
     /**
@@ -122,7 +122,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     public function release($delay, $job, $data, $queue, $attempts = 0)
     {
-        return $this->pushRaw($this->createPayload($job, $data), $queue, [
+        return $this->pushRaw($this->createPayload($job, $queue, $data), $queue, [
             'delay' => $this->secondsUntil($delay),
             'attempts' => $attempts,
         ]);
