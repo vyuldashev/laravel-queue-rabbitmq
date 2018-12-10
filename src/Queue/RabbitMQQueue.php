@@ -100,7 +100,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         } catch (\Exception $exception) {
             $this->reportConnectionError('pushRaw', $exception);
 
-            return null;
+            return;
         }
     }
 
@@ -143,7 +143,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         } catch (\Throwable $exception) {
             $this->reportConnectionError('pop', $exception);
 
-            return null;
+            return;
         }
     }
 
