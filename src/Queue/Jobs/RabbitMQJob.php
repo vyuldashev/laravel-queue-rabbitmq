@@ -20,7 +20,7 @@ class RabbitMQJob extends Job implements JobContract
     /**
      * Same as RabbitMQQueue, used for attempt counts.
      */
-    const ATTEMPT_COUNT_HEADERS_KEY = 'attempts_count';
+    public const ATTEMPT_COUNT_HEADERS_KEY = 'attempts_count';
 
     protected $connection;
     protected $consumer;
@@ -47,12 +47,12 @@ class RabbitMQJob extends Job implements JobContract
      *
      * @return void
      */
-    public function fire()
+    public function fire(): void
     {
         try {
             $payload = $this->payload();
 
-            list($class, $method) = JobName::parse($payload['job']);
+            [$class, $method] = JobName::parse($payload['job']);
 
             with($this->instance = $this->resolve($class))->{$method}($this, $payload['data']);
         } catch (Exception $exception) {
@@ -94,15 +94,17 @@ class RabbitMQJob extends Job implements JobContract
     }
 
     /** {@inheritdoc} */
-    public function delete()
+    public function delete(): void
     {
         parent::delete();
 
         $this->consumer->acknowledge($this->message);
     }
 
-    /** {@inheritdoc} */
-    public function release($delay = 0)
+    /** {@inheritdoc}
+     * @throws Exception
+     */
+    public function release($delay = 0): void
     {
         parent::release($delay);
 
@@ -128,6 +130,7 @@ class RabbitMQJob extends Job implements JobContract
      * Get the job identifier.
      *
      * @return string
+     * @throws \Interop\Queue\Exception
      */
     public function getJobId(): string
     {
@@ -141,7 +144,7 @@ class RabbitMQJob extends Job implements JobContract
      *
      * @return void
      */
-    public function setJobId($id)
+    public function setJobId($id): void
     {
         $this->connection->setCorrelationId($id);
     }
