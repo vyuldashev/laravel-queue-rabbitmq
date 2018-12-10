@@ -31,6 +31,7 @@ class RabbitMQConnector implements ConnectorInterface
      * @param array $config
      *
      * @return Queue
+     * @throws \ReflectionException
      */
     public function connect(array $config): Queue
     {
