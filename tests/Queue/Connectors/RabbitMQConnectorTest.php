@@ -74,6 +74,7 @@ class RabbitMQConnectorTest extends TestCase
                 'ssl_cert' => 'theLocalCert',
                 'ssl_key' => 'theLocalKey',
                 'ssl_passphrase' => 'thePassPhrase',
+                'connection_method' => 'basic_get',
             ], $config);
         };
 
@@ -183,6 +184,11 @@ class RabbitMQConnectorTest extends TestCase
                     'exclusive' => false,
                     'auto_delete' => false,
                     'arguments' => '[]',
+                ],
+
+                'connection' => [
+                    'method' => 'basic_get',
+                    'timeout' => 5000,
                 ],
             ],
             'sleep_on_error' => env('RABBITMQ_ERROR_SLEEP', 5),

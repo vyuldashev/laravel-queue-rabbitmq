@@ -70,6 +70,19 @@ return [
             'auto_delete' => env('RABBITMQ_QUEUE_AUTODELETE', false),
             'arguments' => env('RABBITMQ_QUEUE_ARGUMENTS'),
         ],
+
+        'connection' => [
+            /**
+             * Currently support 2 values:
+             *     'basic_get' (by default) : poll, not block 
+             *     'basic_consume'          : block and not poll
+             */
+            'method' => env('RABBITMQ_CONNECTION_METHOD', 'basic_get'),
+            /**
+             * The timeout (in milliseconds) to block and wait for a message
+             */
+            'timeout' => env('RABBITMQ_CONNECTION_TIMEOUT', 5000),
+        ],
     ],
 
     /*

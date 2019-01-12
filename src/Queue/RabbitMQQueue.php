@@ -7,6 +7,7 @@ use Illuminate\Queue\Queue;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpTopic;
 use Psr\Log\LoggerInterface;
+use Interop\Amqp\AmqpConsumer;
 use Interop\Amqp\AmqpContext;
 use Interop\Amqp\AmqpMessage;
 use Interop\Amqp\Impl\AmqpBind;
@@ -20,9 +21,13 @@ class RabbitMQQueue extends Queue implements QueueContract
     protected $queueName;
     protected $queueOptions;
     protected $exchangeOptions;
+    protected $connectionOptions;
 
     protected $declaredExchanges = [];
     protected $declaredQueues = [];
+
+    private $declarationsCache = [];
+    private $consumerCache = [];
 
     /**
      * @var AmqpContext
@@ -43,6 +48,8 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->exchangeOptions['arguments'] = isset($this->exchangeOptions['arguments']) ?
             json_decode($this->exchangeOptions['arguments'], true) : [];
 
+        $this->connectionOptions = $config['options']['connection'] ?? [];
+
         $this->sleepOnError = $config['sleep_on_error'] ?? 5;
     }
 
@@ -50,7 +57,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     public function size($queueName = null): int
     {
         /** @var AmqpQueue $queue */
-        [$queue] = $this->declareEverything($queueName);
+        [$queue] = $this->declareEverythingOnce($queueName);
 
         return $this->context->declareQueue($queue);
     }
@@ -69,7 +76,7 @@ class RabbitMQQueue extends Queue implements QueueContract
              * @var AmqpTopic
              * @var AmqpQueue $queue
              */
-            [$queue, $topic] = $this->declareEverything($queueName);
+            [$queue, $topic] = $this->declareEverythingOnce($queueName);
 
             $message = $this->context->createMessage($payload);
             $message->setRoutingKey($queue->getQueueName());
@@ -133,11 +140,18 @@ class RabbitMQQueue extends Queue implements QueueContract
     {
         try {
             /** @var AmqpQueue $queue */
-            [$queue] = $this->declareEverything($queueName);
+            [$queue] = $this->declareEverythingOnce($queueName);
 
-            $consumer = $this->context->createConsumer($queue);
+            // create the consumer once and cache it
+            $consumer = $this->createConsumerOnce($queue);
 
-            if ($message = $consumer->receiveNoWait()) {
+            if (isset($this->connectionOptions['method']) and $this->connectionOptions['method'] == 'basic_consume') {
+                $message = $consumer->receive($this->connectionOptions['timeout']);
+            } else {
+                $message = $consumer->receiveNoWait();
+            }
+
+            if ($message) {
                 return new RabbitMQJob($this->container, $this, $consumer, $message);
             }
         } catch (\Throwable $exception) {
@@ -175,6 +189,20 @@ class RabbitMQQueue extends Queue implements QueueContract
     public function getContext(): AmqpContext
     {
         return $this->context;
+    }
+
+    /**
+     * @param string $queueName
+     *
+     * @return array [Interop\Amqp\AmqpQueue, Interop\Amqp\AmqpTopic]
+     */
+    private function declareEverythingOnce(string $queueName = null): array
+    {
+        $queueName = $queueName ?: $this->queueOptions['name'];
+        if (!isset($this->declarationsCache[$queueName])) {
+            $this->declarationsCache[$queueName] = $this->declareEverything($queueName);
+        }
+        return $this->declarationsCache[$queueName];
     }
 
     /**
@@ -232,6 +260,20 @@ class RabbitMQQueue extends Queue implements QueueContract
         }
 
         return [$queue, $topic];
+    }
+
+    /**
+     * @param Interop\Amqp\AmqpQueue $queue
+     *
+     * @return Interop\Amqp\AmqpConsumer
+     */
+    protected function createConsumerOnce($queue): AmqpConsumer
+    {
+        $cache_key = spl_object_hash($queue);
+        if (!isset($this->consumerCache[$cache_key])) {
+            $this->consumerCache[$cache_key] = $this->context->createConsumer($queue);
+        }
+        return $this->consumerCache[$cache_key];
     }
 
     /**
