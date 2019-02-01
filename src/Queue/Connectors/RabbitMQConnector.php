@@ -35,7 +35,7 @@ class RabbitMQConnector implements ConnectorInterface
      */
     public function connect(array $config): Queue
     {
-        $config = array_merge(require __DIR__ . '/../../../config/rabbitmq.php', $config);
+        $config = array_merge(require __DIR__.'/../../../config/rabbitmq.php', $config);
 
         if (false === array_key_exists('factory_class', $config)) {
             throw new \LogicException('The factory_class option is missing though it is required.');
