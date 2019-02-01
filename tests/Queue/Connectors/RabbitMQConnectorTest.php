@@ -28,15 +28,6 @@ class RabbitMQConnectorTest extends TestCase
         new RabbitMQConnector($this->createMock(Dispatcher::class));
     }
 
-    public function testThrowsIfFactoryClassIsMissing()
-    {
-        $connector = new RabbitMQConnector($this->createMock(Dispatcher::class));
-
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('The factory_class option is missing though it is required.');
-        $connector->connect([]);
-    }
-
     public function testThrowsIfFactoryClassIsNotValidClass()
     {
         $connector = new RabbitMQConnector($this->createMock(Dispatcher::class));
@@ -95,6 +86,15 @@ class RabbitMQConnectorTest extends TestCase
         $config['factory_class'] = AmqpConnectionFactorySpy::class;
 
         $queue = $connector->connect($config);
+
+        $this->assertInstanceOf(RabbitMQQueue::class, $queue);
+    }
+
+    public function testShouldReturnExpectedInstanceOfQueueOnConnectWithEmptyConfigs()
+    {
+        $connector = new RabbitMQConnector($this->createMock(Dispatcher::class));
+
+        $queue = $connector->connect([]);
 
         $this->assertInstanceOf(RabbitMQQueue::class, $queue);
     }
