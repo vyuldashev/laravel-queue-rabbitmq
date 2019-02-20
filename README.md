@@ -120,6 +120,13 @@ Setup connection in `config/queue.php`
 ],
 ```
 
+## Lumen Usage
+
+For lumen usage the service provider should be registered manually as follow in bootstrap/app.php
+```
+$app->register(VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider::class);
+```
+
 ## Usage
 
 Once you completed the configuration you can use Laravel Queue API. If you used other queue drivers you do not need to change anything else. If you do not know how to use Queue API, please refer to the official Laravel documentation: http://laravel.com/docs/queues
