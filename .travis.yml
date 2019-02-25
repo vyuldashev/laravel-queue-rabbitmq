@@ -24,6 +24,7 @@ before_install:
 before_script:
   - travis_retry composer self-update
   - travis_retry composer update --no-progress --no-interaction --prefer-dist
+  - docker-compose up -d
 
 script:
   - composer test
