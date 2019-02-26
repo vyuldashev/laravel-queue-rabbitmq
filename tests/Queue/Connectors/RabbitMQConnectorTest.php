@@ -185,7 +185,7 @@ class RabbitMQConnectorTest extends TestCase
                     'arguments' => '[]',
                 ],
             ],
-            'sleep_on_error' => env('RABBITMQ_ERROR_SLEEP', 5),
+            'sleep_on_error' => getenv('RABBITMQ_ERROR_SLEEP', 5),
         ];
     }
 }
