@@ -6,97 +6,93 @@ use Interop\Amqp\AmqpBind;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpTopic;
 use Interop\Amqp\AmqpContext;
-use Interop\Amqp\AmqpConsumer;
-use Interop\Queue\PsrDestination;
+use Interop\Queue\Consumer;
+use Interop\Queue\Destination;
+use Interop\Queue\Message;
+use Interop\Queue\Producer;
+use Interop\Queue\Queue;
+use Interop\Queue\SubscriptionConsumer;
+use Interop\Queue\Topic;
 
 class AmqpContextMock implements AmqpContext
 {
-    public function declareTopic(AmqpTopic $topic)
+    public function createSubscriptionConsumer(): SubscriptionConsumer
     {
         throw new \LogicException('It is not expected to be called');
     }
 
-    public function deleteTopic(AmqpTopic $topic)
+    public function declareTopic(AmqpTopic $topic): void
     {
         throw new \LogicException('It is not expected to be called');
     }
 
-    public function declareQueue(AmqpQueue $queue)
+    public function deleteTopic(AmqpTopic $topic): void
     {
         throw new \LogicException('It is not expected to be called');
     }
 
-    public function deleteQueue(AmqpQueue $queue)
+    public function declareQueue(AmqpQueue $queue): int
     {
         throw new \LogicException('It is not expected to be called');
     }
 
-    public function purgeQueue(AmqpQueue $queue)
+    public function deleteQueue(AmqpQueue $queue): void
     {
         throw new \LogicException('It is not expected to be called');
     }
 
-    public function bind(AmqpBind $bind)
+    public function purgeQueue(Queue $queue): void
     {
         throw new \LogicException('It is not expected to be called');
     }
 
-    public function unbind(AmqpBind $bind)
+    public function bind(AmqpBind $bind): void
     {
         throw new \LogicException('It is not expected to be called');
     }
 
-    public function setQos($prefetchSize, $prefetchCount, $global)
+    public function unbind(AmqpBind $bind): void
     {
         throw new \LogicException('It is not expected to be called');
     }
 
-    public function subscribe(AmqpConsumer $consumer, callable $callback)
+    public function setQos(int $prefetchSize, int $prefetchCount, bool $global): void
     {
         throw new \LogicException('It is not expected to be called');
     }
 
-    public function unsubscribe(AmqpConsumer $consumer)
+
+    public function close(): void
     {
         throw new \LogicException('It is not expected to be called');
     }
 
-    public function consume($timeout = 0)
+    public function createQueue(string $queueName): Queue
     {
         throw new \LogicException('It is not expected to be called');
     }
 
-    public function close()
+    public function createTemporaryQueue(): Queue
     {
         throw new \LogicException('It is not expected to be called');
     }
 
-    public function createQueue($queueName)
+    public function createProducer(): Producer
     {
         throw new \LogicException('It is not expected to be called');
     }
 
-    public function createTemporaryQueue()
+    public function createConsumer(Destination $destination): Consumer
     {
         throw new \LogicException('It is not expected to be called');
     }
 
-    public function createProducer()
+    public function createTopic(string $amqpTopic): Topic
     {
         throw new \LogicException('It is not expected to be called');
     }
 
-    public function createConsumer(PsrDestination $destination)
-    {
-        throw new \LogicException('It is not expected to be called');
-    }
-
-    public function createTopic($amqpTopic)
-    {
-        throw new \LogicException('It is not expected to be called');
-    }
-
-    public function createMessage($body = '', array $properties = [], array $headers = [])
+    public function createMessage(string $body = '', array $properties = [], array $headers = []): Message
     {
         throw new \LogicException('It is not expected to be called');
     }
