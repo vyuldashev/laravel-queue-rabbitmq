@@ -2,6 +2,7 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors;
 
+use Enqueue\AmqpLib\AmqpConnectionFactory as EnqueueAmqpConnectionFactory;
 use Illuminate\Support\Arr;
 use Interop\Amqp\AmqpContext;
 use Illuminate\Contracts\Queue\Queue;
@@ -42,8 +43,9 @@ class RabbitMQConnector implements ConnectorInterface
             throw new \LogicException('The factory_class option is missing though it is required.');
         }
 
-        $factoryClass = $config['factory_class'];
-        if (false === class_exists($factoryClass) || false === (new \ReflectionClass($factoryClass))->implementsInterface(InteropAmqpConnectionFactory::class)) {
+        $factoryClass = Arr::get($config, 'factory_class', EnqueueAmqpConnectionFactory::class);
+
+        if (!class_exists($factoryClass) || !(new \ReflectionClass($factoryClass))->implementsInterface(InteropAmqpConnectionFactory::class)) {
             throw new \LogicException(sprintf('The factory_class option has to be valid class that implements "%s"', InteropAmqpConnectionFactory::class));
         }
 
