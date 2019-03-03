@@ -39,10 +39,6 @@ class RabbitMQConnector implements ConnectorInterface
      */
     public function connect(array $config): Queue
     {
-        if (false === array_key_exists('factory_class', $config)) {
-            throw new \LogicException('The factory_class option is missing though it is required.');
-        }
-
         $factoryClass = Arr::get($config, 'factory_class', EnqueueAmqpConnectionFactory::class);
 
         if (!class_exists($factoryClass) || !(new \ReflectionClass($factoryClass))->implementsInterface(InteropAmqpConnectionFactory::class)) {
