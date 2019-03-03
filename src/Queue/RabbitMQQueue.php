@@ -2,6 +2,7 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
+use Illuminate\Support\Str;
 use RuntimeException;
 use Illuminate\Queue\Queue;
 use Interop\Amqp\AmqpQueue;
@@ -253,5 +254,22 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         // Sleep so that we don't flood the log file
         sleep($this->sleepOnError);
+    }
+
+    protected function createPayloadArray($job, $queue, $data = '')
+    {
+        return array_merge(parent::createPayloadArray($job, $queue, $data), [
+            'id' => $this->getRandomId(),
+        ]);
+    }
+
+    /**
+     * Get a random ID string.
+     *
+     * @return string
+     */
+    protected function getRandomId(): string
+    {
+        return Str::random(32);
     }
 }

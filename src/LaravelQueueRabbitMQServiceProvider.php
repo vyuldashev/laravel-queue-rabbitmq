@@ -13,7 +13,7 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->mergeConfigFrom(
             __DIR__.'/../config/rabbitmq.php', 'queue.connections.rabbitmq'
@@ -25,7 +25,7 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         /** @var QueueManager $queue */
         $queue = $this->app['queue'];

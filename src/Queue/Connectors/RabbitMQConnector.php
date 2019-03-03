@@ -2,6 +2,7 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors;
 
+use Illuminate\Support\Arr;
 use Interop\Amqp\AmqpContext;
 use Illuminate\Contracts\Queue\Queue;
 use Interop\Amqp\AmqpConnectionFactory;
@@ -10,6 +11,7 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Queue\Events\WorkerStopping;
 use Enqueue\AmqpTools\RabbitMqDlxDelayStrategy;
 use Illuminate\Queue\Connectors\ConnectorInterface;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\RabbitMQQueue as HorizonRabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 use Interop\Amqp\AmqpConnectionFactory as InteropAmqpConnectionFactory;
 
@@ -71,6 +73,14 @@ class RabbitMQConnector implements ConnectorInterface
             $context->close();
         });
 
-        return new RabbitMQQueue($context, $config);
+        $worker = Arr::get($config, 'worker', 'default');
+
+        if($worker === 'default') {
+            return new RabbitMQQueue($context, $config);
+        }
+
+        if($worker === 'horizon') {
+            return new HorizonRabbitMQQueue($context, $config);
+        }
     }
 }
