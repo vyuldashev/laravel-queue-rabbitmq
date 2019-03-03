@@ -55,7 +55,7 @@ class RabbitMQConnector implements ConnectorInterface
             'vhost' => Arr::get($config, 'vhost', '/'),
             'ssl_on' => Arr::get($config, 'ssl_params.ssl_on', false),
             'ssl_verify' => Arr::get($config, 'ssl_params.verify_peer', true),
-            'ssl_cacert' => Arr::get($config, 'ssl_params.ca_file'),
+            'ssl_cacert' => Arr::get($config, 'ssl_params.cafile'),
             'ssl_cert' => Arr::get($config, 'ssl_params.local_cert'),
             'ssl_key' => Arr::get($config, 'ssl_params.local_key'),
             'ssl_passphrase' => Arr::get($config, 'ssl_params.passphrase'),
