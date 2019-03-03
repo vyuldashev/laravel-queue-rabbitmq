@@ -2,17 +2,17 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mock;
 
+use Interop\Queue\Queue;
+use Interop\Queue\Topic;
 use Interop\Amqp\AmqpBind;
+use Interop\Queue\Message;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpTopic;
-use Interop\Amqp\AmqpContext;
 use Interop\Queue\Consumer;
-use Interop\Queue\Destination;
-use Interop\Queue\Message;
 use Interop\Queue\Producer;
-use Interop\Queue\Queue;
+use Interop\Amqp\AmqpContext;
+use Interop\Queue\Destination;
 use Interop\Queue\SubscriptionConsumer;
-use Interop\Queue\Topic;
 
 class AmqpContextMock implements AmqpContext
 {
@@ -60,7 +60,6 @@ class AmqpContextMock implements AmqpContext
     {
         throw new \LogicException('It is not expected to be called');
     }
-
 
     public function close(): void
     {
