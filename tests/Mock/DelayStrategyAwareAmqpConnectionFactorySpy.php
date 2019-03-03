@@ -2,9 +2,9 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mock;
 
+use Interop\Queue\Context;
 use Enqueue\AmqpTools\DelayStrategy;
 use Enqueue\AmqpTools\DelayStrategyAware;
-use Interop\Queue\Context;
 
 class DelayStrategyAwareAmqpConnectionFactorySpy implements \Interop\Amqp\AmqpConnectionFactory, DelayStrategyAware
 {
