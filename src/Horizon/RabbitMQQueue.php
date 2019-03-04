@@ -23,7 +23,7 @@ class RabbitMQQueue extends BaseRabbitMQQueue
     /**
      * Get the number of queue jobs that are ready to process.
      *
-     * @param  string|null  $queue
+     * @param  string|null $queue
      * @return int
      */
     public function readyNow($queue = null): int
@@ -45,7 +45,7 @@ class RabbitMQQueue extends BaseRabbitMQQueue
         $payload = (new JobPayload($payload))->prepare($this->lastPushed)->value;
 
         return tap(parent::pushRaw($payload, $queueName, $options), function () use ($queueName, $payload) {
-            $this->event($queueName ?: $this->queueName, new JobPushed($payload));
+            $this->event($this->getQueueName($queueName), new JobPushed($payload));
         });
     }
 
@@ -55,7 +55,7 @@ class RabbitMQQueue extends BaseRabbitMQQueue
         $payload = (new JobPayload($this->createPayload($job, $data)))->prepare($job)->value;
 
         return tap(parent::pushRaw($payload, $queueName, ['delay' => $this->secondsUntil($delay)]), function () use ($payload, $queueName) {
-            $this->event($queueName ?: $this->queueName, new JobPushed($payload));
+            $this->event($this->getQueueName($queueName), new JobPushed($payload));
         });
     }
 
@@ -87,7 +87,7 @@ class RabbitMQQueue extends BaseRabbitMQQueue
      */
     public function deleteReserved($queueName, $job): void
     {
-        $this->event($queueName ?: $this->queueName, new JobDeleted($job, $job->getRawBody()));
+        $this->event($this->getQueueName($queueName), new JobDeleted($job, $job->getRawBody()));
     }
 
     /**

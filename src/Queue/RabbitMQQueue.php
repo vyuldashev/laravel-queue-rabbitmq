@@ -185,7 +185,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     protected function declareEverything(string $queueName = null): array
     {
-        $queueName = $queueName ?: $this->queueName;
+        $queueName = $this->getQueueName($queueName);
         $exchangeName = $this->exchangeOptions['name'] ?: $queueName;
 
         $topic = $this->context->createTopic($exchangeName);
@@ -235,6 +235,27 @@ class RabbitMQQueue extends Queue implements QueueContract
         return [$queue, $topic];
     }
 
+    protected function getQueueName($queueName = null) {
+        return $queueName ?: $this->queueName;
+    }
+
+    protected function createPayloadArray($job, $queue, $data = '')
+    {
+        return array_merge(parent::createPayloadArray($job, $queue, $data), [
+            'id' => $this->getRandomId(),
+        ]);
+    }
+
+    /**
+     * Get a random ID string.
+     *
+     * @return string
+     */
+    protected function getRandomId(): string
+    {
+        return Str::random(32);
+    }
+
     /**
      * @param string $action
      * @param \Throwable $e
@@ -254,22 +275,5 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         // Sleep so that we don't flood the log file
         sleep($this->sleepOnError);
-    }
-
-    protected function createPayloadArray($job, $queue, $data = '')
-    {
-        return array_merge(parent::createPayloadArray($job, $queue, $data), [
-            'id' => $this->getRandomId(),
-        ]);
-    }
-
-    /**
-     * Get a random ID string.
-     *
-     * @return string
-     */
-    protected function getRandomId(): string
-    {
-        return Str::random(32);
     }
 }
