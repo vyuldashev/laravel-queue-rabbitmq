@@ -67,7 +67,7 @@ class SendAndReceiveMessageTest extends TestCase
 
         $queue->getContext()->purgeQueue($queue->getContext()->createQueue('default'));
 
-        $expectedPayload = __METHOD__ . microtime(true);
+        $expectedPayload = __METHOD__.microtime(true);
 
         $queue->pushRaw($expectedPayload);
 
