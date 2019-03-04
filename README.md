@@ -131,7 +131,7 @@ Once you completed the configuration you can use Laravel Queue API. If you used 
 
 ## Laravel Horizon Usage
 
-This package supports [Laravel Horizon](http://horizon.laravel.com) out of the box. Firstly, install Horizon and then set `RABBITMQ_WORKER` to `horizon`.
+Starting with 7.4, this package supports [Laravel Horizon](http://horizon.laravel.com) out of the box. Firstly, install Horizon and then set `RABBITMQ_WORKER` to `horizon`.
 
 ## Lumen Usage
 
