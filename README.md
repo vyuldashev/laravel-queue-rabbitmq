@@ -25,6 +25,11 @@ Setup connection in `config/queue.php`
     
         'driver' => 'rabbitmq',
     
+        /*
+         * Set to "horizon" if you wish to use Laravel Horizon.
+         */
+        'worker' => env('RABBITMQ_WORKER', 'default'),
+    
         'dsn' => env('RABBITMQ_DSN', null),
     
         /*
@@ -120,16 +125,22 @@ Setup connection in `config/queue.php`
 ],
 ```
 
+## Laravel Usage
+
+Once you completed the configuration you can use Laravel Queue API. If you used other queue drivers you do not need to change anything else. If you do not know how to use Queue API, please refer to the official Laravel documentation: http://laravel.com/docs/queues
+
+## Laravel Horizon Usage
+
+Starting with 7.4, this package supports [Laravel Horizon](http://horizon.laravel.com) out of the box. Firstly, install Horizon and then set `RABBITMQ_WORKER` to `horizon`.
+
 ## Lumen Usage
 
-For lumen usage the service provider should be registered manually as follow in bootstrap/app.php
-```
+For Lumen usage the service provider should be registered manually as follow in `bootstrap/app.php`:
+
+```php
 $app->register(VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider::class);
 ```
 
-## Usage
-
-Once you completed the configuration you can use Laravel Queue API. If you used other queue drivers you do not need to change anything else. If you do not know how to use Queue API, please refer to the official Laravel documentation: http://laravel.com/docs/queues
 
 ## Using other AMQP transports
 
@@ -157,10 +168,15 @@ Change the factory class in `config/queue.php`:
 
 ## Testing
 
-You can run the tests with:
+Setup RabbitMQ using `docker-compose`:
+```bash
+docker-compose up -d
+```
+
+Run tests:
 
 ``` bash
-vendor/bin/phpunit
+composer test
 ```
 
 ## Contribution

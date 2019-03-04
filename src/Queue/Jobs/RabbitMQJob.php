@@ -11,6 +11,7 @@ use Illuminate\Queue\Jobs\JobName;
 use Illuminate\Container\Container;
 use Illuminate\Database\DetectsDeadlocks;
 use Illuminate\Contracts\Queue\Job as JobContract;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\RabbitMQQueue as HorizonRabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQJob extends Job implements JobContract
@@ -31,7 +32,8 @@ class RabbitMQJob extends Job implements JobContract
         RabbitMQQueue $connection,
         AmqpConsumer $consumer,
         AmqpMessage $message
-    ) {
+    )
+    {
         $this->container = $container;
         $this->connection = $connection;
         $this->consumer = $consumer;
@@ -99,6 +101,11 @@ class RabbitMQJob extends Job implements JobContract
         parent::delete();
 
         $this->consumer->acknowledge($this->message);
+
+        // required for Laravel Horizon
+        if($this->connection instanceof HorizonRabbitMQQueue) {
+            $this->connection->deleteReserved($this->queue, $this);
+        }
     }
 
     /** {@inheritdoc}

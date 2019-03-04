@@ -20,12 +20,12 @@ class SendAndReceiveMessageTest extends TestCase
     {
         $config = [
             'factory_class' => AmqpConnectionFactory::class,
-            'dsn'      => null,
-            'host'     => getenv('HOST'),
-            'port'     => getenv('PORT'),
-            'login'    => 'guest',
+            'dsn' => null,
+            'host' => getenv('HOST'),
+            'port' => getenv('PORT'),
+            'login' => 'guest',
             'password' => 'guest',
-            'vhost'    => '/',
+            'vhost' => '/',
             'options' => [
                 'exchange' => [
                     'name' => null,
@@ -48,12 +48,12 @@ class SendAndReceiveMessageTest extends TestCase
                 ],
             ],
             'ssl_params' => [
-                'ssl_on'        => false,
-                'cafile'        => null,
-                'local_cert'    => null,
-                'local_key'     => null,
-                'verify_peer'   => true,
-                'passphrase'    => null,
+                'ssl_on' => false,
+                'cafile' => null,
+                'local_cert' => null,
+                'local_key' => null,
+                'verify_peer' => true,
+                'passphrase' => null,
             ],
         ];
 
@@ -67,11 +67,13 @@ class SendAndReceiveMessageTest extends TestCase
 
         $queue->getContext()->purgeQueue($queue->getContext()->createQueue('default'));
 
-        $expectedPayload = __METHOD__.microtime(true);
+        $expectedPayload = __METHOD__ . microtime(true);
 
         $queue->pushRaw($expectedPayload);
 
         sleep(1);
+
+        $this->assertEquals(1, $queue->size());
 
         $job = $queue->pop();
 
@@ -79,6 +81,8 @@ class SendAndReceiveMessageTest extends TestCase
         $this->assertSame($expectedPayload, $job->getRawBody());
 
         $job->delete();
+
+        $this->assertEquals(0, $queue->size());
     }
 
     private function createDummyContainer()

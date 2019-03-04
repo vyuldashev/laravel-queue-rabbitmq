@@ -28,15 +28,6 @@ class RabbitMQConnectorTest extends TestCase
         new RabbitMQConnector($this->createMock(Dispatcher::class));
     }
 
-    public function testThrowsIfFactoryClassIsMissing()
-    {
-        $connector = new RabbitMQConnector($this->createMock(Dispatcher::class));
-
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('The factory_class option is missing though it is required.');
-        $connector->connect([]);
-    }
-
     public function testThrowsIfFactoryClassIsNotValidClass()
     {
         $connector = new RabbitMQConnector($this->createMock(Dispatcher::class));
