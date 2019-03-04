@@ -2,9 +2,9 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
-use Illuminate\Support\Str;
 use RuntimeException;
 use Illuminate\Queue\Queue;
+use Illuminate\Support\Str;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpTopic;
 use Psr\Log\LoggerInterface;
@@ -235,7 +235,8 @@ class RabbitMQQueue extends Queue implements QueueContract
         return [$queue, $topic];
     }
 
-    protected function getQueueName($queueName = null) {
+    protected function getQueueName($queueName = null)
+    {
         return $queueName ?: $this->queueName;
     }
 
