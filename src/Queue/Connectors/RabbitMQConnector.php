@@ -6,6 +6,7 @@ use Illuminate\Support\Arr;
 use Interop\Amqp\AmqpContext;
 use InvalidArgumentException;
 use Illuminate\Contracts\Queue\Queue;
+use Illuminate\Queue\Events\JobFailed;
 use Interop\Amqp\AmqpConnectionFactory;
 use Enqueue\AmqpTools\DelayStrategyAware;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -15,6 +16,7 @@ use Illuminate\Queue\Connectors\ConnectorInterface;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 use Interop\Amqp\AmqpConnectionFactory as InteropAmqpConnectionFactory;
 use Enqueue\AmqpLib\AmqpConnectionFactory as EnqueueAmqpConnectionFactory;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\Listeners\RabbitMQFailedEvent;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\RabbitMQQueue as HorizonRabbitMQQueue;
 
 class RabbitMQConnector implements ConnectorInterface
@@ -79,6 +81,8 @@ class RabbitMQConnector implements ConnectorInterface
         }
 
         if ($worker === 'horizon') {
+            $this->dispatcher->listen(JobFailed::class, RabbitMQFailedEvent::class);
+
             return new HorizonRabbitMQQueue($context, $config);
         }
 
