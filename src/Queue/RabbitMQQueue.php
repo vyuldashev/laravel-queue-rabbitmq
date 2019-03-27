@@ -4,7 +4,6 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
 use RuntimeException;
 use Illuminate\Queue\Queue;
-use Illuminate\Support\Str;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpTopic;
 use Psr\Log\LoggerInterface;
@@ -238,16 +237,6 @@ class RabbitMQQueue extends Queue implements QueueContract
     protected function getQueueName($queueName = null)
     {
         return $queueName ?: $this->queueName;
-    }
-
-    /**
-     * Get a random ID string.
-     *
-     * @return string
-     */
-    protected function getRandomId(): string
-    {
-        return Str::random(32);
     }
 
     /**

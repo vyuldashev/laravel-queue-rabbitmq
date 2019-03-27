@@ -12,7 +12,6 @@ use Illuminate\Container\Container;
 use Illuminate\Database\DetectsDeadlocks;
 use Illuminate\Contracts\Queue\Job as JobContract;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\RabbitMQQueue as HorizonRabbitMQQueue;
 
 class RabbitMQJob extends Job implements JobContract
 {
@@ -100,11 +99,6 @@ class RabbitMQJob extends Job implements JobContract
         parent::delete();
 
         $this->consumer->acknowledge($this->message);
-
-        // required for Laravel Horizon
-        if ($this->connection instanceof HorizonRabbitMQQueue) {
-            $this->connection->deleteReserved($this->queue, $this);
-        }
     }
 
     /** {@inheritdoc}
