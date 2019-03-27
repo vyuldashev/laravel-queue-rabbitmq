@@ -240,6 +240,13 @@ class RabbitMQQueue extends Queue implements QueueContract
         return $queueName ?: $this->queueName;
     }
 
+    protected function createPayloadArray($job, $queue, $data = '')
+    {
+        return array_merge(parent::createPayloadArray($job, $queue, $data), [
+            'id' => $this->getRandomId(),
+        ]);
+    }
+
     /**
      * Get a random ID string.
      *
