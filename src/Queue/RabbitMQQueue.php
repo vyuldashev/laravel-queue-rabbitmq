@@ -78,6 +78,10 @@ class RabbitMQQueue extends Queue implements QueueContract
             $message->setContentType('application/json');
             $message->setDeliveryMode(AmqpMessage::DELIVERY_MODE_PERSISTENT);
 
+            if (isset($options['expiration'])) {
+                $message->setExpiration($options['expiration']);
+            }
+
             if (isset($options['headers'])) {
                 $message->setHeaders($options['headers']);
             }
