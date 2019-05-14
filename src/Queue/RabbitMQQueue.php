@@ -72,14 +72,33 @@ class RabbitMQQueue extends Queue implements QueueContract
              */
             [$queue, $topic] = $this->declareEverything($queueName);
 
+            /** @var AmqpMessage $message */
             $message = $this->context->createMessage($payload);
-            $message->setRoutingKey($queue->getQueueName());
+
             $message->setCorrelationId($this->getCorrelationId());
             $message->setContentType('application/json');
             $message->setDeliveryMode(AmqpMessage::DELIVERY_MODE_PERSISTENT);
 
+            if (isset($options['routing_key'])) {
+                $message->setRoutingKey($options['routing_key']);
+            } else {
+                $message->setRoutingKey($queue->getQueueName());
+            }
+
+            if (isset($options['priority'])) {
+                $message->setPriority($options['priority']);
+            }
+
             if (isset($options['expiration'])) {
                 $message->setExpiration($options['expiration']);
+            }
+
+            if (isset($options['delivery_tag'])) {
+                $message->setDeliveryTag($options['delivery_tag']);
+            }
+
+            if (isset($options['consumer_tag'])) {
+                $message->setConsumerTag($options['consumer_tag']);
             }
 
             if (isset($options['headers'])) {
