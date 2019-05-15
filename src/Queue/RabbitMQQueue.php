@@ -93,14 +93,6 @@ class RabbitMQQueue extends Queue implements QueueContract
                 $message->setExpiration($options['expiration']);
             }
 
-            if (isset($options['delivery_tag'])) {
-                $message->setDeliveryTag($options['delivery_tag']);
-            }
-
-            if (isset($options['consumer_tag'])) {
-                $message->setConsumerTag($options['consumer_tag']);
-            }
-
             if (isset($options['headers'])) {
                 $message->setHeaders($options['headers']);
             }
