@@ -206,7 +206,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @return array [Interop\Amqp\AmqpQueue, Interop\Amqp\AmqpTopic]
      */
-    protected function declareEverything(string $queueName = null): array
+    public function declareEverything(string $queueName = null): array
     {
         $queueName = $this->getQueueName($queueName);
         $exchangeName = $this->exchangeOptions['name'] ?: $queueName;
