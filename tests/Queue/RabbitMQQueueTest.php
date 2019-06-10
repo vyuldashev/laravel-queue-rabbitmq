@@ -3,6 +3,7 @@
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
 use Interop\Amqp\AmqpQueue;
+use Interop\Amqp\AmqpSubscriptionConsumer;
 use Interop\Amqp\AmqpTopic;
 use Psr\Log\LoggerInterface;
 use Interop\Amqp\AmqpContext;
@@ -390,6 +391,62 @@ class RabbitMQQueueTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Error writing data to the connection with RabbitMQ');
         $queue->pop('aQueue');
+    }
+
+    public function testShouldUseBasicConsumeSubscriber()
+    {
+        $callback = function ($msg) {
+            //
+        };
+
+        $config = $this->createDummyConfig();
+        $config['options']['queue']['basic_consume'] = true;
+
+        $queue = $this->createMock(AmqpQueue::class);
+
+        $consumer = $this->createMock(AmqpConsumer::class);
+        $subConsumer = $this->createMock(AmqpSubscriptionConsumer::class);
+        $subConsumer
+            ->expects($this->once())
+            ->method('subscribe')
+            ->willReturnCallback(function ($context, $cb) use (&$callback) {
+                //save callback, to call it later
+                $callback = $cb;
+            });
+
+        $subConsumer
+            ->expects($this->once())
+            ->method('consume')
+            ->willReturnCallback(function () use (&$callback) {
+                $callback(new \Interop\Amqp\Impl\AmqpMessage('thePayload'));
+            });
+
+        $context = $this->createAmqpContext();
+        $context
+            ->expects($this->once())
+            ->method('createSubscriptionConsumer')
+            ->willReturn($subConsumer);
+
+        $context
+            ->expects($this->once())
+            ->method('createConsumer')
+            ->willReturn($consumer);
+
+        $context
+            ->expects($this->once())
+            ->method('createQueue')
+            ->willReturn($queue);
+
+        $context
+            ->expects($this->once())
+            ->method('createTopic')
+            ->willReturn($this->createMock(AmqpTopic::class));
+
+        $queue = new RabbitMQQueue($context, $config);
+        $queue->setContainer($this->createDummyContainer());
+        $job = $queue->pop('aQueue');
+
+        $this->assertInstanceOf(RabbitMQJob::class, $job);
     }
 
     /**

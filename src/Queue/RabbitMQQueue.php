@@ -24,6 +24,10 @@ class RabbitMQQueue extends Queue implements QueueContract
 
     protected $declaredExchanges = [];
     protected $declaredQueues = [];
+    /**
+     * @var BasicConsumeHandler
+     */
+    private $jobConsumer;
 
     /**
      * @var AmqpContext
@@ -152,18 +156,56 @@ class RabbitMQQueue extends Queue implements QueueContract
         ]);
     }
 
+
+    /**
+     * @param null $queueName
+     * @return RabbitMQJob|null
+     * @throws \Interop\Queue\Exception\SubscriptionConsumerNotSupportedException
+     */
+    private function popBasicConsume($queueName): ?RabbitMQJob
+    {
+        [$queue] = $this->declareEverything($queueName);
+
+        $options = [];
+        if ($timeout = $this->queueOptions['basic_consume_timeout'] ?? false) {
+            $options['timeout'] = $timeout;
+        }
+        $this->jobConsumer = $this->jobConsumer ?: new BasicConsumeHandler(
+            $this->context,
+            $queue,
+            $options
+        );
+
+        return $this->jobConsumer->getJob($this->container, $this);
+    }
+
+    /**
+     * @param $queueName
+     * @return RabbitMQJob|null
+     */
+    private function popPolling($queueName): ?RabbitMQJob
+    {
+        /** @var AmqpQueue $queue */
+        [$queue] = $this->declareEverything($queueName);
+
+        $consumer = $this->context->createConsumer($queue);
+
+        if ($message = $consumer->receiveNoWait()) {
+            return new RabbitMQJob($this->container, $this, $consumer, $message);
+        }
+
+        return null;
+    }
+
     /** {@inheritdoc} */
     public function pop($queueName = null)
     {
         try {
-            /** @var AmqpQueue $queue */
-            [$queue] = $this->declareEverything($queueName);
-
-            $consumer = $this->context->createConsumer($queue);
-
-            if ($message = $consumer->receiveNoWait()) {
-                return new RabbitMQJob($this->container, $this, $consumer, $message);
+            if ($this->queueOptions['basic_consume'] ?? false) {
+                return $this->popBasicConsume($queueName);
             }
+
+            return $this->popPolling($queueName);
         } catch (\Throwable $exception) {
             $this->reportConnectionError('pop', $exception);
 

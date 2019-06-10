@@ -74,6 +74,9 @@ return [
             'exclusive' => env('RABBITMQ_QUEUE_EXCLUSIVE', false),
             'auto_delete' => env('RABBITMQ_QUEUE_AUTODELETE', false),
             'arguments' => env('RABBITMQ_QUEUE_ARGUMENTS'),
+
+            'basic_consume' => env('RABBITMQ_QUEUE_BASIC_CONSUME', false),
+            'basic_consume_timeout' => env('RABBITMQ_QUEUE_BASIC_CONSUME_TIMEOUT', false),
         ],
     ],
 
