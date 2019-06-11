@@ -156,7 +156,6 @@ class RabbitMQQueue extends Queue implements QueueContract
         ]);
     }
 
-
     /**
      * @param null $queueName
      * @return RabbitMQJob|null

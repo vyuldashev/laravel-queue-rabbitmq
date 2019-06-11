@@ -2,11 +2,11 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
-use Illuminate\Container\Container;
-use Interop\Amqp\AmqpConsumer;
-use Interop\Amqp\AmqpQueue;
-use Interop\Amqp\AmqpSubscriptionConsumer;
 use Interop\Queue\Context;
+use Interop\Amqp\AmqpQueue;
+use Interop\Amqp\AmqpConsumer;
+use Illuminate\Container\Container;
+use Interop\Amqp\AmqpSubscriptionConsumer;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 class BasicConsumeHandler

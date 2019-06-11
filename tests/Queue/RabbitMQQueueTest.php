@@ -3,7 +3,6 @@
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
 use Interop\Amqp\AmqpQueue;
-use Interop\Amqp\AmqpSubscriptionConsumer;
 use Interop\Amqp\AmqpTopic;
 use Psr\Log\LoggerInterface;
 use Interop\Amqp\AmqpContext;
@@ -12,6 +11,7 @@ use Interop\Amqp\AmqpConsumer;
 use Interop\Amqp\AmqpProducer;
 use PHPUnit\Framework\TestCase;
 use Illuminate\Container\Container;
+use Interop\Amqp\AmqpSubscriptionConsumer;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 class RabbitMQQueueTest extends TestCase
