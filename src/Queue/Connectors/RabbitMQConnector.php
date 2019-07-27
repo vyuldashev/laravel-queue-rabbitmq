@@ -86,7 +86,7 @@ class RabbitMQConnector implements ConnectorInterface
             return new HorizonRabbitMQQueue($context, $config);
         }
 
-        if($worker instanceof RabbitMQQueue) {
+        if ($worker instanceof RabbitMQQueue) {
             return new $worker($context, $config);
         }
 
