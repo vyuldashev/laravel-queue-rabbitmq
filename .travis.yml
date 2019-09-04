@@ -1,12 +1,8 @@
 language: php
 
 php:
-  - 7.1
   - 7.2
   - 7.3
-
-env:
-  - DOCKER_COMPOSE_VERSION=1.23.2
 
 services:
   - docker
@@ -17,7 +13,7 @@ cache:
 
 before_install:
   - sudo rm /usr/local/bin/docker-compose
-  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/1.24.1/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
 
