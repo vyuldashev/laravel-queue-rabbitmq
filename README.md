@@ -124,6 +124,17 @@ Setup connection in `config/queue.php`
     // ...    
 ],
 ```
+## Laravel Provider setup
+
+under `config/app.php` add a new provider
+
+```
+'providers' => [
+    ...
+    \VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider::class,
+    ...
+]
+```
 
 ## Laravel Usage
 
