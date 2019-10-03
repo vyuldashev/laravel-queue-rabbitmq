@@ -124,7 +124,7 @@ Setup connection in `config/queue.php`
     // ...    
 ],
 ```
-## Laravel Provider setup
+## Laravel Provider Setup
 
 under `config/app.php` add a new provider
 
