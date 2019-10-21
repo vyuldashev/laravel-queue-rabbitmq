@@ -138,7 +138,7 @@ class RabbitMQJob extends Job implements JobContract
      * @return string
      * @throws \Interop\Queue\Exception
      */
-    public function getJobId(): string
+    public function getJobId(): ?string
     {
         return $this->message->getCorrelationId();
     }
