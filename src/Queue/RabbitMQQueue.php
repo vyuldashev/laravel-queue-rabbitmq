@@ -201,7 +201,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     public function declareEverything(string $queueName = null): array
     {
         $queueName = $this->getQueueName($queueName);
-        $exchangeName = $this->exchangeOptions['name'] ?: $queueName;
+        $exchangeName = is_string($this->exchangeOptions['name'] ?? null) ? $this->exchangeOptions['name'] : $queueName;
 
         $topic = $this->context->createTopic($exchangeName);
         $topic->setType($this->exchangeOptions['type']);
