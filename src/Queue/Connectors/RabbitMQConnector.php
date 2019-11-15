@@ -34,15 +34,18 @@ class RabbitMQConnector implements ConnectorInterface
     public function connect(array $config): Queue
     {
         $context = static::createContext($config, $this->dispatcher);
+
         return new RabbitMQQueue($context, $config);
     }
 
     /**
      * Create a context.
      *
-     * @param  array  $config
-     * @return AmqpContext
+     * @param array $config
+     *
      * @throws \ReflectionException
+     *
+     * @return AmqpContext
      */
     public static function createContext($config, $dispatcher)
     {
@@ -57,17 +60,17 @@ class RabbitMQConnector implements ConnectorInterface
 
         /** @var \Enqueue\AmqpLib\AmqpConnectionFactory $factory */
         $factory = new $factoryClass([
-            'dsn' => $config['dsn'],
-            'host' => $config['host'],
-            'port' => $config['port'],
-            'user' => $config['login'],
-            'pass' => $config['password'],
-            'vhost' => $config['vhost'],
-            'ssl_on' => $config['ssl_params']['ssl_on'],
-            'ssl_verify' => $config['ssl_params']['verify_peer'],
-            'ssl_cacert' => $config['ssl_params']['cafile'],
-            'ssl_cert' => $config['ssl_params']['local_cert'],
-            'ssl_key' => $config['ssl_params']['local_key'],
+            'dsn'            => $config['dsn'],
+            'host'           => $config['host'],
+            'port'           => $config['port'],
+            'user'           => $config['login'],
+            'pass'           => $config['password'],
+            'vhost'          => $config['vhost'],
+            'ssl_on'         => $config['ssl_params']['ssl_on'],
+            'ssl_verify'     => $config['ssl_params']['verify_peer'],
+            'ssl_cacert'     => $config['ssl_params']['cafile'],
+            'ssl_cert'       => $config['ssl_params']['local_cert'],
+            'ssl_key'        => $config['ssl_params']['local_key'],
             'ssl_passphrase' => $config['ssl_params']['passphrase'],
         ]);
 

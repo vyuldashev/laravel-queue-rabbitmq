@@ -10,9 +10,9 @@ use Interop\Amqp\AmqpMessage;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpTopic;
 use Interop\Amqp\Impl\AmqpBind;
-use Psr\Log\LoggerInterface;
 use PhpAmqpLib\Exception\AMQPChannelClosedException;
 use PhpAmqpLib\Exception\AMQPConnectionClosedException;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
@@ -50,7 +50,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->sleepOnError = $config['sleep_on_error'] ?? 5;
     }
 
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     public function size($queueName = null): int
     {
         /** @var AmqpQueue $queue */
@@ -59,18 +59,18 @@ class RabbitMQQueue extends Queue implements QueueContract
         return $this->context->declareQueue($queue);
     }
 
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     public function push($job, $data = '', $queue = null)
     {
         return $this->pushRaw($this->createPayload($job, $data), $queue, []);
     }
 
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     public function pushRaw($payload, $queueName = null, array $options = [])
     {
         try {
             /**
-             * @var AmqpTopic $topic
+             * @var AmqpTopic
              * @var AmqpQueue $queue
              */
             list($queue, $topic) = $this->declareEverything($queueName);
@@ -96,11 +96,11 @@ class RabbitMQQueue extends Queue implements QueueContract
         } catch (\Exception $exception) {
             $this->reportConnectionError('pushRaw', $exception);
 
-            return null;
+            return;
         }
     }
 
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     public function later($delay, $job, $data = '', $queue = null)
     {
         return $this->pushRaw($this->createPayload($job, $data), $queue, ['delay' => $this->secondsUntil($delay)]);
@@ -109,22 +109,23 @@ class RabbitMQQueue extends Queue implements QueueContract
     /**
      * Release a reserved job back onto the queue.
      *
-     * @param  \DateTimeInterface|\DateInterval|int  $delay
-     * @param  string|object  $job
-     * @param  mixed   $data
-     * @param  string  $queue
-     * @param  int  $attempts
+     * @param \DateTimeInterface|\DateInterval|int $delay
+     * @param string|object                        $job
+     * @param mixed                                $data
+     * @param string                               $queue
+     * @param int                                  $attempts
+     *
      * @return mixed
      */
     public function release($delay, $job, $data, $queue, $attempts = 0)
     {
         return $this->pushRaw($this->createPayload($job, $data), $queue, [
-            'delay' => $this->secondsUntil($delay),
-            'attempts' => $attempts
+            'delay'    => $this->secondsUntil($delay),
+            'attempts' => $attempts,
         ]);
     }
 
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     public function pop($queueName = null)
     {
         try {
@@ -140,7 +141,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             if ($exception instanceof AMQPConnectionClosedException ||
                 $exception instanceof AMQPChannelClosedException
             ) {
-                /**
+                /*
                  * @see \Enqueue\AmqpLib\AmqpContext
                  * @see \PhpAmqpLib\Channel\AMQPChannel::close()
                  */
@@ -157,8 +158,6 @@ class RabbitMQQueue extends Queue implements QueueContract
 
             $this->reportConnectionError('pop', $exception);
         }
-
-        return null;
     }
 
     /**
@@ -249,8 +248,9 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * @param string $action
+     * @param string     $action
      * @param \Exception $e
+     *
      * @throws \Exception
      */
     protected function reportConnectionError($action, \Exception $e)
@@ -258,7 +258,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         /** @var LoggerInterface $logger */
         $logger = $this->container['log'];
 
-        $logger->error('AMQP error while attempting ' . $action . ': ' . $e->getMessage());
+        $logger->error('AMQP error while attempting '.$action.': '.$e->getMessage());
 
         // If it's set to false, throw an error rather than waiting
         if ($this->sleepOnError === false) {
