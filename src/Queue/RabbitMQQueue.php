@@ -25,6 +25,8 @@ class RabbitMQQueue extends Queue implements QueueContract
     protected $declaredExchanges = [];
     protected $declaredQueues = [];
 
+    protected $message;
+
     /**
      * @var AmqpContext
      */
@@ -73,36 +75,36 @@ class RabbitMQQueue extends Queue implements QueueContract
             [$queue, $topic] = $this->declareEverything($queueName);
 
             /** @var AmqpMessage $message */
-            $message = $this->context->createMessage($payload);
+            $this->message = $this->context->createMessage($payload);
 
-            $message->setCorrelationId($this->getCorrelationId());
-            $message->setContentType('application/json');
-            $message->setDeliveryMode(AmqpMessage::DELIVERY_MODE_PERSISTENT);
+            $this->message->setCorrelationId($this->getCorrelationId());
+            $this->message->setContentType('application/json');
+            $this->message->setDeliveryMode(AmqpMessage::DELIVERY_MODE_PERSISTENT);
 
             if (isset($options['routing_key'])) {
-                $message->setRoutingKey($options['routing_key']);
+                $this->message->setRoutingKey($options['routing_key']);
             } else {
-                $message->setRoutingKey($queue->getQueueName());
+                $this->message->setRoutingKey($queue->getQueueName());
             }
 
             if (isset($options['priority'])) {
-                $message->setPriority($options['priority']);
+                $this->message->setPriority($options['priority']);
             }
 
             if (isset($options['expiration'])) {
-                $message->setExpiration($options['expiration']);
+                $this->message->setExpiration($options['expiration']);
             }
 
             if (isset($options['headers'])) {
-                $message->setHeaders($options['headers']);
+                $this->message->setHeaders($options['headers']);
             }
 
             if (isset($options['properties'])) {
-                $message->setProperties($options['properties']);
+                $this->message->setProperties($options['properties']);
             }
 
             if (isset($options['attempts'])) {
-                $message->setProperty(RabbitMQJob::ATTEMPT_COUNT_HEADERS_KEY, $options['attempts']);
+                $this->message->setProperty(RabbitMQJob::ATTEMPT_COUNT_HEADERS_KEY, $options['attempts']);
             }
 
             $producer = $this->context->createProducer();
@@ -110,9 +112,9 @@ class RabbitMQQueue extends Queue implements QueueContract
                 $producer->setDeliveryDelay($options['delay'] * 1000);
             }
 
-            $producer->send($topic, $message);
+            $producer->send($topic, $this->message);
 
-            return $message->getCorrelationId();
+            return $this->message->getCorrelationId();
         } catch (\Exception $exception) {
             $this->reportConnectionError('pushRaw', $exception);
 
@@ -153,8 +155,8 @@ class RabbitMQQueue extends Queue implements QueueContract
 
             $consumer = $this->context->createConsumer($queue);
 
-            if ($message = $consumer->receiveNoWait()) {
-                return new RabbitMQJob($this->container, $this, $consumer, $message);
+            if ($this->message = $consumer->receiveNoWait()) {
+                return new RabbitMQJob($this->container, $this, $consumer, $this->message);
             }
         } catch (\Throwable $exception) {
             $this->reportConnectionError('pop', $exception);
