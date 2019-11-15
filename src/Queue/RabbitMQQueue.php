@@ -2,6 +2,7 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Queue\Queue;
 use Interop\Amqp\AmqpContext;
@@ -10,7 +11,10 @@ use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpTopic;
 use Interop\Amqp\Impl\AmqpBind;
 use Psr\Log\LoggerInterface;
+use PhpAmqpLib\Exception\AMQPChannelClosedException;
+use PhpAmqpLib\Exception\AMQPConnectionClosedException;
 use RuntimeException;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 class RabbitMQQueue extends Queue implements QueueContract
@@ -27,11 +31,13 @@ class RabbitMQQueue extends Queue implements QueueContract
      * @var AmqpContext
      */
     private $context;
+    private $config;
     private $correlationId;
 
     public function __construct(AmqpContext $context, array $config)
     {
         $this->context = $context;
+        $this->config = $config;
 
         $this->queueOptions = $config['options']['queue'];
         $this->queueOptions['arguments'] = isset($this->queueOptions['arguments']) ?
@@ -131,6 +137,24 @@ class RabbitMQQueue extends Queue implements QueueContract
                 return new RabbitMQJob($this->container, $this, $consumer, $message);
             }
         } catch (\Exception $exception) {
+            if ($exception instanceof AMQPConnectionClosedException ||
+                $exception instanceof AMQPChannelClosedException
+            ) {
+                /**
+                 * @see \Enqueue\AmqpLib\AmqpContext
+                 * @see \PhpAmqpLib\Channel\AMQPChannel::close()
+                 */
+                try {
+                    $this->declaredExchanges = [];
+                    $this->declaredQueues = [];
+
+                    $dispatcher = app(Dispatcher::class);
+                    $this->context = RabbitMQConnector::createContext($this->config, $dispatcher);
+                } catch (\Exception $e) {
+                    // Silent reconnect attempt.
+                }
+            }
+
             $this->reportConnectionError('pop', $exception);
         }
 
