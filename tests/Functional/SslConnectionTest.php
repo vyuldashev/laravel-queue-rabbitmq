@@ -2,13 +2,13 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional;
 
-use PHPUnit\Framework\TestCase;
+use Enqueue\AmqpLib\AmqpConnectionFactory;
 use Enqueue\AmqpLib\AmqpContext;
 use Illuminate\Events\Dispatcher;
-use Enqueue\AmqpLib\AmqpConnectionFactory;
 use PhpAmqpLib\Connection\AMQPSSLConnection;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
+use PHPUnit\Framework\TestCase;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 /**
  * @group functional

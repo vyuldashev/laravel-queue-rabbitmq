@@ -3,16 +3,16 @@
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs;
 
 use Exception;
-use Illuminate\Support\Str;
-use Interop\Amqp\AmqpMessage;
-use Illuminate\Queue\Jobs\Job;
-use Interop\Amqp\AmqpConsumer;
-use Illuminate\Queue\Jobs\JobName;
 use Illuminate\Container\Container;
-use Illuminate\Database\DetectsLostConnections;
 use Illuminate\Contracts\Queue\Job as JobContract;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
+use Illuminate\Database\DetectsLostConnections;
+use Illuminate\Queue\Jobs\Job;
+use Illuminate\Queue\Jobs\JobName;
+use Illuminate\Support\Str;
+use Interop\Amqp\AmqpConsumer;
+use Interop\Amqp\AmqpMessage;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\RabbitMQQueue as HorizonRabbitMQQueue;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQJob extends Job implements JobContract
 {

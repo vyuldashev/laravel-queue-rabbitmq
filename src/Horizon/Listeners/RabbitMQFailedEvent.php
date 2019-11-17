@@ -3,8 +3,8 @@
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\Listeners;
 
 use Illuminate\Contracts\Events\Dispatcher;
-use Laravel\Horizon\Events\JobFailed as HorizonJobFailed;
 use Illuminate\Queue\Events\JobFailed as LaravelJobFailed;
+use Laravel\Horizon\Events\JobFailed as HorizonJobFailed;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 class RabbitMQFailedEvent

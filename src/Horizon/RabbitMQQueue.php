@@ -2,12 +2,12 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Horizon;
 
+use Illuminate\Contracts\Events\Dispatcher;
+use Laravel\Horizon\Events\JobDeleted;
+use Laravel\Horizon\Events\JobPushed;
+use Laravel\Horizon\Events\JobReserved;
 use Laravel\Horizon\JobId;
 use Laravel\Horizon\JobPayload;
-use Laravel\Horizon\Events\JobPushed;
-use Laravel\Horizon\Events\JobDeleted;
-use Laravel\Horizon\Events\JobReserved;
-use Illuminate\Contracts\Events\Dispatcher;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue as BaseRabbitMQQueue;
 
