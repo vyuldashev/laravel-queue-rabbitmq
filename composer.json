@@ -21,7 +21,8 @@
     "phpunit/phpunit": "^8.4",
     "illuminate/events": "^6.0",
     "mockery/mockery": "^1.0",
-    "laravel/horizon": "^3.0"
+    "laravel/horizon": "^3.0",
+    "larapack/dd": "^1.1"
   },
   "autoload": {
     "psr-4": {
