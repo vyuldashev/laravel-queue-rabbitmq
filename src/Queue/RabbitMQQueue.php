@@ -2,16 +2,16 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
-use RuntimeException;
+use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Queue\Queue;
 use Illuminate\Support\Str;
-use Interop\Amqp\AmqpQueue;
-use Interop\Amqp\AmqpTopic;
-use Psr\Log\LoggerInterface;
 use Interop\Amqp\AmqpContext;
 use Interop\Amqp\AmqpMessage;
+use Interop\Amqp\AmqpQueue;
+use Interop\Amqp\AmqpTopic;
 use Interop\Amqp\Impl\AmqpBind;
-use Illuminate\Contracts\Queue\Queue as QueueContract;
+use Psr\Log\LoggerInterface;
+use RuntimeException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 class RabbitMQQueue extends Queue implements QueueContract

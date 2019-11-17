@@ -2,15 +2,15 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Queue\Jobs;
 
+use Illuminate\Container\Container;
+use Illuminate\Contracts\Queue\Job as JobContract;
+use Illuminate\Database\DetectsLostConnections;
 use Illuminate\Queue\Jobs\Job;
 use Interop\Amqp\AmqpConsumer;
-use PHPUnit\Framework\TestCase;
 use Interop\Amqp\Impl\AmqpMessage;
-use Illuminate\Container\Container;
-use Illuminate\Database\DetectsLostConnections;
-use Illuminate\Contracts\Queue\Job as JobContract;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
+use PHPUnit\Framework\TestCase;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQJobTest extends TestCase
 {
