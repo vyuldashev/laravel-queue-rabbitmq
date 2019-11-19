@@ -21,7 +21,7 @@ class RabbitMQJob extends Job implements JobContract
     /**
      * Same as RabbitMQQueue, used for attempt counts.
      */
-    public const ATTEMPT_COUNT_HEADERS_KEY = 'attempts';
+    public const ATTEMPT_COUNT_HEADERS_KEY = 'attempts_count';
 
     protected $connection;
     protected $consumer;
