@@ -40,7 +40,9 @@ class RabbitMQFailedEvent
         }
 
         $this->events->dispatch((new HorizonJobFailed(
-            $event->exception, $event->job, $event->job->getRawBody()
+            $event->exception,
+            $event->job,
+            $event->job->getRawBody()
         ))->connection($event->connectionName)->queue($event->job->getQueue()));
     }
 }

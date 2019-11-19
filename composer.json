@@ -22,7 +22,8 @@
     "illuminate/events": "^6.0",
     "mockery/mockery": "^1.0",
     "laravel/horizon": "^3.0",
-    "larapack/dd": "^1.1"
+    "larapack/dd": "^1.1",
+    "friendsofphp/php-cs-fixer": "^2.16"
   },
   "autoload": {
     "psr-4": {
