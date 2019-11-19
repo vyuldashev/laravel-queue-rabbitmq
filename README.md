@@ -169,14 +169,29 @@ Change the factory class in `config/queue.php`:
 ## Testing
 
 Setup RabbitMQ using `docker-compose`:
+
 ```bash
 docker-compose up -d
 ```
 
-Run tests:
+To run the test suite you can use the following commands:
 
-``` bash
+```bash
+# To run both style and unit tests.
 composer test
+
+# To run only style tests.
+composer test:style
+
+# To run only unit tests.
+composer test:unit
+```
+
+If you receive any errors from the style tests, you can automatically fix most,
+if not all of the issues with the following command:
+
+```bash
+composer fix:style
 ```
 
 ## Contribution
