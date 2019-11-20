@@ -137,25 +137,23 @@ class RabbitMQQueue extends Queue implements QueueContract
             if ($message = $consumer->receiveNoWait()) {
                 return new RabbitMQJob($this->container, $this, $consumer, $message);
             }
-        } catch (\Exception $exception) {
-            if ($exception instanceof AMQPConnectionClosedException ||
-                $exception instanceof AMQPChannelClosedException
-            ) {
-                /*
-                 * @see \Enqueue\AmqpLib\AmqpContext
-                 * @see \PhpAmqpLib\Channel\AMQPChannel::close()
-                 */
-                try {
-                    $this->declaredExchanges = [];
-                    $this->declaredQueues = [];
+        } catch (AMQPConnectionClosedException | AMQPChannelClosedException $exception) {
+            /*
+             * @see \Enqueue\AmqpLib\AmqpContext
+             * @see \PhpAmqpLib\Channel\AMQPChannel::close()
+             */
+            try {
+                $this->declaredExchanges = [];
+                $this->declaredQueues = [];
 
-                    $dispatcher = app(Dispatcher::class);
-                    $this->context = RabbitMQConnector::createContext($this->config, $dispatcher);
-                } catch (\Exception $e) {
-                    // Silent reconnect attempt.
-                }
+                $dispatcher = app(Dispatcher::class);
+                $this->context = RabbitMQConnector::createContext($this->config, $dispatcher);
+            } catch (\Exception $e) {
+                // Silent reconnect attempt.
             }
-
+            
+            $this->reportConnectionError('pop', $exception);
+        } catch (\Exception $exception) {
             $this->reportConnectionError('pop', $exception);
         }
     }
