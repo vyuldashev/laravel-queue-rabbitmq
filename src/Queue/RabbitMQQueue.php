@@ -151,7 +151,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             } catch (\Exception $e) {
                 // Silent reconnect attempt.
             }
-            
+
             $this->reportConnectionError('pop', $exception);
         } catch (\Exception $exception) {
             $this->reportConnectionError('pop', $exception);
