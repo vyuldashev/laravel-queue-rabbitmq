@@ -10,6 +10,7 @@ use Interop\Amqp\AmqpMessage;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpTopic;
 use Interop\Amqp\Impl\AmqpBind;
+use PhpAmqpLib\Exception\AMQPChannelClosedException;
 use PhpAmqpLib\Exception\AMQPConnectionClosedException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
@@ -167,7 +168,7 @@ class RabbitMQQueue extends Queue implements QueueContract
                 $this->declaredExchanges = [];
                 $this->declaredQueues = [];
                 $this->context = RabbitMQConnector::createContext($this->config);
-            } catch (\Exception $e) {
+            } catch (Throwable $e) {
                 // Silent reconnect attempt.
             }
 
