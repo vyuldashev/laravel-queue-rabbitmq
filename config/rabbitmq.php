@@ -78,12 +78,6 @@ return [
     ],
 
     /*
-     * Determine the number of seconds to sleep if there's an error communicating with rabbitmq
-     * If set to false, it'll throw an exception rather than doing the sleep for X seconds.
-     */
-    'sleep_on_error' => env('RABBITMQ_ERROR_SLEEP', 5),
-
-    /*
      * Optional SSL params if an SSL connection is used
      */
     'ssl_params' => [

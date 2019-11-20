@@ -2,6 +2,8 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
+use DateInterval;
+use DateTimeInterface;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Queue\Queue;
 use Illuminate\Support\Str;
@@ -10,18 +12,11 @@ use Interop\Amqp\AmqpMessage;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpTopic;
 use Interop\Amqp\Impl\AmqpBind;
-use PhpAmqpLib\Exception\AMQPChannelClosedException;
-use PhpAmqpLib\Exception\AMQPConnectionClosedException;
-use Psr\Log\LoggerInterface;
-use RuntimeException;
-use Throwable;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
+use Interop\Queue\Exception;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 class RabbitMQQueue extends Queue implements QueueContract
 {
-    protected $sleepOnError;
-
     protected $queueName;
     protected $queueOptions;
     protected $exchangeOptions;
@@ -49,11 +44,11 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->exchangeOptions = $config['options']['exchange'];
         $this->exchangeOptions['arguments'] = isset($this->exchangeOptions['arguments']) ?
             json_decode($this->exchangeOptions['arguments'], true) : [];
-
-        $this->sleepOnError = $config['sleep_on_error'] ?? 5;
     }
 
-    /** {@inheritdoc} */
+    /**
+     * {@inheritdoc}
+     */
     public function size($queueName = null): int
     {
         /** @var AmqpQueue $queue */
@@ -62,85 +57,84 @@ class RabbitMQQueue extends Queue implements QueueContract
         return $this->context->declareQueue($queue);
     }
 
-    /** {@inheritdoc} */
+    /**
+     * {@inheritdoc}
+     *
+     * @throws Exception
+     */
     public function push($job, $data = '', $queue = null)
     {
         return $this->pushRaw($this->createPayload($job, $queue, $data), $queue, []);
     }
 
-    /** {@inheritdoc} */
+    /**
+     * {@inheritdoc}
+     *
+     * @throws Exception
+     */
     public function pushRaw($payload, $queueName = null, array $options = [])
     {
-        try {
-            /**
-             * @var AmqpTopic
-             * @var AmqpQueue $queue
-             */
-            [$queue, $topic] = $this->declareEverything($queueName);
+        /**
+         * @var AmqpTopic
+         * @var AmqpQueue $queue
+         */
+        [$queue, $topic] = $this->declareEverything($queueName);
 
-            /** @var AmqpMessage $message */
-            $message = $this->context->createMessage($payload);
+        /** @var AmqpMessage $message */
+        $message = $this->context->createMessage($payload);
 
-            $message->setCorrelationId($this->getCorrelationId());
-            $message->setContentType('application/json');
-            $message->setDeliveryMode(AmqpMessage::DELIVERY_MODE_PERSISTENT);
+        $message->setCorrelationId($this->getCorrelationId());
+        $message->setContentType('application/json');
+        $message->setDeliveryMode(AmqpMessage::DELIVERY_MODE_PERSISTENT);
 
-            if (isset($options['routing_key'])) {
-                $message->setRoutingKey($options['routing_key']);
-            } else {
-                $message->setRoutingKey($queue->getQueueName());
-            }
-
-            if (isset($options['priority'])) {
-                $message->setPriority($options['priority']);
-            }
-
-            if (isset($options['expiration'])) {
-                $message->setExpiration($options['expiration']);
-            }
-
-            if (isset($options['headers'])) {
-                $message->setHeaders($options['headers']);
-            }
-
-            if (isset($options['properties'])) {
-                $message->setProperties($options['properties']);
-            }
-
-            if (isset($options['attempts'])) {
-                $message->setProperty(RabbitMQJob::ATTEMPT_COUNT_HEADERS_KEY, $options['attempts']);
-            }
-
-            $producer = $this->context->createProducer();
-            if (isset($options['delay']) && $options['delay'] > 0) {
-                $producer->setDeliveryDelay($options['delay'] * 1000);
-            }
-
-            $producer->send($topic, $message);
-
-            return $message->getCorrelationId();
-        } catch (\Exception $exception) {
-            $this->reportConnectionError('pushRaw', $exception);
-
-            return;
+        if (isset($options['routing_key'])) {
+            $message->setRoutingKey($options['routing_key']);
+        } else {
+            $message->setRoutingKey($queue->getQueueName());
         }
+
+        if (isset($options['priority'])) {
+            $message->setPriority($options['priority']);
+        }
+
+        if (isset($options['expiration'])) {
+            $message->setExpiration($options['expiration']);
+        }
+
+        if (isset($options['headers'])) {
+            $message->setHeaders($options['headers']);
+        }
+
+        if (isset($options['properties'])) {
+            $message->setProperties($options['properties']);
+        }
+
+        if (isset($options['attempts'])) {
+            $message->setProperty(RabbitMQJob::ATTEMPT_COUNT_HEADERS_KEY, $options['attempts']);
+        }
+
+        $producer = $this->context->createProducer();
+        if (isset($options['delay']) && $options['delay'] > 0) {
+            $producer->setDeliveryDelay($options['delay'] * 1000);
+        }
+
+        $producer->send($topic, $message);
+
+        return $message->getCorrelationId();
     }
 
-    /** {@inheritdoc} */
+    /**
+     * {@inheritdoc}
+     * @throws Exception
+     */
     public function later($delay, $job, $data = '', $queue = null)
     {
         return $this->pushRaw($this->createPayload($job, $queue, $data), $queue, ['delay' => $this->secondsUntil($delay)]);
     }
 
     /**
-     * Release a reserved job back onto the queue.
-     *
-     * @param  \DateTimeInterface|\DateInterval|int $delay
-     * @param  string|object $job
-     * @param  mixed $data
-     * @param  string $queue
-     * @param  int $attempts
-     * @return mixed
+     * {@inheritDoc}
+     * @throws Exception
      */
     public function release($delay, $job, $data, $queue, $attempts = 0)
     {
@@ -150,36 +144,21 @@ class RabbitMQQueue extends Queue implements QueueContract
         ]);
     }
 
-    /** {@inheritdoc} */
+    /**
+     * {@inheritdoc}
+     */
     public function pop($queueName = null)
     {
-        try {
-            /** @var AmqpQueue $queue */
-            [$queue] = $this->declareEverything($queueName);
+        /** @var AmqpQueue $queue */
+        [$queue] = $this->declareEverything($queueName);
 
-            $consumer = $this->context->createConsumer($queue);
+        $consumer = $this->context->createConsumer($queue);
 
-            if ($message = $consumer->receiveNoWait()) {
-                return new RabbitMQJob($this->container, $this, $consumer, $message);
-            }
-        } catch (AMQPConnectionClosedException | AMQPChannelClosedException $connectionException) {
-            try {
-                // Connection/channel closed, attempt to reconnect.
-                $this->declaredExchanges = [];
-                $this->declaredQueues = [];
-                $this->context = RabbitMQConnector::createContext($this->config);
-            } catch (Throwable $e) {
-                // Silent reconnect attempt.
-            }
-
-            $this->reportConnectionError('pop', $connectionException);
-
-            return;
-        } catch (Throwable $exception) {
-            $this->reportConnectionError('pop', $exception);
-
-            return;
+        if ($message = $consumer->receiveNoWait()) {
+            return new RabbitMQJob($this->container, $this, $consumer, $message);
         }
+
+        return null;
     }
 
     /**
@@ -235,7 +214,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             $topic->addFlag(AmqpTopic::FLAG_AUTODELETE);
         }
 
-        if ($this->exchangeOptions['declare'] && ! in_array($exchangeName, $this->declaredExchanges, true)) {
+        if ($this->exchangeOptions['declare'] && !in_array($exchangeName, $this->declaredExchanges, true)) {
             $this->context->declareTopic($topic);
 
             $this->declaredExchanges[] = $exchangeName;
@@ -256,7 +235,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             $queue->addFlag(AmqpQueue::FLAG_AUTODELETE);
         }
 
-        if ($this->queueOptions['declare'] && ! in_array($queueName, $this->declaredQueues, true)) {
+        if ($this->queueOptions['declare'] && !in_array($queueName, $this->declaredQueues, true)) {
             $this->context->declareQueue($queue);
 
             $this->declaredQueues[] = $queueName;
@@ -289,26 +268,5 @@ class RabbitMQQueue extends Queue implements QueueContract
     protected function getRandomId(): string
     {
         return Str::random(32);
-    }
-
-    /**
-     * @param string $action
-     * @param \Throwable $e
-     * @throws \Exception
-     */
-    protected function reportConnectionError($action, \Throwable $e)
-    {
-        /** @var LoggerInterface $logger */
-        $logger = $this->container['log'];
-
-        $logger->error('AMQP error while attempting '.$action.': '.$e->getMessage());
-
-        // If it's set to false, throw an error rather than waiting
-        if ($this->sleepOnError === false) {
-            throw new RuntimeException('Error writing data to the connection with RabbitMQ', null, $e);
-        }
-
-        // Sleep so that we don't flood the log file
-        sleep($this->sleepOnError);
     }
 }

@@ -1,40 +1,46 @@
 <?php
 
-namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
+namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Unit\Queue;
 
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Queue\Queue as QueueContract;
+use Illuminate\Queue\Queue;
 use Interop\Amqp\AmqpConsumer;
 use Interop\Amqp\AmqpContext;
 use Interop\Amqp\AmqpMessage;
 use Interop\Amqp\AmqpProducer;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpTopic;
+use Interop\Queue\Exception;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use ReflectionClass;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQQueueTest extends TestCase
 {
-    public function testShouldImplementQueueInterface()
+    public function testShouldImplementQueueInterface(): void
     {
-        $rc = new \ReflectionClass(RabbitMQQueue::class);
+        $rc = new ReflectionClass(RabbitMQQueue::class);
 
-        $this->assertTrue($rc->implementsInterface(\Illuminate\Contracts\Queue\Queue::class));
+        $this->assertTrue($rc->implementsInterface(QueueContract::class));
     }
 
-    public function testShouldBeSubClassOfQueue()
+    public function testShouldBeSubClassOfQueue(): void
     {
-        $rc = new \ReflectionClass(RabbitMQQueue::class);
+        $rc = new ReflectionClass(RabbitMQQueue::class);
 
-        $this->assertTrue($rc->isSubclassOf(\Illuminate\Queue\Queue::class));
+        $this->assertTrue($rc->isSubclassOf(Queue::class));
     }
 
-    public function testCouldBeConstructedWithExpectedArguments()
+    public function testCouldBeConstructedWithExpectedArguments(): void
     {
         new RabbitMQQueue($this->createAmqpContext(), $this->createDummyConfig());
     }
 
-    public function testShouldGenerateNewCorrelationIdIfNotSet()
+    public function testShouldGenerateNewCorrelationIdIfNotSet(): void
     {
         $queue = new RabbitMQQueue($this->createAmqpContext(), $this->createDummyConfig());
 
@@ -46,7 +52,7 @@ class RabbitMQQueueTest extends TestCase
         $this->assertNotSame($firstId, $secondId);
     }
 
-    public function testShouldReturnPreviouslySetCorrelationId()
+    public function testShouldReturnPreviouslySetCorrelationId(): void
     {
         $expectedId = 'theCorrelationId';
 
@@ -58,7 +64,7 @@ class RabbitMQQueueTest extends TestCase
         $this->assertSame($expectedId, $queue->getCorrelationId());
     }
 
-    public function testShouldAllowGetContextSetInConstructor()
+    public function testShouldAllowGetContextSetInConstructor(): void
     {
         $context = $this->createAmqpContext();
 
@@ -67,7 +73,7 @@ class RabbitMQQueueTest extends TestCase
         $this->assertSame($context, $queue->getContext());
     }
 
-    public function testShouldReturnExpectedNumberOfMessages()
+    public function testShouldReturnExpectedNumberOfMessages(): void
     {
         $expectedQueueName = 'theQueueName';
         $queue = $this->createMock(AmqpQueue::class);
@@ -95,21 +101,24 @@ class RabbitMQQueueTest extends TestCase
         $this->assertSame($expectedCount, $queue->size($expectedQueueName));
     }
 
-    public function testShouldSendExpectedMessageOnPushRaw()
+    /**
+     * @throws Exception
+     */
+    public function testShouldSendExpectedMessageOnPushRaw(): void
     {
         $expectedQueueName = 'theQueueName';
         $expectedBody = 'thePayload';
         $topic = $this->createMock(AmqpTopic::class);
 
         $queue = $this->createMock(AmqpQueue::class);
-        $queue->expects($this->any())->method('getQueueName')->willReturn('theQueueName');
+        $queue->method('getQueueName')->willReturn('theQueueName');
 
         $producer = $this->createMock(AmqpProducer::class);
         $producer
             ->expects($this->once())
             ->method('send')
             ->with($this->identicalTo($topic), $this->isInstanceOf(AmqpMessage::class))
-            ->willReturnCallback(function ($actualTopic, AmqpMessage $message) use ($expectedQueueName, $expectedBody, $topic) {
+            ->willReturnCallback(function ($actualTopic, AmqpMessage $message) use ($expectedQueueName, $expectedBody, $topic): void {
                 $this->assertSame($topic, $actualTopic);
                 $this->assertSame($expectedBody, $message->getBody());
                 $this->assertSame($expectedQueueName, $message->getRoutingKey());
@@ -149,7 +158,10 @@ class RabbitMQQueueTest extends TestCase
         $queue->pushRaw('thePayload', $expectedQueueName);
     }
 
-    public function testShouldSetAttemptCountPropIfNotNull()
+    /**
+     * @throws Exception
+     */
+    public function testShouldSetAttemptCountPropIfNotNull(): void
     {
         $expectedAttempts = 54321;
 
@@ -160,7 +172,7 @@ class RabbitMQQueueTest extends TestCase
             ->expects($this->once())
             ->method('send')
             ->with($this->identicalTo($topic), $this->isInstanceOf(AmqpMessage::class))
-            ->willReturnCallback(function ($actualTopic, AmqpMessage $message) use ($expectedAttempts) {
+            ->willReturnCallback(function ($actualTopic, AmqpMessage $message) use ($expectedAttempts): void {
                 $this->assertSame($expectedAttempts, $message->getProperty(RabbitMQJob::ATTEMPT_COUNT_HEADERS_KEY));
             });
         $producer
@@ -192,7 +204,10 @@ class RabbitMQQueueTest extends TestCase
         $queue->pushRaw('thePayload', 'aQueue', ['attempts' => $expectedAttempts]);
     }
 
-    public function testShouldSetDeliveryDelayIfDelayOptionPresent()
+    /**
+     * @throws Exception
+     */
+    public function testShouldSetDeliveryDelayIfDelayOptionPresent(): void
     {
         $expectedDelay = 56;
         $expectedDeliveryDelay = 56000;
@@ -233,52 +248,7 @@ class RabbitMQQueueTest extends TestCase
         $queue->pushRaw('thePayload', 'aQueue', ['delay' => $expectedDelay]);
     }
 
-    public function testShouldLogExceptionOnPushRaw()
-    {
-        $producer = $this->createMock(AmqpProducer::class);
-        $producer
-            ->expects($this->once())
-            ->method('send')
-            ->willReturnCallback(function () {
-                throw new \LogicException('Something went wrong while sending a message');
-            });
-
-        $context = $this->createAmqpContext();
-        $context
-            ->expects($this->once())
-            ->method('createTopic')
-            ->willReturn($this->createMock(AmqpTopic::class));
-        $context
-            ->expects($this->once())
-            ->method('createMessage')
-            ->willReturn($this->createMock(AmqpMessage::class));
-        $context
-            ->expects($this->once())
-            ->method('createQueue')
-            ->willReturn($this->createMock(AmqpQueue::class));
-        $context
-            ->expects($this->once())
-            ->method('createProducer')
-            ->willReturn($producer);
-
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger
-            ->expects($this->once())
-            ->method('error')
-            ->with('AMQP error while attempting pushRaw: Something went wrong while sending a message');
-
-        $container = new Container();
-        $container['log'] = $logger;
-
-        $queue = new RabbitMQQueue($context, $this->createDummyConfig());
-        $queue->setContainer($container);
-
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Error writing data to the connection with RabbitMQ');
-        $queue->pushRaw('thePayload', 'aQueue');
-    }
-
-    public function testShouldReturnNullIfNoMessagesOnQueue()
+    public function testShouldReturnNullIfNoMessagesOnQueue(): void
     {
         $queue = $this->createMock(AmqpQueue::class);
 
@@ -309,7 +279,7 @@ class RabbitMQQueueTest extends TestCase
         $this->assertNull($queue->pop('aQueue'));
     }
 
-    public function testShouldReturnRabbitMQJobIfMessageReceivedFromQueue()
+    public function testShouldReturnRabbitMQJobIfMessageReceivedFromQueue(): void
     {
         $queue = $this->createMock(AmqpQueue::class);
 
@@ -348,72 +318,23 @@ class RabbitMQQueueTest extends TestCase
         $this->assertInstanceOf(RabbitMQJob::class, $job);
     }
 
-    public function testShouldLogExceptionOnPop()
-    {
-        $queue = $this->createMock(AmqpQueue::class);
-
-        $consumer = $this->createMock(AmqpConsumer::class);
-        $consumer
-            ->expects($this->once())
-            ->method('receiveNoWait')
-            ->willReturnCallback(function () {
-                throw new \LogicException('Something went wrong while receiving a message');
-            });
-
-        $context = $this->createAmqpContext();
-        $context
-            ->expects($this->once())
-            ->method('createTopic')
-            ->willReturn($this->createMock(AmqpTopic::class));
-        $context
-            ->expects($this->once())
-            ->method('createQueue')
-            ->willReturn($queue);
-        $context
-            ->expects($this->once())
-            ->method('createConsumer')
-            ->with($this->identicalTo($queue))
-            ->willReturn($consumer);
-
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger
-            ->expects($this->once())
-            ->method('error')
-            ->with('AMQP error while attempting pop: Something went wrong while receiving a message');
-
-        $container = new Container();
-        $container['log'] = $logger;
-
-        $queue = new RabbitMQQueue($context, $this->createDummyConfig());
-        $queue->setContainer($container);
-
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Error writing data to the connection with RabbitMQ');
-        $queue->pop('aQueue');
-    }
-
     /**
-     * @return AmqpContext|\PHPUnit_Framework_MockObject_MockObject|AmqpContext
+     * @return AmqpContext|MockObject|AmqpContext
      */
     private function createAmqpContext()
     {
         return $this->createMock(AmqpContext::class);
     }
 
-    private function createDummyContainer()
+    private function createDummyContainer(): Container
     {
-        $logger = $this->createMock(LoggerInterface::class);
-
-        $container = new Container();
-        $container['log'] = $logger;
-
-        return $container;
+        return new Container();
     }
 
     /**
      * @return array
      */
-    private function createDummyConfig()
+    private function createDummyConfig(): array
     {
         return [
             'dsn' => 'aDsn',
@@ -433,7 +354,7 @@ class RabbitMQQueueTest extends TestCase
                 'exchange' => [
                     'name' => 'anExchangeName',
                     'declare' => false,
-                    'type' => \Interop\Amqp\AmqpTopic::TYPE_DIRECT,
+                    'type' => AmqpTopic::TYPE_DIRECT,
                     'passive' => false,
                     'durable' => true,
                     'auto_delete' => false,

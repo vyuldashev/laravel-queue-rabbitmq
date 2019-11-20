@@ -2,9 +2,10 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mock;
 
+use Interop\Amqp\AmqpConnectionFactory;
 use Interop\Queue\Context;
 
-class CustomContextAmqpConnectionFactoryMock implements \Interop\Amqp\AmqpConnectionFactory
+class CustomContextAmqpConnectionFactoryMock implements AmqpConnectionFactory
 {
     public static $context;
 

@@ -12,14 +12,14 @@ class RabbitMQFailedEvent
     /**
      * The event dispatcher implementation.
      *
-     * @var \Illuminate\Contracts\Events\Dispatcher
+     * @var Dispatcher
      */
     public $events;
 
     /**
      * Create a new listener instance.
      *
-     * @param  \Illuminate\Contracts\Events\Dispatcher $events
+     * @param Dispatcher $events
      * @return void
      */
     public function __construct(Dispatcher $events)
@@ -30,10 +30,10 @@ class RabbitMQFailedEvent
     /**
      * Handle the event.
      *
-     * @param  \Illuminate\Queue\Events\JobFailed $event
+     * @param LaravelJobFailed $event
      * @return void
      */
-    public function handle(LaravelJobFailed $event)
+    public function handle(LaravelJobFailed $event): void
     {
         if (! $event->job instanceof RabbitMQJob) {
             return;

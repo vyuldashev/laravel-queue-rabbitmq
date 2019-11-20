@@ -48,4 +48,6 @@ return PhpCsFixer\Config::create()
                 '=' => 'single_space',
             ],
         ],
+        'fully_qualified_strict_types' => true,
+        'void_return' => true,
     ]);

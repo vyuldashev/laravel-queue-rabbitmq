@@ -23,7 +23,8 @@
     "mockery/mockery": "^1.0",
     "laravel/horizon": "^3.0",
     "larapack/dd": "^1.1",
-    "friendsofphp/php-cs-fixer": "^2.16"
+    "friendsofphp/php-cs-fixer": "^2.16",
+    "orchestra/testbench": "^4.3"
   },
   "autoload": {
     "psr-4": {

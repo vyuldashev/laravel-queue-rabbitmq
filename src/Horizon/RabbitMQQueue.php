@@ -2,6 +2,7 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Horizon;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Events\Dispatcher;
 use Laravel\Horizon\Events\JobDeleted;
 use Laravel\Horizon\Events\JobPushed;
@@ -44,7 +45,7 @@ class RabbitMQQueue extends BaseRabbitMQQueue
     {
         $payload = (new JobPayload($payload))->prepare($this->lastPushed)->value;
 
-        return tap(parent::pushRaw($payload, $queueName, $options), function () use ($queueName, $payload) {
+        return tap(parent::pushRaw($payload, $queueName, $options), function () use ($queueName, $payload): void {
             $this->event($this->getQueueName($queueName), new JobPushed($payload));
         });
     }
@@ -54,7 +55,7 @@ class RabbitMQQueue extends BaseRabbitMQQueue
     {
         $payload = (new JobPayload($this->createPayload($job, $data)))->prepare($job)->value;
 
-        return tap(parent::pushRaw($payload, $queueName, ['delay' => $this->secondsUntil($delay)]), function () use ($payload, $queueName) {
+        return tap(parent::pushRaw($payload, $queueName, ['delay' => $this->secondsUntil($delay)]), function () use ($payload, $queueName): void {
             $this->event($this->getQueueName($queueName), new JobPushed($payload));
         });
     }
@@ -62,7 +63,7 @@ class RabbitMQQueue extends BaseRabbitMQQueue
     /** {@inheritdoc} */
     public function pop($queueName = null)
     {
-        return tap(parent::pop($queueName), function ($result) use ($queueName) {
+        return tap(parent::pop($queueName), function ($result) use ($queueName): void {
             if ($result instanceof RabbitMQJob) {
                 $this->event($queueName ?: $this->queueName, new JobReserved($result->getRawBody()));
             }
@@ -83,7 +84,7 @@ class RabbitMQQueue extends BaseRabbitMQQueue
      * @param  string $queueName
      * @param  RabbitMQJob $job
      * @return void
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function deleteReserved($queueName, $job): void
     {
@@ -96,7 +97,7 @@ class RabbitMQQueue extends BaseRabbitMQQueue
      * @param  string $queue
      * @param  mixed $event
      * @return void
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     protected function event($queue, $event): void
     {

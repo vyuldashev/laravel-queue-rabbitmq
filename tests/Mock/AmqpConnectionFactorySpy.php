@@ -2,11 +2,13 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mock;
 
+use Closure;
+use Interop\Amqp\AmqpConnectionFactory;
 use Interop\Queue\Context;
 
-class AmqpConnectionFactorySpy implements \Interop\Amqp\AmqpConnectionFactory
+class AmqpConnectionFactorySpy implements AmqpConnectionFactory
 {
-    /** @var \Closure */
+    /** @var Closure */
     public static $spy;
 
     public function __construct($config)

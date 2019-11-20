@@ -1,43 +1,46 @@
 <?php
 
-namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Queue\Jobs;
+namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Unit\Queue\Jobs;
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Queue\Job as JobContract;
 use Illuminate\Database\DetectsLostConnections;
 use Illuminate\Queue\Jobs\Job;
 use Interop\Amqp\AmqpConsumer;
+use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\Impl\AmqpMessage;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQJobTest extends TestCase
 {
-    public function testShouldImplementQueueInterface()
+    public function testShouldImplementQueueInterface(): void
     {
-        $rc = new \ReflectionClass(RabbitMQJob::class);
+        $rc = new ReflectionClass(RabbitMQJob::class);
 
         $this->assertTrue($rc->implementsInterface(JobContract::class));
     }
 
-    public function testShouldBeSubClassOfQueue()
+    public function testShouldBeSubClassOfQueue(): void
     {
-        $rc = new \ReflectionClass(RabbitMQJob::class);
+        $rc = new ReflectionClass(RabbitMQJob::class);
 
         $this->assertTrue($rc->isSubclassOf(Job::class));
     }
 
-    public function testShouldUseDetectDeadlocksTrait()
+    public function testShouldUseDetectDeadlocksTrait(): void
     {
-        $rc = new \ReflectionClass(RabbitMQJob::class);
+        $rc = new ReflectionClass(RabbitMQJob::class);
 
         $this->assertContains(DetectsLostConnections::class, $rc->getTraitNames());
     }
 
-    public function testCouldBeConstructedWithExpectedArguments()
+    public function testCouldBeConstructedWithExpectedArguments(): void
     {
-        $queue = $this->createMock(\Interop\Amqp\AmqpQueue::class);
+        $queue = $this->createMock(AmqpQueue::class);
         $queue
             ->expects($this->once())
             ->method('getQueueName')
@@ -51,7 +54,6 @@ class RabbitMQJobTest extends TestCase
 
         $connectionMock = $this->createRabbitMQQueueMock();
         $connectionMock
-            ->expects($this->any())
             ->method('getConnectionName')
             ->willReturn('theConnectionName');
 
@@ -62,12 +64,12 @@ class RabbitMQJobTest extends TestCase
             new AmqpMessage()
         );
 
-        $this->assertAttributeSame('theQueueName', 'queue', $job);
+        $this->assertSame('theQueueName', $job->getQueue());
         $this->assertSame('theConnectionName', $job->getConnectionName());
     }
 
     /**
-     * @return AmqpConsumer|\PHPUnit_Framework_MockObject_MockObject|AmqpConsumer
+     * @return AmqpConsumer|MockObject|AmqpConsumer
      */
     private function createConsumerMock()
     {
@@ -75,7 +77,7 @@ class RabbitMQJobTest extends TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject|RabbitMQQueue|RabbitMQQueue
+     * @return MockObject|RabbitMQQueue|RabbitMQQueue
      */
     private function createRabbitMQQueueMock()
     {

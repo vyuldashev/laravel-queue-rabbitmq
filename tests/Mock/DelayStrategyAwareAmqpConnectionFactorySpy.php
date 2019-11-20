@@ -2,13 +2,15 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mock;
 
+use Closure;
 use Enqueue\AmqpTools\DelayStrategy;
 use Enqueue\AmqpTools\DelayStrategyAware;
+use Interop\Amqp\AmqpConnectionFactory;
 use Interop\Queue\Context;
 
-class DelayStrategyAwareAmqpConnectionFactorySpy implements \Interop\Amqp\AmqpConnectionFactory, DelayStrategyAware
+class DelayStrategyAwareAmqpConnectionFactorySpy implements AmqpConnectionFactory, DelayStrategyAware
 {
-    /** @var \Closure */
+    /** @var Closure */
     public static $spy;
 
     public function createContext(): Context

@@ -17,6 +17,7 @@ use Interop\Amqp\AmqpContext;
 use InvalidArgumentException;
 use LogicException;
 use ReflectionClass;
+use ReflectionException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\Listeners\RabbitMQFailedEvent;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\RabbitMQQueue as HorizonRabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
@@ -39,14 +40,14 @@ class RabbitMQConnector implements ConnectorInterface
      * @param array $config
      *
      * @return Queue
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function connect(array $config): Queue
     {
         /** @var AmqpContext $context */
         $context = self::createContext($config);
 
-        $this->dispatcher->listen(WorkerStopping::class, function () use ($context) {
+        $this->dispatcher->listen(WorkerStopping::class, function () use ($context): void {
             $context->close();
         });
 
@@ -72,8 +73,9 @@ class RabbitMQConnector implements ConnectorInterface
     /**
      * Create a context.
      *
-     * @param  array  $config
+     * @param array $config
      * @return AmqpContext
+     * @throws ReflectionException
      */
     public static function createContext(array $config): AmqpContext
     {

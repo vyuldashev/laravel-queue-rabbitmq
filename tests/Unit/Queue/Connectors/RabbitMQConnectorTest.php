@@ -1,13 +1,19 @@
 <?php
 
-namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Queue\Connectors;
+namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Unit\Queue\Connectors;
 
+use Closure;
 use Enqueue\AmqpTools\RabbitMqDlxDelayStrategy;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Queue\Connectors\ConnectorInterface;
 use Illuminate\Queue\Events\WorkerStopping;
 use Interop\Amqp\AmqpContext;
+use Interop\Amqp\AmqpTopic;
+use LogicException;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use ReflectionException;
+use stdClass;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mock\AmqpConnectionFactorySpy;
@@ -16,40 +22,52 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mock\DelayStrategyAwareAmqpConn
 
 class RabbitMQConnectorTest extends TestCase
 {
-    public function testShouldImplementConnectorInterface()
+    public function testShouldImplementConnectorInterface(): void
     {
-        $rc = new \ReflectionClass(RabbitMQConnector::class);
+        $rc = new ReflectionClass(RabbitMQConnector::class);
 
         $this->assertTrue($rc->implementsInterface(ConnectorInterface::class));
     }
 
-    public function testCouldBeConstructedWithDispatcherAsFirstArgument()
+    public function testCouldBeConstructedWithDispatcherAsFirstArgument(): void
     {
         new RabbitMQConnector($this->createMock(Dispatcher::class));
     }
 
-    public function testThrowsIfFactoryClassIsNotValidClass()
+    /**
+     * @throws ReflectionException
+     */
+    public function testThrowsIfFactoryClassIsNotValidClass(): void
     {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('The factory_class option has to be valid class that implements "Interop\Amqp\AmqpConnectionFactory"');
+
         $connector = new RabbitMQConnector($this->createMock(Dispatcher::class));
 
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('The factory_class option has to be valid class that implements "Interop\Amqp\AmqpConnectionFactory"');
         $connector->connect(['factory_class' => 'invalidClassName']);
     }
 
-    public function testThrowsIfFactoryClassDoesNotImplementConnectorFactoryInterface()
+    /**
+     * @throws ReflectionException
+     */
+    public function testThrowsIfFactoryClassDoesNotImplementConnectorFactoryInterface(): void
     {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('The factory_class option has to be valid class that implements "Interop\Amqp\AmqpConnectionFactory"');
+
         $connector = new RabbitMQConnector($this->createMock(Dispatcher::class));
 
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('The factory_class option has to be valid class that implements "Interop\Amqp\AmqpConnectionFactory"');
-        $connector->connect(['factory_class' => \stdClass::class]);
+        $connector->connect(['factory_class' => stdClass::class]);
     }
 
-    public function testShouldPassExpectedConfigToConnectionFactory()
+    /**
+     * @throws ReflectionException
+     */
+    public function testShouldPassExpectedConfigToConnectionFactory(): void
     {
         $called = false;
-        AmqpConnectionFactorySpy::$spy = function ($config) use (&$called) {
+
+        AmqpConnectionFactorySpy::$spy = function ($config) use (&$called): void {
             $called = true;
 
             $this->assertEquals([
@@ -78,7 +96,10 @@ class RabbitMQConnectorTest extends TestCase
         $this->assertTrue($called);
     }
 
-    public function testShouldReturnExpectedInstanceOfQueueOnConnect()
+    /**
+     * @throws ReflectionException
+     */
+    public function testShouldReturnExpectedInstanceOfQueueOnConnect(): void
     {
         $connector = new RabbitMQConnector($this->createMock(Dispatcher::class));
 
@@ -90,12 +111,15 @@ class RabbitMQConnectorTest extends TestCase
         $this->assertInstanceOf(RabbitMQQueue::class, $queue);
     }
 
-    public function testShouldSetRabbitMqDlxDelayStrategyIfConnectionFactoryImplementsDelayStrategyAwareInterface()
+    /**
+     * @throws ReflectionException
+     */
+    public function testShouldSetRabbitMqDlxDelayStrategyIfConnectionFactoryImplementsDelayStrategyAwareInterface(): void
     {
         $connector = new RabbitMQConnector($this->createMock(Dispatcher::class));
 
         $called = false;
-        DelayStrategyAwareAmqpConnectionFactorySpy::$spy = function ($actualStrategy) use (&$called) {
+        DelayStrategyAwareAmqpConnectionFactorySpy::$spy = function ($actualStrategy) use (&$called): void {
             $this->assertInstanceOf(RabbitMqDlxDelayStrategy::class, $actualStrategy);
 
             $called = true;
@@ -109,7 +133,10 @@ class RabbitMQConnectorTest extends TestCase
         $this->assertTrue($called);
     }
 
-    public function testShouldCallContextCloseMethodOnWorkerStoppingEvent()
+    /**
+     * @throws ReflectionException
+     */
+    public function testShouldCallContextCloseMethodOnWorkerStoppingEvent(): void
     {
         $contextMock = $this->createMock(AmqpContext::class);
         $contextMock
@@ -120,8 +147,8 @@ class RabbitMQConnectorTest extends TestCase
         $dispatcherMock
             ->expects($this->once())
             ->method('listen')
-            ->with(WorkerStopping::class, $this->isInstanceOf(\Closure::class))
-            ->willReturnCallback(function ($eventName, \Closure $listener) {
+            ->with(WorkerStopping::class, $this->isInstanceOf(Closure::class))
+            ->willReturnCallback(static function ($eventName, Closure $listener): void {
                 $listener();
             });
 
@@ -138,7 +165,7 @@ class RabbitMQConnectorTest extends TestCase
     /**
      * @return array
      */
-    private function createDummyConfig()
+    private function createDummyConfig(): array
     {
         return [
             'dsn' => 'theDsn',
@@ -159,7 +186,7 @@ class RabbitMQConnectorTest extends TestCase
                 'exchange' => [
                     'name' => 'anExchangeName',
                     'declare' => false,
-                    'type' => \Interop\Amqp\AmqpTopic::TYPE_DIRECT,
+                    'type' => AmqpTopic::TYPE_DIRECT,
                     'passive' => false,
                     'durable' => true,
                     'auto_delete' => false,
