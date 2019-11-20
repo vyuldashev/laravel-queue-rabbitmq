@@ -13,12 +13,19 @@ abstract class TestCase extends BaseTestCase
     /**
      * @throws PurgeQueueNotSupportedException
      */
-    public function testPush(): void
+    protected function setUp(): void
     {
+        parent::setUp();
+
+        $this->connection()->declareEverything('default');
+
         $this->connection()->getContext()->purgeQueue(
             $this->connection()->getContext()->createQueue('default')
         );
+    }
 
+    public function testPush(): void
+    {
         $this->assertSame(0, Queue::size());
 
         Queue::pushRaw($payload = Str::random());
@@ -35,15 +42,8 @@ abstract class TestCase extends BaseTestCase
         $this->assertSame(0, Queue::size());
     }
 
-    /**
-     * @throws PurgeQueueNotSupportedException
-     */
     public function testLater(): void
     {
-        $this->connection()->getContext()->purgeQueue(
-            $this->connection()->getContext()->createQueue('default')
-        );
-
         $this->assertSame(0, Queue::size());
 
         $payload = Str::random();
@@ -75,15 +75,8 @@ abstract class TestCase extends BaseTestCase
         $this->assertSame(0, Queue::size());
     }
 
-    /**
-     * @throws PurgeQueueNotSupportedException
-     */
     public function testJobAttempts(): void
     {
-        $this->connection()->getContext()->purgeQueue(
-            $this->connection()->getContext()->createQueue('default')
-        );
-
         $expectedPayload = __METHOD__.microtime(true);
 
         Queue::pushRaw($expectedPayload);
