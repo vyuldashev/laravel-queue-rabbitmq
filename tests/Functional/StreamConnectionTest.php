@@ -19,12 +19,12 @@ class StreamConnectionTest extends TestCase
     {
         $config = [
             'factory_class' => AmqpConnectionFactory::class,
-            'dsn'      => null,
-            'host'     => getenv('HOST'),
-            'port'     => getenv('PORT'),
-            'login'    => 'guest',
+            'dsn' => null,
+            'host' => getenv('HOST'),
+            'port' => getenv('PORT'),
+            'login' => 'guest',
             'password' => 'guest',
-            'vhost'    => '/',
+            'vhost' => '/',
             'options' => [
                 'exchange' => [
                     'name' => null,
@@ -47,12 +47,12 @@ class StreamConnectionTest extends TestCase
                 ],
             ],
             'ssl_params' => [
-                'ssl_on'        => false,
-                'cafile'        => null,
-                'local_cert'    => null,
-                'local_key'     => null,
-                'verify_peer'   => true,
-                'passphrase'    => null,
+                'ssl_on' => false,
+                'cafile' => null,
+                'local_cert' => null,
+                'local_key' => null,
+                'verify_peer' => true,
+                'passphrase' => null,
             ],
         ];
 

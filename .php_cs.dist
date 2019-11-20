@@ -4,6 +4,7 @@ $finder = PhpCsFixer\Finder::create()
     ->in(['config', 'src', 'tests']);
 
 return PhpCsFixer\Config::create()
+    ->setUsingCache(false)
     ->setFinder($finder)
     ->setRules([
         'psr0' => false,
@@ -19,7 +20,8 @@ return PhpCsFixer\Config::create()
         'lowercase_constants' => true,
         'lowercase_keywords' => true,
         'method_argument_space' => [
-            'ensure_fully_multiline' => true,],
+            'ensure_fully_multiline' => true,
+        ],
         'no_break_comment' => true,
         'no_closing_tag' => true,
         'no_spaces_after_function_name' => true,
@@ -37,4 +39,13 @@ return PhpCsFixer\Config::create()
         'visibility_required' => true,
         'encoding' => true,
         'full_opening_tag' => true,
+        'blank_line_before_return' => true,
+        'no_trailing_comma_in_singleline_array' => true,
+        'trailing_comma_in_multiline_array' => true,
+        'array_indentation' => true,
+        'binary_operator_spaces' => [
+            'operators' => [
+                '=' => 'single_space',
+            ],
+        ],
     ]);

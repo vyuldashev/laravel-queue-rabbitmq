@@ -19,12 +19,12 @@ class SslConnectionTest extends TestCase
     {
         $config = [
             'factory_class' => AmqpConnectionFactory::class,
-            'dsn'      => null,
-            'host'     => getenv('HOST'),
-            'port'     => getenv('PORT_SSL'),
-            'login'    => 'guest',
+            'dsn' => null,
+            'host' => getenv('HOST'),
+            'port' => getenv('PORT_SSL'),
+            'login' => 'guest',
             'password' => 'guest',
-            'vhost'    => '/',
+            'vhost' => '/',
             'options' => [
                 'exchange' => [
                     'name' => null,
@@ -47,12 +47,12 @@ class SslConnectionTest extends TestCase
                 ],
             ],
             'ssl_params' => [
-                'ssl_on'        => true,
-                'cafile'        => getenv('RABBITMQ_SSL_CAFILE'),
-                'local_cert'    => null,
-                'local_key'     => null,
-                'verify_peer'   => false,
-                'passphrase'    => null,
+                'ssl_on' => true,
+                'cafile' => getenv('RABBITMQ_SSL_CAFILE'),
+                'local_cert' => null,
+                'local_key' => null,
+                'verify_peer' => false,
+                'passphrase' => null,
             ],
         ];
 

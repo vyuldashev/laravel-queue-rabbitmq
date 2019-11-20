@@ -427,7 +427,7 @@ class RabbitMQQueueTest extends TestCase
                 'verify_peer' => 'aVerifyPeer',
                 'cafile' => 'aCafile',
                 'local_cert' => 'aLocalCert',
-                'local_key'  => 'aLocalKey',
+                'local_key' => 'aLocalKey',
             ],
             'options' => [
                 'exchange' => [

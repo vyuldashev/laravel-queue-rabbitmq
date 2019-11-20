@@ -152,8 +152,8 @@ class RabbitMQConnectorTest extends TestCase
                 'verify_peer' => 'theVerifyPeer',
                 'cafile' => 'theCafile',
                 'local_cert' => 'theLocalCert',
-                'local_key'  => 'theLocalKey',
-                'passphrase'  => 'thePassPhrase',
+                'local_key' => 'theLocalKey',
+                'passphrase' => 'thePassPhrase',
             ],
             'options' => [
                 'exchange' => [
