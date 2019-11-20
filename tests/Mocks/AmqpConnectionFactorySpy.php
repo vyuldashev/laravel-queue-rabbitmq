@@ -1,6 +1,6 @@
 <?php
 
-namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mock;
+namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks;
 
 use Closure;
 use Interop\Amqp\AmqpConnectionFactory;

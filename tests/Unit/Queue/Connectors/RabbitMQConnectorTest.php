@@ -16,9 +16,9 @@ use ReflectionException;
 use stdClass;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mock\AmqpConnectionFactorySpy;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mock\CustomContextAmqpConnectionFactoryMock;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mock\DelayStrategyAwareAmqpConnectionFactorySpy;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks\AmqpConnectionFactorySpy;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks\CustomContextAmqpConnectionFactoryMock;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks\DelayStrategyAwareAmqpConnectionFactorySpy;
 
 class RabbitMQConnectorTest extends TestCase
 {
