@@ -11,6 +11,7 @@ return PhpCsFixer\Config::create()
         'blank_line_after_namespace' => true,
         'braces' => true,
         'class_definition' => true,
+        'concat_space' => ['spacing' => 'none'],
         'elseif' => true,
         'function_declaration' => true,
         'indentation_type' => true,

@@ -10,8 +10,11 @@ use Interop\Amqp\AmqpMessage;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpTopic;
 use Interop\Amqp\Impl\AmqpBind;
+use PhpAmqpLib\Exception\AMQPConnectionClosedException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
+use Throwable;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 class RabbitMQQueue extends Queue implements QueueContract
@@ -29,10 +32,12 @@ class RabbitMQQueue extends Queue implements QueueContract
      * @var AmqpContext
      */
     protected $context;
+    protected $config;
     protected $correlationId;
 
     public function __construct(AmqpContext $context, array $config)
     {
+        $this->config = $config;
         $this->context = $context;
 
         $this->queueName = $config['queue'] ?? $config['options']['queue']['name'];
@@ -156,7 +161,20 @@ class RabbitMQQueue extends Queue implements QueueContract
             if ($message = $consumer->receiveNoWait()) {
                 return new RabbitMQJob($this->container, $this, $consumer, $message);
             }
-        } catch (\Throwable $exception) {
+        } catch (AMQPConnectionClosedException | AMQPChannelClosedException $connectionException) {
+            try {
+                // Connection/channel closed, attempt to reconnect.
+                $this->declaredExchanges = [];
+                $this->declaredQueues = [];
+                $this->context = RabbitMQConnector::createContext($this->config);
+            } catch (\Exception $e) {
+                // Silent reconnect attempt.
+            }
+
+            $this->reportConnectionError('pop', $connectionException);
+
+            return;
+        } catch (Throwable $exception) {
             $this->reportConnectionError('pop', $exception);
 
             return;
