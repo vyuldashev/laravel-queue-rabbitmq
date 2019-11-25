@@ -2,6 +2,7 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Console;
 
+use ErrorException;
 use Illuminate\Console\Command;
 use PhpAmqpLib\Message\AMQPMessage;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
@@ -17,6 +18,10 @@ class ConsumeCommand extends Command
                            {--exclusive}';
     protected $description = '';
 
+    /**
+     * @param RabbitMQConnector $connector
+     * @throws ErrorException
+     */
     public function handle(RabbitMQConnector $connector): void
     {
         $config = $this->laravel['config']->get('queue.connections.'.$this->argument('connection'));
@@ -40,10 +45,6 @@ class ConsumeCommand extends Command
         }
     }
 
-    protected function processMessage(AMQPMessage $AMQPMessage): void
-    {
-    }
-
     protected function consumerTag(): string
     {
         if ($this->option('consumer-tag')) {
@@ -51,5 +52,10 @@ class ConsumeCommand extends Command
         }
 
         return config('app.name').'_'.getmygid();
+    }
+
+    protected function processMessage(AMQPMessage $AMQPMessage): void
+    {
+        //
     }
 }

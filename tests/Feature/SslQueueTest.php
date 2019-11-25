@@ -2,7 +2,6 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Feature;
 
-use PhpAmqpLib\Connection\AMQPLazyConnection;
 use PhpAmqpLib\Connection\AMQPSSLConnection;
 
 /**
@@ -30,7 +29,7 @@ class SslQueueTest extends TestCase
 
             'options' => [
                 'ssl_options' => [
-                    'cafile' => getenv('RABBITMQ_OPTIONS_SSL_CAFILE'),
+                    'cafile' => getenv('RABBITMQ_SSL_CAFILE'),
                     'local_cert' => null,
                     'local_key' => null,
                     'verify_peer' => true,

@@ -77,7 +77,25 @@ class RabbitMQConnector implements ConnectorInterface
 
         return $connection::create_connection(
             Arr::get($config, 'hosts', []),
-            Arr::get($config, 'options', [])
+            $this->filter(Arr::get($config, 'options', []))
         );
+    }
+
+    private function filter(array $array): array
+    {
+        foreach ($array as $index => &$value) {
+            if (is_array($value)) {
+                $value = $this->filter($value);
+                continue;
+            }
+
+            // If the value is null then remove it.
+            if ($value === null) {
+                unset($array[$index]);
+                continue;
+            }
+        }
+
+        return $array;
     }
 }
