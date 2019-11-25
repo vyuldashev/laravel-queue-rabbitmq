@@ -38,7 +38,6 @@ class SslQueueTest extends TestCase
             ],
 
             'worker' => 'default',
-
         ]);
     }
 

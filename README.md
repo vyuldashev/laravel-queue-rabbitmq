@@ -157,7 +157,7 @@ $app->register(VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServic
 Setup RabbitMQ using `docker-compose`:
 
 ```bash
-docker-compose up -d
+docker-compose up -d rabbitmq
 ```
 
 To run the test suite you can use the following commands:
