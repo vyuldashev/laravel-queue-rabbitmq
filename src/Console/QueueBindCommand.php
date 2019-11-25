@@ -26,9 +26,7 @@ class QueueBindCommand extends Command
 
         $queue = $connector->connect($config);
 
-        $channel = $queue->getChannel();
-
-        $channel->queue_bind(
+        $queue->bindQueue(
             $this->argument('queue'),
             $this->argument('exchange'),
             (string) $this->option('routing-key')

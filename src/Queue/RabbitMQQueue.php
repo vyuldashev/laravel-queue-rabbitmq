@@ -262,6 +262,78 @@ class RabbitMQQueue extends Queue implements QueueContract
         return $queue ?: $this->default;
     }
 
+    /**
+     * @param string $exchange
+     * @return bool
+     * @throws AMQPProtocolChannelException
+     */
+    public function isExchangeExists(string $exchange): bool
+    {
+        try {
+            $this->channel->exchange_declare($exchange, '', true);
+
+            return true;
+        } catch (AMQPProtocolChannelException $exception) {
+            if ($exception->amqp_reply_code === 404) {
+                return false;
+            }
+
+            throw $exception;
+        }
+    }
+
+    public function declareExchange(
+        string $name,
+        string $type = AMQPExchangeType::DIRECT,
+        bool $durable = true,
+        bool $autoDelete = false
+    ): void {
+        $this->channel->exchange_declare(
+            $name,
+            $type,
+            false,
+            $durable,
+            $autoDelete,
+            false,
+            true
+        );
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     * @throws AMQPProtocolChannelException
+     */
+    public function isQueueExists(string $name): bool
+    {
+        try {
+            $this->channel->queue_declare($name, true);
+
+            return true;
+        } catch (AMQPProtocolChannelException $exception) {
+            if ($exception->amqp_reply_code === 404) {
+                return false;
+            }
+
+            throw $exception;
+        }
+    }
+
+    public function declareQueue(string $name, bool $durable = true, bool $autoDelete = false): void
+    {
+        $this->channel->queue_declare(
+            $name,
+            false,
+            $durable,
+            $autoDelete
+        );
+    }
+
+    public function bindQueue(string $queue, string $exchange, string $routingKey = ''): void
+    {
+        $this->channel->queue_bind($queue, $exchange, $routingKey);
+    }
+
     public function purge($queue = null): void
     {
         $this->channel->queue_purge($this->getQueue($queue));

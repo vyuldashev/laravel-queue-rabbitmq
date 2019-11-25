@@ -4,8 +4,6 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Console;
 
 use Exception;
 use Illuminate\Console\Command;
-use PhpAmqpLib\Channel\AMQPChannel;
-use PhpAmqpLib\Exception\AMQPProtocolChannelException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 
 class ExchangeDeclareCommand extends Command
@@ -14,8 +12,8 @@ class ExchangeDeclareCommand extends Command
                             {name : The name of the exchange to declare}
                             {connection=rabbitmq : The name of the queue connection to use}
                             {--type=direct}
-                            {--durable}
-                            {--auto-delete}';
+                            {--durable=1}
+                            {--auto-delete=0}';
 
     protected $description = 'Declare exchange';
 
@@ -28,35 +26,20 @@ class ExchangeDeclareCommand extends Command
         $config = $this->laravel['config']->get('queue.connections.'.$this->argument('connection'));
 
         $queue = $connector->connect($config);
-        $channel = $queue->getChannel();
 
-        try {
-            $channel->exchange_declare($this->argument('name'), '', true);
-        } catch (AMQPProtocolChannelException $exception) {
-            if ($exception->amqp_reply_code === 404) {
-                $this->declareExchange($queue->getConnection()->channel());
+        if ($queue->isExchangeExists($this->argument('name'))) {
+            $this->warn('Exchange already exists.');
 
-                $this->info('Exchange declared successfully.');
-
-                return;
-            }
-
-            throw $exception;
+            return;
         }
 
-        $this->warn('Exchange already exists.');
-    }
-
-    protected function declareExchange(AMQPChannel $channel): void
-    {
-        $channel->exchange_declare(
+        $queue->declareExchange(
             $this->argument('name'),
-            $this->option('type'),
-            false,
-            $this->option('durable'),
-            $this->option('auto-delete'),
-            false,
-            true
+            $this->argument('type'),
+            (bool)$this->option('durable'),
+            (bool)$this->option('auto-delete')
         );
+
+        $this->warn('Exchange already exists.');
     }
 }
