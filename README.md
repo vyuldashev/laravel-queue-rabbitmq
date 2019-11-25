@@ -141,30 +141,16 @@ For Lumen usage the service provider should be registered manually as follow in 
 $app->register(VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider::class);
 ```
 
+## Support Policy
 
-## Using other AMQP transports
-
-The package uses [enqueue/amqp-lib](https://github.com/php-enqueue/enqueue-dev/blob/master/docs/transport/amqp_lib.md) transport which is based on [php-amqplib](https://github.com/php-amqplib/php-amqplib). 
-There is possibility to use any [amqp interop](https://github.com/queue-interop/queue-interop#amqp-interop) compatible transport, for example `enqueue/amqp-ext` or `enqueue/amqp-bunny`.
-Here's an example on how one can change the transport to `enqueue/amqp-bunny`.
-
-First, install desired transport package:
-
-```bash
-composer require enqueue/amqp-bunny:^0.8
-```
-  
-Change the factory class in `config/queue.php`:
-
-```php
-    // ...
-    'connections' => [
-        'rabbitmq' => [
-            'driver' => 'rabbitmq',
-            'factory_class' => Enqueue\AmqpBunny\AmqpConnectionFactory::class,
-        ],
-    ],
-```
+| Package Version | Laravel Version | Bug Fixes Until     |
+|-----------------|-----------------|---------------------|
+| 6.0             | 5.5             | August 30th, 2019   |
+| 7.0             | 5.6             | August 7th, 2018    |
+| 7.1             | 5.7             | March 4th, 2019     |
+| 7.2             | 5.8             | August 26th, 2019   |
+| 9               | 6               | September 3rd, 2021 |
+| 10              | 6               | September 3rd, 2021 |
 
 ## Testing
 

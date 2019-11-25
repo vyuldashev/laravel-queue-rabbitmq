@@ -4,6 +4,7 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ;
 
 use Illuminate\Queue\QueueManager;
 use Illuminate\Support\ServiceProvider;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Console;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 
 class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
@@ -19,6 +20,16 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
             __DIR__.'/../config/rabbitmq.php',
             'queue.connections.rabbitmq'
         );
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                Console\ConsumeCommand::class,
+                Console\ExchangeMakeCommand::class,
+                Console\QueueBindCommand::class,
+                Console\QueueMakeCommand::class,
+                Console\QueuePurgeCommand::class,
+            ]);
+        }
     }
 
     /**

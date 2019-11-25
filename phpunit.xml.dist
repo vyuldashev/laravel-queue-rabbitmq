@@ -21,7 +21,7 @@
         <env name="HOST" value="127.0.0.1"/>
         <env name="PORT" value="5672"/>
         <env name="PORT_SSL" value="5671"/>
-        <env name="RABBITMQ_SSL_CAFILE" value="./tests/files/rootCA.pem"/>
+        <env name="RABBITMQ_OPTIONS_SSL_CAFILE" value="./tests/files/rootCA.pem"/>
     </php>
     <filter>
         <whitelist>

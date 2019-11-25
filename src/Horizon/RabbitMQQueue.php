@@ -32,7 +32,9 @@ class RabbitMQQueue extends BaseRabbitMQQueue
         return $this->size($queue);
     }
 
-    /** {@inheritdoc} */
+    /**
+     * {@inheritdoc}
+     */
     public function push($job, $data = '', $queue = null)
     {
         $this->lastPushed = $job;
@@ -40,37 +42,45 @@ class RabbitMQQueue extends BaseRabbitMQQueue
         return parent::push($job, $data, $queue);
     }
 
-    /** {@inheritdoc} */
-    public function pushRaw($payload, $queueName = null, array $options = [])
+    /**
+     * {@inheritdoc}
+     */
+    public function pushRaw($payload, $queue = null, array $options = [])
     {
         $payload = (new JobPayload($payload))->prepare($this->lastPushed)->value;
 
-        return tap(parent::pushRaw($payload, $queueName, $options), function () use ($queueName, $payload): void {
-            $this->event($this->getQueueName($queueName), new JobPushed($payload));
+        return tap(parent::pushRaw($payload, $queue, $options), function () use ($queue, $payload): void {
+            $this->event($this->getQueue($queue), new JobPushed($payload));
         });
     }
 
-    /** {@inheritdoc} */
+    /**
+     * {@inheritdoc}
+     */
     public function later($delay, $job, $data = '', $queueName = null)
     {
         $payload = (new JobPayload($this->createPayload($job, $data)))->prepare($job)->value;
 
         return tap(parent::pushRaw($payload, $queueName, ['delay' => $this->secondsUntil($delay)]), function () use ($payload, $queueName): void {
-            $this->event($this->getQueueName($queueName), new JobPushed($payload));
+            $this->event($this->getQueue($queueName), new JobPushed($payload));
         });
     }
 
-    /** {@inheritdoc} */
-    public function pop($queueName = null)
+    /**
+     * {@inheritdoc}
+     */
+    public function pop($queue = null)
     {
-        return tap(parent::pop($queueName), function ($result) use ($queueName): void {
+        return tap(parent::pop($queue), function ($result) use ($queue): void {
             if ($result instanceof RabbitMQJob) {
-                $this->event($queueName ?: $this->queueName, new JobReserved($result->getRawBody()));
+                $this->event($queue ?: $this->default, new JobReserved($result->getRawBody()));
             }
         });
     }
 
-    /** {@inheritdoc} */
+    /**
+     * {@inheritdoc}
+     */
     public function release($delay, $job, $data, $queue, $attempts = 0)
     {
         $this->lastPushed = $job;
@@ -88,7 +98,7 @@ class RabbitMQQueue extends BaseRabbitMQQueue
      */
     public function deleteReserved($queueName, $job): void
     {
-        $this->event($this->getQueueName($queueName), new JobDeleted($job, $job->getRawBody()));
+        $this->event($this->getQueue($queueName), new JobDeleted($job, $job->getRawBody()));
     }
 
     /**
@@ -108,7 +118,9 @@ class RabbitMQQueue extends BaseRabbitMQQueue
         }
     }
 
-    /** {@inheritdoc} */
+    /**
+     * {@inheritdoc}
+     */
     protected function getRandomId(): string
     {
         return JobId::generate();

@@ -2,22 +2,16 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors;
 
-use Enqueue\AmqpLib\AmqpConnectionFactory as EnqueueAmqpConnectionFactory;
-use Enqueue\AmqpTools\DelayStrategyAware;
-use Enqueue\AmqpTools\RabbitMqDlxDelayStrategy;
+use Exception;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Queue\Queue;
 use Illuminate\Queue\Connectors\ConnectorInterface;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\WorkerStopping;
 use Illuminate\Support\Arr;
-use Interop\Amqp\AmqpConnectionFactory;
-use Interop\Amqp\AmqpConnectionFactory as InteropAmqpConnectionFactory;
-use Interop\Amqp\AmqpContext;
 use InvalidArgumentException;
-use LogicException;
-use ReflectionClass;
-use ReflectionException;
+use PhpAmqpLib\Connection\AbstractConnection;
+use PhpAmqpLib\Connection\AMQPLazyConnection;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\Listeners\RabbitMQFailedEvent;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\RabbitMQQueue as HorizonRabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
@@ -39,72 +33,51 @@ class RabbitMQConnector implements ConnectorInterface
      *
      * @param array $config
      *
-     * @return Queue
-     * @throws ReflectionException
+     * @return RabbitMQQueue
+     * @throws Exception
      */
     public function connect(array $config): Queue
     {
-        /** @var AmqpContext $context */
-        $context = self::createContext($config);
+        $connection = $this->createConnection($config);
+        $channel = $connection->channel();
 
-        $this->dispatcher->listen(WorkerStopping::class, function () use ($context): void {
-            $context->close();
+        $this->dispatcher->listen(WorkerStopping::class, static function () use ($channel, $connection): void {
+            $channel->close();
+            $connection->close();
         });
 
         $worker = Arr::get($config, 'worker', 'default');
 
         if ($worker === 'default') {
-            return new RabbitMQQueue($context, $config);
+            return new RabbitMQQueue($connection, $channel, $config['queue']);
         }
 
         if ($worker === 'horizon') {
             $this->dispatcher->listen(JobFailed::class, RabbitMQFailedEvent::class);
 
-            return new HorizonRabbitMQQueue($context, $config);
+            return new HorizonRabbitMQQueue($connection, $channel, $config['queue']);
         }
 
         if ($worker instanceof RabbitMQQueue) {
-            return new $worker($context, $config);
+            return new $worker($connection, $config);
         }
 
         throw new InvalidArgumentException('Invalid worker.');
     }
 
     /**
-     * Create a context.
-     *
      * @param array $config
-     * @return AmqpContext
-     * @throws ReflectionException
+     * @return AbstractConnection
+     * @throws Exception
      */
-    public static function createContext(array $config): AmqpContext
+    protected function createConnection(array $config): AbstractConnection
     {
-        $factoryClass = Arr::get($config, 'factory_class', EnqueueAmqpConnectionFactory::class);
+        /** @var AbstractConnection $connection */
+        $connection = Arr::get($config, 'connection', AMQPLazyConnection::class);
 
-        if (! class_exists($factoryClass) || ! (new ReflectionClass($factoryClass))->implementsInterface(InteropAmqpConnectionFactory::class)) {
-            throw new LogicException(sprintf('The factory_class option has to be valid class that implements "%s"', InteropAmqpConnectionFactory::class));
-        }
-
-        /** @var AmqpConnectionFactory $factory */
-        $factory = new $factoryClass([
-            'dsn' => Arr::get($config, 'dsn'),
-            'host' => Arr::get($config, 'host', '127.0.0.1'),
-            'port' => Arr::get($config, 'port', 5672),
-            'user' => Arr::get($config, 'login', 'guest'),
-            'pass' => Arr::get($config, 'password', 'guest'),
-            'vhost' => Arr::get($config, 'vhost', '/'),
-            'ssl_on' => Arr::get($config, 'ssl_params.ssl_on', false),
-            'ssl_verify' => Arr::get($config, 'ssl_params.verify_peer', true),
-            'ssl_cacert' => Arr::get($config, 'ssl_params.cafile'),
-            'ssl_cert' => Arr::get($config, 'ssl_params.local_cert'),
-            'ssl_key' => Arr::get($config, 'ssl_params.local_key'),
-            'ssl_passphrase' => Arr::get($config, 'ssl_params.passphrase'),
-        ]);
-
-        if ($factory instanceof DelayStrategyAware) {
-            $factory->setDelayStrategy(new RabbitMqDlxDelayStrategy());
-        }
-
-        return $factory->createContext();
+        return $connection::create_connection(
+            Arr::get($config, 'hosts', []),
+            Arr::get($config, 'options', [])
+        );
     }
 }
