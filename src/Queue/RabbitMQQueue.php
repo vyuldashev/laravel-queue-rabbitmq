@@ -51,6 +51,13 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     protected $queues = [];
 
+    /**
+     * List of already bound queues to exchanges.
+     *
+     * @var array
+     */
+    protected $boundQueues = [];
+
     public function __construct(
         AbstractConnection $connection,
         AMQPChannel $channel,
@@ -286,6 +293,14 @@ class RabbitMQQueue extends Queue implements QueueContract
 
     public function bindQueue(string $queue, string $exchange, string $routingKey = ''): void
     {
+        if (in_array(
+            implode('', compact('queue', 'exchange', 'routingKey')),
+            $this->boundQueues,
+            true
+        )) {
+            return;
+        }
+
         $this->channel->queue_bind($queue, $exchange, $routingKey);
     }
 
