@@ -46,11 +46,11 @@ class RabbitMQConnector implements ConnectorInterface
             $config['queue']
         );
 
-        if(!$queue instanceof RabbitMQQueue) {
+        if (!$queue instanceof RabbitMQQueue) {
             throw new InvalidArgumentException('Invalid worker.');
         }
 
-        if($queue instanceof HorizonRabbitMQQueue) {
+        if ($queue instanceof HorizonRabbitMQQueue) {
             $this->dispatcher->listen(JobFailed::class, RabbitMQFailedEvent::class);
         }
 
@@ -80,7 +80,7 @@ class RabbitMQConnector implements ConnectorInterface
 
     protected function createQueue(string $worker, AbstractConnection $connection, string $queue)
     {
-        switch($worker) {
+        switch ($worker) {
             case 'default':
                 return new RabbitMQQueue($connection, $queue);
             case 'horizon':

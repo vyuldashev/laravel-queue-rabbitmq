@@ -135,7 +135,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     {
         $ttl = $this->secondsUntil($delay) * 1000;
 
-        if($ttl < 0) {
+        if ($ttl < 0) {
             return $this->pushRaw($payload, $queue, []);
         }
 

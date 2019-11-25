@@ -18,7 +18,7 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        if($this->connection()->isQueueExists()) {
+        if ($this->connection()->isQueueExists()) {
             $this->connection()->purge();
         }
     }
@@ -28,7 +28,7 @@ abstract class TestCase extends BaseTestCase
      */
     protected function tearDown(): void
     {
-        if($this->connection()->isQueueExists()) {
+        if ($this->connection()->isQueueExists()) {
             $this->connection()->purge();
         }
 
@@ -154,7 +154,7 @@ abstract class TestCase extends BaseTestCase
         $count = 100;
         $jobs = [];
 
-        for($i = 0; $i < $count; $i++) {
+        for ($i = 0; $i < $count; $i++) {
             $jobs[$i] = new TestJob($i);
         }
 
