@@ -62,11 +62,10 @@ class RabbitMQQueue extends Queue implements QueueContract
 
     public function __construct(
         AbstractConnection $connection,
-        AMQPChannel $channel,
         string $default
     ) {
         $this->connection = $connection;
-        $this->channel = $channel;
+        $this->channel = $connection->channel();
         $this->default = $default;
     }
 
@@ -184,7 +183,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             ]);
             $this->bindQueue($queue, $queue, $queue);
 
-            $this->channel->batch_basic_publish($message);
+            $this->channel->batch_basic_publish($message, $queue, $queue);
         }
 
         $this->channel->publish_batch();
@@ -333,8 +332,10 @@ class RabbitMQQueue extends Queue implements QueueContract
 
     public function purge($queue = null): void
     {
-        $this->channel->queue_purge($this->getQueue($queue));
-        $this->channel->wait_for_pending_acks();
+        // create a temporary channel, so the main channel will not be closed on exception
+        $channel = $this->connection->channel();
+        $channel->queue_purge($this->getQueue($queue));
+        $channel->close();
     }
 
     public function ack(RabbitMQJob $job): void
@@ -343,10 +344,18 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->channel->wait_for_pending_acks();
     }
 
-    public function reject(RabbitMQJob $job): void
+    public function reject(RabbitMQJob $job, bool $requeue = false): void
     {
-        $this->channel->basic_reject($job->getRabbitMQMessage()->getDeliveryTag(), false);
+        $this->channel->basic_reject($job->getRabbitMQMessage()->getDeliveryTag(), $requeue);
         $this->channel->wait_for_pending_acks();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function close(): void
+    {
+        $this->connection->close();
     }
 
     protected function createMessage($payload, int $attempts = 0): array

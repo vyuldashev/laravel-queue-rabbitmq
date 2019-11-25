@@ -39,30 +39,27 @@ class RabbitMQConnector implements ConnectorInterface
     public function connect(array $config): Queue
     {
         $connection = $this->createConnection($config);
-        $channel = $connection->channel();
 
-        $this->dispatcher->listen(WorkerStopping::class, static function () use ($channel, $connection): void {
-            $channel->close();
-            $connection->close();
+        $queue = $this->createQueue(
+            Arr::get($config, 'worker', 'default'),
+            $connection,
+            $config['queue']
+        );
+
+        if(!$queue instanceof RabbitMQQueue) {
+            throw new InvalidArgumentException('Invalid worker.');
+        }
+
+        if($queue instanceof HorizonRabbitMQQueue) {
+            $this->dispatcher->listen(JobFailed::class, RabbitMQFailedEvent::class);
+        }
+
+        $this->dispatcher->listen(WorkerStopping::class, static function () use ($queue): void {
+            $queue->close();
         });
 
-        $worker = Arr::get($config, 'worker', 'default');
 
-        if ($worker === 'default') {
-            return new RabbitMQQueue($connection, $channel, $config['queue']);
-        }
-
-        if ($worker === 'horizon') {
-            $this->dispatcher->listen(JobFailed::class, RabbitMQFailedEvent::class);
-
-            return new HorizonRabbitMQQueue($connection, $channel, $config['queue']);
-        }
-
-        if ($worker instanceof RabbitMQQueue) {
-            return new $worker($connection, $channel, $config);
-        }
-
-        throw new InvalidArgumentException('Invalid worker.');
+        return $queue;
     }
 
     /**
@@ -79,6 +76,18 @@ class RabbitMQConnector implements ConnectorInterface
             Arr::get($config, 'hosts', []),
             $this->filter(Arr::get($config, 'options', []))
         );
+    }
+
+    protected function createQueue(string $worker, AbstractConnection $connection, string $queue)
+    {
+        switch($worker) {
+            case 'default':
+                return new RabbitMQQueue($connection, $queue);
+            case 'horizon':
+                return new HorizonRabbitMQQueue($connection, $queue);
+            default:
+                return new $worker($connection, $queue);
+        }
     }
 
     private function filter(array $array): array

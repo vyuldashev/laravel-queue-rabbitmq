@@ -9,6 +9,7 @@ use Laravel\Horizon\Events\JobPushed;
 use Laravel\Horizon\Events\JobReserved;
 use Laravel\Horizon\JobId;
 use Laravel\Horizon\JobPayload;
+use PhpAmqpLib\Exception\AMQPProtocolChannelException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue as BaseRabbitMQQueue;
 
@@ -24,8 +25,9 @@ class RabbitMQQueue extends BaseRabbitMQQueue
     /**
      * Get the number of queue jobs that are ready to process.
      *
-     * @param  string|null $queue
+     * @param string|null $queue
      * @return int
+     * @throws AMQPProtocolChannelException
      */
     public function readyNow($queue = null): int
     {

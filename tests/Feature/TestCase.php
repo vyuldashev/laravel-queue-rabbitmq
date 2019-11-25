@@ -23,20 +23,32 @@ abstract class TestCase extends BaseTestCase
         }
     }
 
+    /**
+     * @throws AMQPProtocolChannelException
+     */
+    protected function tearDown(): void
+    {
+        if($this->connection()->isQueueExists()) {
+            $this->connection()->purge();
+        }
+
+        $this->assertSame(0, Queue::size());
+
+        parent::tearDown();
+    }
+
     public function testSizeDoesNotThrowExceptionOnUnknownQueue(): void
     {
         $this->assertEmpty(0, Queue::size(Str::random()));
     }
 
-    public function testPop(): void
+    public function testPopNothing(): void
     {
         $this->assertNull(Queue::pop('foo'));
     }
 
     public function testPushRaw(): void
     {
-        $this->assertSame(0, Queue::size());
-
         Queue::pushRaw($payload = Str::random());
 
         sleep(1);
@@ -48,92 +60,6 @@ abstract class TestCase extends BaseTestCase
         $this->assertSame($payload, $job->getRawBody());
 
         $this->assertNull($job->getJobId());
-
-        $job->delete();
-
-        $this->assertSame(0, Queue::size());
-    }
-
-    public function testReleaseRaw(): void
-    {
-        Queue::pushRaw($payload = Str::random());
-
-        sleep(1);
-
-        $this->assertSame(1, Queue::size());
-        $this->assertNotNull($job = Queue::pop());
-        $this->assertSame(0, $job->attempts());
-
-        for ($attempt = 1; $attempt <= 3; $attempt++) {
-            $job->release();
-
-            sleep(1); // TODO ???
-
-            $this->assertSame(1, Queue::size());
-
-            $job = Queue::pop();
-
-            $this->assertSame($attempt, $job->attempts());
-        }
-    }
-
-    public function testReleaseWithDelayRaw(): void
-    {
-        $this->assertSame(0, Queue::size());
-
-        Queue::pushRaw($payload = Str::random());
-
-        sleep(1);
-
-        $this->assertSame(1, Queue::size());
-        $this->assertNotNull($job = Queue::pop());
-        $this->assertSame(0, $job->attempts());
-
-        for ($attempt = 1; $attempt <= 3; $attempt++) {
-            $job->release(4);
-
-            sleep(1); // TODO ???
-
-            $this->assertSame(0, Queue::size());
-            $this->assertNull(Queue::pop());
-
-            sleep(4);
-
-            $this->assertSame(1, Queue::size());
-
-            $job = Queue::pop();
-
-            $this->assertSame($attempt, $job->attempts());
-        }
-    }
-
-    public function testLaterRaw(): void
-    {
-        $this->assertSame(0, Queue::size());
-
-        $payload = Str::random();
-        $data = [Str::random() => Str::random()];
-
-        Queue::later(3, $payload, $data);
-
-        sleep(1);
-
-        $this->assertSame(0, Queue::size());
-        $this->assertNull(Queue::pop());
-
-        sleep(3);
-
-        $this->assertSame(1, Queue::size());
-        $this->assertNotNull($job = Queue::pop());
-
-        $this->assertInstanceOf(RabbitMQJob::class, $job);
-        $this->assertSame($payload, $job->getName());
-
-        $body = json_decode($job->getRawBody(), true);
-
-        $this->assertSame($payload, $body['displayName']);
-        $this->assertSame($payload, $body['job']);
-        $this->assertSame($data, $body['data']);
 
         $job->delete();
 
@@ -164,33 +90,39 @@ abstract class TestCase extends BaseTestCase
         $this->assertSame($job->getJobId(), $payload['id']);
     }
 
-    public function testRelease(): void
+    public function testLaterRaw(): void
     {
-        Queue::push(new TestJob());
+        $payload = Str::random();
+        $data = [Str::random() => Str::random()];
+
+        Queue::later(3, $payload, $data);
 
         sleep(1);
 
+        $this->assertSame(0, Queue::size());
+        $this->assertNull(Queue::pop());
+
+        sleep(3);
+
         $this->assertSame(1, Queue::size());
         $this->assertNotNull($job = Queue::pop());
-        $this->assertSame(0, $job->attempts());
 
-        for ($attempt = 1; $attempt <= 3; $attempt++) {
-            $job->release();
+        $this->assertInstanceOf(RabbitMQJob::class, $job);
+        $this->assertSame($payload, $job->getName());
 
-            sleep(1); // TODO ???
+        $body = json_decode($job->getRawBody(), true);
 
-            $this->assertSame(1, Queue::size());
+        $this->assertSame($payload, $body['displayName']);
+        $this->assertSame($payload, $body['job']);
+        $this->assertSame($data, $body['data']);
 
-            $job = Queue::pop();
+        $job->delete();
 
-            $this->assertSame($attempt, $job->attempts());
-        }
+        $this->assertSame(0, Queue::size());
     }
 
     public function testLater(): void
     {
-        $this->assertSame(0, Queue::size());
-
         Queue::later(3, new TestJob());
 
         sleep(1);
@@ -217,10 +149,110 @@ abstract class TestCase extends BaseTestCase
         $this->assertSame(0, Queue::size());
     }
 
+    public function testBulk(): void
+    {
+        $count = 100;
+        $jobs = [];
+
+        for($i = 0; $i < $count; $i++) {
+            $jobs[$i] = new TestJob($i);
+        }
+
+        Queue::bulk($jobs);
+
+        sleep(1);
+
+        $this->assertSame($count, Queue::size());
+    }
+
+    public function testReleaseRaw(): void
+    {
+        Queue::pushRaw($payload = Str::random());
+
+        sleep(1);
+
+        $this->assertSame(1, Queue::size());
+        $this->assertNotNull($job = Queue::pop());
+        $this->assertSame(0, $job->attempts());
+
+        for ($attempt = 1; $attempt <= 3; $attempt++) {
+            $job->release();
+
+            sleep(1); // TODO ???
+
+            $this->assertSame(1, Queue::size());
+
+            $job = Queue::pop();
+
+            $this->assertSame($attempt, $job->attempts());
+        }
+    }
+
+    public function testRelease(): void
+    {
+        Queue::push(new TestJob());
+
+        sleep(1);
+
+        $this->assertSame(1, Queue::size());
+        $this->assertNotNull($job = Queue::pop());
+        $this->assertSame(0, $job->attempts());
+
+        for ($attempt = 1; $attempt <= 3; $attempt++) {
+            $job->release();
+
+            sleep(1); // TODO ???
+
+            $this->assertSame(1, Queue::size());
+
+            $job = Queue::pop();
+
+            $this->assertSame($attempt, $job->attempts());
+        }
+    }
+
+    public function testReleaseWithDelayRaw(): void
+    {
+        Queue::pushRaw($payload = Str::random());
+
+        sleep(1);
+
+        $this->assertSame(1, Queue::size());
+        $this->assertNotNull($job = Queue::pop());
+        $this->assertSame(0, $job->attempts());
+
+        for ($attempt = 1; $attempt <= 3; $attempt++) {
+            $job->release(4);
+
+            sleep(1); // TODO ???
+
+            $this->assertSame(0, Queue::size());
+            $this->assertNull(Queue::pop());
+
+            sleep(4);
+
+            $this->assertSame(1, Queue::size());
+
+            $job = Queue::pop();
+
+            $this->assertSame($attempt, $job->attempts());
+        }
+    }
+
+    public function testReleaseInThePast(): void
+    {
+        Queue::push(new TestJob());
+
+        $job = Queue::pop();
+        $job->release(-3);
+
+        sleep(1);
+
+        $this->assertInstanceOf(RabbitMQJob::class, Queue::pop());
+    }
+
     public function testReleaseAndReleaseWithDelayAttempts(): void
     {
-        $this->assertSame(0, Queue::size());
-
         Queue::push(new TestJob());
 
         sleep(1);
@@ -240,6 +272,21 @@ abstract class TestCase extends BaseTestCase
         sleep(4);
 
         $this->assertNotNull($job = Queue::pop());
+
         $this->assertSame(2, $job->attempts());
+    }
+
+    public function testDelete(): void
+    {
+        Queue::push(new TestJob());
+
+        $job = Queue::pop();
+
+        $job->delete();
+
+        sleep(1);
+
+        $this->assertSame(0, Queue::size());
+        $this->assertNull(Queue::pop());
     }
 }
