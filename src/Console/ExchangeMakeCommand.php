@@ -25,7 +25,7 @@ class ExchangeMakeCommand extends Command
      */
     public function handle(RabbitMQConnector $connector): void
     {
-        $config = $this->laravel['config']->get('queue.connections.' . $this->argument('connection'));
+        $config = $this->laravel['config']->get('queue.connections.'.$this->argument('connection'));
 
         $queue = $connector->connect($config);
         $channel = $queue->getChannel();
@@ -33,7 +33,7 @@ class ExchangeMakeCommand extends Command
         try {
             $channel->exchange_declare($this->argument('name'), '', true);
         } catch (AMQPProtocolChannelException $exception) {
-            if($exception->amqp_reply_code === 404) {
+            if ($exception->amqp_reply_code === 404) {
                 $this->declareExchange($queue->getConnection()->channel());
 
                 $this->info('Exchange declared successfully.');

@@ -19,7 +19,7 @@ class ConsumeCommand extends Command
 
     public function handle(RabbitMQConnector $connector): void
     {
-        $config = $this->laravel['config']->get('queue.connections.' . $this->argument('connection'));
+        $config = $this->laravel['config']->get('queue.connections.'.$this->argument('connection'));
 
         $queue = $connector->connect($config);
 
@@ -35,14 +35,13 @@ class ConsumeCommand extends Command
             [$this, 'processMessage']
         );
 
-        while($channel->is_consuming()) {
+        while ($channel->is_consuming()) {
             $channel->wait();
         }
     }
 
     protected function processMessage(AMQPMessage $AMQPMessage): void
     {
-
     }
 
     protected function consumerTag(): string
@@ -51,6 +50,6 @@ class ConsumeCommand extends Command
             return (string)$this->option('consumer-tag');
         }
 
-        return config('app.name') . '_' . getmygid();
+        return config('app.name').'_'.getmygid();
     }
 }

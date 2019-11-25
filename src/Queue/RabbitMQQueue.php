@@ -48,8 +48,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         AbstractConnection $connection,
         AMQPChannel $channel,
         string $default
-    )
-    {
+    ) {
         $this->connection = $connection;
         $this->channel = $channel;
         $this->default = $default;
