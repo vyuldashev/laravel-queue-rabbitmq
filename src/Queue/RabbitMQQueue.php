@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection PhpRedundantCatchClauseInspection */
+
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
 use Exception;
