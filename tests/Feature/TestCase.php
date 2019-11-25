@@ -4,20 +4,28 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Feature;
 
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
+use PhpAmqpLib\Exception\AMQPProtocolChannelException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks\TestJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCase as BaseTestCase;
 
-// https://github.com/laravel/framework/blob/6.x/tests/Queue/RedisQueueIntegrationTest.php
 abstract class TestCase extends BaseTestCase
 {
+    /**
+     * @throws AMQPProtocolChannelException
+     */
     protected function setUp(): void
     {
         parent::setUp();
 
-        Queue::size();
+        if($this->connection()->isQueueExists()) {
+            $this->connection()->purge();
+        }
+    }
 
-        $this->connection()->purge();
+    public function testSizeDoesNotThrowExceptionOnUnknownQueue(): void
+    {
+        $this->assertEmpty(0, Queue::size(Str::random()));
     }
 
     public function testPop(): void
@@ -234,43 +242,4 @@ abstract class TestCase extends BaseTestCase
         $this->assertNotNull($job = Queue::pop());
         $this->assertSame(2, $job->attempts());
     }
-
-//    public function testFoo()
-//    {
-//        /** @var RabbitMQJob $job */
-//        Queue::pushRaw('foo');
-//
-//        $job = Queue::pop();
-//
-//        $this->assertNotNull($job);
-//
-//        $job->release();
-//
-//        sleep(1);
-//
-//        $job = Queue::pop();
-//
-//        $this->assertNotNull($job);
-//
-//        $this->connection()->getChannel()->basic_reject($job->getMessage()->getDeliveryTag(), false);
-//        $this->connection()->getChannel()->wait_for_pending_acks_returns();
-//
-//        sleep(1);
-//
-//        $job = Queue::pop();
-//
-//        sleep(1);
-//
-//        $this->connection()->getChannel()->basic_nack($job->getMessage()->getDeliveryTag(), false, false);
-//        $this->connection()->getChannel()->wait_for_pending_acks_returns();
-//
-//        sleep(1);
-//
-//        $job = Queue::pop();
-//
-//        /** @var AMQPTable|null $headers */
-//        $headers = Arr::get($job->getMessage()->get_properties(), 'application_headers');
-//
-//        dd($headers->getNativeData());
-//    }
 }
