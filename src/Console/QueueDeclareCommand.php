@@ -14,7 +14,7 @@ class QueueDeclareCommand extends Command
                            {--durable=1}
                            {--auto-delete=0}';
 
-    protected $description = '';
+    protected $description = 'Declare queue';
 
     /**
      * @param RabbitMQConnector $connector

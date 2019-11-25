@@ -12,7 +12,7 @@ class QueuePurgeCommand extends Command
                            {queue}
                            {connection=rabbitmq : The name of the queue connection to use}';
 
-    protected $description = 'Purge queue';
+    protected $description = 'Purge all messages in queue';
 
     /**
      * @param RabbitMQConnector $connector
