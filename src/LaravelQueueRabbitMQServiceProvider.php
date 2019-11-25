@@ -23,7 +23,6 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->commands([
-                Console\ConsumeCommand::class,
                 Console\ExchangeMakeCommand::class,
                 Console\QueueBindCommand::class,
                 Console\QueueMakeCommand::class,
