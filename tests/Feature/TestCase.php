@@ -178,7 +178,7 @@ abstract class TestCase extends BaseTestCase
         for ($attempt = 1; $attempt <= 3; $attempt++) {
             $job->release();
 
-            sleep(1); // TODO ???
+            sleep(1);
 
             $this->assertSame(1, Queue::size());
 
@@ -201,7 +201,7 @@ abstract class TestCase extends BaseTestCase
         for ($attempt = 1; $attempt <= 3; $attempt++) {
             $job->release();
 
-            sleep(1); // TODO ???
+            sleep(1);
 
             $this->assertSame(1, Queue::size());
 
@@ -224,7 +224,7 @@ abstract class TestCase extends BaseTestCase
         for ($attempt = 1; $attempt <= 3; $attempt++) {
             $job->release(4);
 
-            sleep(1); // TODO ???
+            sleep(1);
 
             $this->assertSame(0, Queue::size());
             $this->assertNull(Queue::pop());

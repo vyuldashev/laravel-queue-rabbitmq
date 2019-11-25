@@ -76,7 +76,6 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     public function size($queue = null): int
     {
-        // TODO count delayed too
         $queue = $this->getQueue($queue);
 
         if (!$this->isQueueExists($queue)) {
@@ -116,7 +115,6 @@ class RabbitMQQueue extends Queue implements QueueContract
         [$message, $correlationId] = $this->createMessage($payload);
 
         $this->channel->basic_publish($message, $queue, $queue, true, false);
-        $this->channel->wait_for_pending_acks();
 
         return $correlationId;
     }
@@ -159,7 +157,6 @@ class RabbitMQQueue extends Queue implements QueueContract
         [$message, $correlationId] = $this->createMessage($payload, $attempts);
 
         $this->channel->basic_publish($message, null, $delayedQueue, true, false);
-        $this->channel->wait_for_pending_acks();
 
         return $correlationId;
     }
@@ -341,13 +338,11 @@ class RabbitMQQueue extends Queue implements QueueContract
     public function ack(RabbitMQJob $job): void
     {
         $this->channel->basic_ack($job->getRabbitMQMessage()->getDeliveryTag());
-        $this->channel->wait_for_pending_acks();
     }
 
     public function reject(RabbitMQJob $job, bool $requeue = false): void
     {
         $this->channel->basic_reject($job->getRabbitMQMessage()->getDeliveryTag(), $requeue);
-        $this->channel->wait_for_pending_acks();
     }
 
     /**
