@@ -38,11 +38,18 @@ class RabbitMQQueue extends Queue implements QueueContract
     protected $default;
 
     /**
+     * List of already declared exchanges.
+     *
+     * @var array
+     */
+    protected $exchanges = [];
+
+    /**
      * List of already declared queues.
      *
      * @var array
      */
-    protected $queues;
+    protected $queues = [];
 
     public function __construct(
         AbstractConnection $connection,
@@ -62,18 +69,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         // TODO count delayed too
         $queue = $this->getQueue($queue);
 
-        [, $size] = $this->channel->queue_declare(
-            $queue,
-            false,
-            true,
-            false,
-            false,
-            false,
-            new AMQPTable([
-                'x-dead-letter-exchange' => $queue,
-                'x-dead-letter-routing-key' => $queue,
-            ])
-        );
+        [, $size] = $this->channel->queue_declare($queue, true);
 
         return $size;
     }
@@ -93,30 +89,12 @@ class RabbitMQQueue extends Queue implements QueueContract
     {
         $queue = $this->getQueue($queue);
 
-        if (!isset($this->queues[$queue])) {
-            $this->channel->exchange_declare(
-                $queue,
-                AMQPExchangeType::DIRECT,
-                false,
-                true,
-                true
-            );
-
-            $this->channel->queue_declare(
-                $queue,
-                false,
-                true,
-                false,
-                false,
-                false,
-                new AMQPTable([
-                    'x-dead-letter-exchange' => $queue,
-                    'x-dead-letter-routing-key' => $queue,
-                ])
-            );
-
-            $this->channel->queue_bind($queue, $queue, $queue);
-        }
+        $this->declareExchange($queue);
+        $this->declareQueue($queue, true, false, [
+            'x-dead-letter-exchange' => $queue,
+            'x-dead-letter-routing-key' => $queue,
+        ]);
+        $this->bindQueue($queue, $queue, $queue);
 
         [$message, $correlationId] = $this->createMessage($payload);
 
@@ -145,29 +123,13 @@ class RabbitMQQueue extends Queue implements QueueContract
         $destinationQueue = $this->getQueue($queue);
         $delayedQueue = $this->getQueue($queue).'.delay.'.$ttl;
 
-        $this->channel->exchange_declare(
-            $destinationQueue,
-            AMQPExchangeType::DIRECT,
-            false,
-            true,
-            true
-        );
-
-        $this->channel->queue_declare(
-            $delayedQueue,
-            false,
-            true,
-            false,
-            false,
-            false,
-            new AMQPTable([
-                'x-dead-letter-exchange' => $destinationQueue,
-                'x-dead-letter-routing-key' => $destinationQueue,
-                'x-message-ttl' => $ttl, // TODO
-            ])
-        );
-
-        $this->channel->queue_bind($destinationQueue, $destinationQueue, $destinationQueue);
+        $this->declareExchange($destinationQueue);
+        $this->declareQueue($delayedQueue, true, false, [
+            'x-dead-letter-exchange' => $destinationQueue,
+            'x-dead-letter-routing-key' => $destinationQueue,
+            'x-message-ttl' => $ttl, // TODO
+        ]);
+        $this->bindQueue($destinationQueue, $destinationQueue, $destinationQueue);
 
         [$message, $correlationId] = $this->createMessage($payload, $attempts);
 
@@ -189,30 +151,12 @@ class RabbitMQQueue extends Queue implements QueueContract
                 $this->createPayload($job, $queue, $data)
             );
 
-            if (!isset($this->queues[$queue])) {
-                $this->channel->exchange_declare(
-                    $queue,
-                    AMQPExchangeType::DIRECT,
-                    false,
-                    true,
-                    true
-                );
-
-                $this->channel->queue_declare(
-                    $queue,
-                    false,
-                    true,
-                    false,
-                    false,
-                    false,
-                    new AMQPTable([
-                        'x-dead-letter-exchange' => $queue,
-                        'x-dead-letter-routing-key' => $queue,
-                    ])
-                );
-
-                $this->channel->queue_bind($queue, $queue, $queue);
-            }
+            $this->declareExchange($queue);
+            $this->declareQueue($queue, true, false, [
+                'x-dead-letter-exchange' => $queue,
+                'x-dead-letter-routing-key' => $queue,
+            ]);
+            $this->bindQueue($queue, $queue, $queue);
 
             $this->channel->batch_basic_publish($message);
         }
@@ -288,6 +232,10 @@ class RabbitMQQueue extends Queue implements QueueContract
         bool $durable = true,
         bool $autoDelete = false
     ): void {
+        if (in_array($name, $this->exchanges, true)) {
+            return;
+        }
+
         $this->channel->exchange_declare(
             $name,
             $type,
@@ -319,13 +267,20 @@ class RabbitMQQueue extends Queue implements QueueContract
         }
     }
 
-    public function declareQueue(string $name, bool $durable = true, bool $autoDelete = false): void
+    public function declareQueue(string $name, bool $durable = true, bool $autoDelete = false, array $arguments = []): void
     {
+        if (in_array($name, $this->queues, true)) {
+            return;
+        }
+
         $this->channel->queue_declare(
             $name,
             false,
             $durable,
-            $autoDelete
+            $autoDelete,
+            false,
+            false,
+            new AMQPTable($arguments)
         );
     }
 
