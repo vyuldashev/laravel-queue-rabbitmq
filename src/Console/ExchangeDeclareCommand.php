@@ -8,15 +8,16 @@ use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Exception\AMQPProtocolChannelException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 
-class QueueMakeCommand extends Command
+class ExchangeDeclareCommand extends Command
 {
-    protected $signature = 'rabbitmq:make-queue
-                           {name : The name of the queue to declare}
-                           {connection=rabbitmq : The name of the queue connection to work}
-                           {--durable}
-                           {--auto-delete}';
+    protected $signature = 'rabbitmq:exchange-declare
+                            {name : The name of the exchange to declare}
+                            {connection=rabbitmq : The name of the queue connection to use}
+                            {--type=direct}
+                            {--durable}
+                            {--auto-delete}';
 
-    protected $description = '';
+    protected $description = 'Declare exchange';
 
     /**
      * @param RabbitMQConnector $connector
@@ -27,16 +28,15 @@ class QueueMakeCommand extends Command
         $config = $this->laravel['config']->get('queue.connections.'.$this->argument('connection'));
 
         $queue = $connector->connect($config);
-
         $channel = $queue->getChannel();
 
         try {
-            $channel->queue_declare($this->argument('name'), true);
+            $channel->exchange_declare($this->argument('name'), '', true);
         } catch (AMQPProtocolChannelException $exception) {
             if ($exception->amqp_reply_code === 404) {
-                $this->declareQueue($queue->getConnection()->channel());
+                $this->declareExchange($queue->getConnection()->channel());
 
-                $this->info('Queue declared successfully.');
+                $this->info('Exchange declared successfully.');
 
                 return;
             }
@@ -44,18 +44,19 @@ class QueueMakeCommand extends Command
             throw $exception;
         }
 
-        $this->warn('Queue already exists.');
+        $this->warn('Exchange already exists.');
     }
 
-    protected function declareQueue(AMQPChannel $channel): void
+    protected function declareExchange(AMQPChannel $channel): void
     {
-        $channel->queue_declare(
+        $channel->exchange_declare(
             $this->argument('name'),
+            $this->option('type'),
             false,
             $this->option('durable'),
-            false,
             $this->option('auto-delete'),
-            false
+            false,
+            true
         );
     }
 }

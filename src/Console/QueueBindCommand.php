@@ -11,9 +11,10 @@ class QueueBindCommand extends Command
     protected $signature = 'rabbitmq:queue-bind                          
                            {queue}
                            {exchange}
-                           {connection=rabbitmq : The name of the queue connection to work}
+                           {connection=rabbitmq : The name of the queue connection to use}
                            {--routing-key}';
-    protected $description = '';
+
+    protected $description = 'Bind queue to exchange';
 
     /**
      * @param RabbitMQConnector $connector
@@ -32,5 +33,7 @@ class QueueBindCommand extends Command
             $this->argument('exchange'),
             (string) $this->option('routing-key')
         );
+
+        $this->info('Queue bound to exchange successfully.');
     }
 }
