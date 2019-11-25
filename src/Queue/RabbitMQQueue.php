@@ -150,7 +150,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->declareQueue($delayedQueue, true, false, [
             'x-dead-letter-exchange' => $destinationQueue,
             'x-dead-letter-routing-key' => $destinationQueue,
-            'x-message-ttl' => $ttl, // TODO
+            'x-message-ttl' => $ttl,
         ]);
         $this->bindQueue($destinationQueue, $destinationQueue, $destinationQueue);
 
@@ -360,7 +360,6 @@ class RabbitMQQueue extends Queue implements QueueContract
             'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT,
         ];
 
-        // todo
         if ($correlationId = json_decode($payload, true)['id'] ?? null) {
             $properties['correlation_id'] = $correlationId;
         }

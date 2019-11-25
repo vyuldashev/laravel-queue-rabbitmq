@@ -59,12 +59,12 @@ class RabbitMQQueue extends BaseRabbitMQQueue
     /**
      * {@inheritdoc}
      */
-    public function later($delay, $job, $data = '', $queueName = null)
+    public function later($delay, $job, $data = '', $queue = null)
     {
         $payload = (new JobPayload($this->createPayload($job, $data)))->prepare($job)->value;
 
-        return tap(parent::pushRaw($payload, $queueName, ['delay' => $this->secondsUntil($delay)]), function () use ($payload, $queueName): void {
-            $this->event($this->getQueue($queueName), new JobPushed($payload));
+        return tap(parent::pushRaw($payload, $queue, ['delay' => $this->secondsUntil($delay)]), function () use ($payload, $queue): void {
+            $this->event($this->getQueue($queue), new JobPushed($payload));
         });
     }
 
@@ -93,14 +93,14 @@ class RabbitMQQueue extends BaseRabbitMQQueue
     /**
      * Fire the job deleted event.
      *
-     * @param  string $queueName
+     * @param  string $queue
      * @param  RabbitMQJob $job
      * @return void
      * @throws BindingResolutionException
      */
-    public function deleteReserved($queueName, $job): void
+    public function deleteReserved($queue, $job): void
     {
-        $this->event($this->getQueue($queueName), new JobDeleted($job, $job->getRawBody()));
+        $this->event($this->getQueue($queue), new JobDeleted($job, $job->getRawBody()));
     }
 
     /**
