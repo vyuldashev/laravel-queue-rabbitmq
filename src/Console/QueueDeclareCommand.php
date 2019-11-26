@@ -34,8 +34,8 @@ class QueueDeclareCommand extends Command
 
         $queue->declareQueue(
             $this->argument('name'),
-            (bool)$this->option('durable'),
-            (bool)$this->option('auto-delete')
+            (bool) $this->option('durable'),
+            (bool) $this->option('auto-delete')
         );
     }
 }

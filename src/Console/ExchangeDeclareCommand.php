@@ -36,8 +36,8 @@ class ExchangeDeclareCommand extends Command
         $queue->declareExchange(
             $this->argument('name'),
             $this->argument('type'),
-            (bool)$this->option('durable'),
-            (bool)$this->option('auto-delete')
+            (bool) $this->option('durable'),
+            (bool) $this->option('auto-delete')
         );
 
         $this->warn('Exchange already exists.');

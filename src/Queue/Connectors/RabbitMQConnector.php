@@ -46,7 +46,7 @@ class RabbitMQConnector implements ConnectorInterface
             $config['queue']
         );
 
-        if (!$queue instanceof RabbitMQQueue) {
+        if (! $queue instanceof RabbitMQQueue) {
             throw new InvalidArgumentException('Invalid worker.');
         }
 

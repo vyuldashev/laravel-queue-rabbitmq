@@ -78,7 +78,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     {
         $queue = $this->getQueue($queue);
 
-        if (!$this->isQueueExists($queue)) {
+        if (! $this->isQueueExists($queue)) {
             return 0;
         }
 
@@ -168,7 +168,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     {
         $queue = $this->getQueue($queue);
 
-        foreach ((array)$jobs as $job) {
+        foreach ((array) $jobs as $job) {
             [$message] = $this->createMessage(
                 $this->createPayload($job, $queue, $data)
             );

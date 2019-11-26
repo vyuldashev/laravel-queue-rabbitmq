@@ -8,8 +8,8 @@ use Illuminate\Queue\Jobs\Job;
 use Illuminate\Support\Arr;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\RabbitMQQueue as HorizonRabbitMQQueue;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQJob extends Job implements JobContract
 {
@@ -70,14 +70,14 @@ class RabbitMQJob extends Job implements JobContract
         /** @var AMQPTable|null $headers */
         $headers = Arr::get($this->message->get_properties(), 'application_headers');
 
-        if (!$headers) {
+        if (! $headers) {
             return 0;
         }
 
         $data = $headers->getNativeData();
 
-        $laravelAttempts = Arr::get($data, 'laravel.attempts', 0);
-        $xDeathCount = Arr::get($headers->getNativeData(), 'x-death.0.count', 0);
+        $laravelAttempts = (int) Arr::get($data, 'laravel.attempts', 0);
+        $xDeathCount = (int) Arr::get($headers->getNativeData(), 'x-death.0.count', 0);
 
         return $laravelAttempts + $xDeathCount;
     }

@@ -24,7 +24,7 @@ class QueuePurgeCommand extends Command
      */
     public function handle(RabbitMQConnector $connector): void
     {
-        if (!$this->confirmToProceed()) {
+        if (! $this->confirmToProceed()) {
             return;
         }
 
