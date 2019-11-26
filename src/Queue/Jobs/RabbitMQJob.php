@@ -45,7 +45,6 @@ class RabbitMQJob extends Job implements JobContract
         $this->decoded = $this->payload();
     }
 
-
     /**
      * {@inheritdoc}
      */

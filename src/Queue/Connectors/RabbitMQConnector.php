@@ -58,7 +58,6 @@ class RabbitMQConnector implements ConnectorInterface
             $queue->close();
         });
 
-
         return $queue;
     }
 
