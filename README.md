@@ -8,6 +8,8 @@ RabbitMQ Queue driver for Laravel
 
 ## Support Policy
 
+Only the latest version will get new features. Bug fixes will be provided using the following scheme:
+
 | Package Version | Laravel Version | Bug Fixes Until     |
 |-----------------|-----------------|---------------------|
 | 6.0             | 5.5             | August 30th, 2019   |
