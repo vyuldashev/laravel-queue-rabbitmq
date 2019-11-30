@@ -50,4 +50,8 @@ return PhpCsFixer\Config::create()
         ],
         'fully_qualified_strict_types' => true,
         'void_return' => true,
+        'cast_spaces' => [
+            'space' => 'single',
+        ],
+        'not_operator_with_successor_space' => true,
     ]);

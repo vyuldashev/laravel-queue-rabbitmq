@@ -2,183 +2,137 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs;
 
-use Exception;
-use Illuminate\Container\Container;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Queue\Job as JobContract;
-use Illuminate\Database\DetectsLostConnections;
 use Illuminate\Queue\Jobs\Job;
-use Illuminate\Queue\Jobs\JobName;
-use Illuminate\Support\Str;
-use Interop\Amqp\AmqpConsumer;
-use Interop\Amqp\AmqpMessage;
+use Illuminate\Support\Arr;
+use PhpAmqpLib\Message\AMQPMessage;
+use PhpAmqpLib\Wire\AMQPTable;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\RabbitMQQueue as HorizonRabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQJob extends Job implements JobContract
 {
-    use DetectsLostConnections;
+    /**
+     * The RabbitMQ queue instance.
+     *
+     * @var RabbitMQQueue
+     */
+    protected $rabbitmq;
 
     /**
-     * Same as RabbitMQQueue, used for attempt counts.
+     * The RabbitMQ message instance.
+     *
+     * @var AMQPMessage
      */
-    public const ATTEMPT_COUNT_HEADERS_KEY = 'attempts_count';
-
-    protected $connection;
-    protected $consumer;
     protected $message;
 
+    /**
+     * The JSON decoded version of "$message".
+     *
+     * @var array
+     */
+    protected $decoded;
+
     public function __construct(
-        Container $container,
-        RabbitMQQueue $connection,
-        AmqpConsumer $consumer,
-        AmqpMessage $message
+        RabbitMQQueue $rabbitmq,
+        AMQPMessage $message,
+        string $queue
     ) {
-        $this->container = $container;
-        $this->connection = $connection;
-        $this->consumer = $consumer;
+        $this->rabbitmq = $rabbitmq;
         $this->message = $message;
-        $this->queue = $consumer->getQueue()->getQueueName();
-        $this->connectionName = $connection->getConnectionName();
+        $this->queue = $queue;
+        $this->decoded = $this->payload();
     }
 
     /**
-     * Fire the job.
-     *
-     * @throws Exception
-     *
-     * @return void
+     * {@inheritdoc}
      */
-    public function fire(): void
+    public function getJobId()
     {
-        try {
-            $payload = $this->payload();
-
-            [$class, $method] = JobName::parse($payload['job']);
-
-            with($this->instance = $this->resolve($class))->{$method}($this, $payload['data']);
-        } catch (Exception $exception) {
-            if (
-                $this->causedByLostConnection($exception) ||
-                Str::contains($exception->getMessage(), ['detected deadlock'])
-            ) {
-                sleep(2);
-                $this->fire();
-
-                return;
-            }
-
-            throw $exception;
-        }
+        return json_decode($this->message->getBody(), true)['id'] ?? null;
     }
 
     /**
-     * Get the number of times the job has been attempted.
-     *
-     * @return int
-     */
-    public function attempts(): int
-    {
-        // set default job attempts to 1 so that jobs can run without retry
-        $defaultAttempts = 1;
-
-        return $this->message->getProperty(self::ATTEMPT_COUNT_HEADERS_KEY, $defaultAttempts);
-    }
-
-    /**
-     * Get the raw body string for the job.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getRawBody(): string
     {
         return $this->message->getBody();
     }
 
-    /** {@inheritdoc} */
+    /**
+     * {@inheritdoc}
+     */
+    public function attempts(): int
+    {
+        /** @var AMQPTable|null $headers */
+        $headers = Arr::get($this->message->get_properties(), 'application_headers');
+
+        if (! $headers) {
+            return 0;
+        }
+
+        $data = $headers->getNativeData();
+
+        $laravelAttempts = (int) Arr::get($data, 'laravel.attempts', 0);
+        $xDeathCount = (int) Arr::get($headers->getNativeData(), 'x-death.0.count', 0);
+
+        return $laravelAttempts + $xDeathCount;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @throws BindingResolutionException
+     */
     public function delete(): void
     {
         parent::delete();
 
-        $this->consumer->acknowledge($this->message);
+        $this->rabbitmq->ack($this);
 
         // required for Laravel Horizon
-        if ($this->connection instanceof HorizonRabbitMQQueue) {
-            $this->connection->deleteReserved($this->queue, $this);
+        if ($this->rabbitmq instanceof HorizonRabbitMQQueue) {
+            $this->rabbitmq->deleteReserved($this->queue, $this);
         }
     }
 
-    /** {@inheritdoc}
-     * @throws Exception
+    /**
+     * {@inheritdoc}
      */
     public function release($delay = 0): void
     {
         parent::release($delay);
 
-        $this->delete();
+        if ($delay > 0) {
+            $this->rabbitmq->ack($this);
 
-        $body = $this->payload();
+            $this->rabbitmq->laterRaw($delay, $this->message->body, $this->queue, $this->attempts());
 
-        /*
-         * Some jobs don't have the command set, so fall back to just sending it the job name string
-         */
-        if (isset($body['data']['command']) === true) {
-            $job = $this->unserialize($body);
-        } else {
-            $job = $this->getName();
+            return;
         }
 
-        $data = $body['data'];
-
-        $this->connection->release($delay, $job, $data, $this->getQueue(), $this->attempts() + 1);
+        $this->rabbitmq->reject($this);
     }
 
     /**
-     * Get the job identifier.
+     * Get the underlying RabbitMQ connection.
      *
-     * @return string|null
+     * @return RabbitMQQueue
      */
-    public function getJobId(): ?string
+    public function getRabbitMQ(): RabbitMQQueue
     {
-        return $this->message->getCorrelationId();
+        return $this->rabbitmq;
     }
 
     /**
-     * Sets the job identifier.
+     * Get the underlying RabbitMQ message.
      *
-     * @param string $id
-     *
-     * @return void
+     * @return AMQPMessage
      */
-    public function setJobId($id): void
+    public function getRabbitMQMessage(): AMQPMessage
     {
-        $this->connection->setCorrelationId($id);
-    }
-
-    /**
-     * Unserialize job.
-     *
-     * @param array $body
-     *
-     * @throws Exception
-     *
-     * @return mixed
-     */
-    protected function unserialize(array $body)
-    {
-        try {
-            /* @noinspection UnserializeExploitsInspection */
-            return unserialize($body['data']['command']);
-        } catch (Exception $exception) {
-            if (
-                $this->causedByLostConnection($exception) ||
-                Str::contains($exception->getMessage(), ['detected deadlock'])
-            ) {
-                sleep(2);
-
-                return $this->unserialize($body);
-            }
-
-            throw $exception;
-        }
+        return $this->message;
     }
 }

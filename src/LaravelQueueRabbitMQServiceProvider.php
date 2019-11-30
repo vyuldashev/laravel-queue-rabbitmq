@@ -19,6 +19,15 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
             __DIR__.'/../config/rabbitmq.php',
             'queue.connections.rabbitmq'
         );
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                Console\ExchangeDeclareCommand::class,
+                Console\QueueBindCommand::class,
+                Console\QueueDeclareCommand::class,
+                Console\QueuePurgeCommand::class,
+            ]);
+        }
     }
 
     /**

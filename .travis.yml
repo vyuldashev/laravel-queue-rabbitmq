@@ -3,7 +3,6 @@ language: php
 php:
   - 7.2
   - 7.3
-  - 7.4snapshot
 
 services:
   - docker
@@ -19,7 +18,7 @@ before_install:
   - sudo mv docker-compose /usr/local/bin
 
 before_script:
-  - docker-compose up -d
+  - docker-compose up -d rabbitmq
   - travis_retry composer self-update
   - travis_retry composer update --no-progress --no-interaction --prefer-dist
   - sleep 10

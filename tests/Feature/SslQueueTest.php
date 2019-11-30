@@ -2,7 +2,6 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Feature;
 
-use Enqueue\AmqpLib\AmqpContext;
 use PhpAmqpLib\Connection\AMQPSSLConnection;
 
 /**
@@ -12,26 +11,38 @@ class SslQueueTest extends TestCase
 {
     protected function getEnvironmentSetUp($app): void
     {
-        parent::getEnvironmentSetUp($app);
+        $app['config']->set('queue.default', 'rabbitmq');
+        $app['config']->set('queue.connections.rabbitmq', [
+            'driver' => 'rabbitmq',
+            'queue' => 'default',
+            'connection' => AMQPSSLConnection::class,
 
-        $app['config']->set('queue.connections.rabbitmq.port', getenv('PORT_SSL'));
-        $app['config']->set('queue.connections.rabbitmq.ssl_params', [
-            'ssl_on' => true,
-            'cafile' => getenv('RABBITMQ_SSL_CAFILE'),
-            'local_cert' => null,
-            'local_key' => null,
-            'verify_peer' => false,
-            'passphrase' => null,
+            'hosts' => [
+                [
+                    'host' => getenv('HOST'),
+                    'port' => getenv('PORT_SSL'),
+                    'vhost' => '/',
+                    'user' => 'guest',
+                    'password' => 'guest',
+                ],
+            ],
+
+            'options' => [
+                'ssl_options' => [
+                    'cafile' => getenv('RABBITMQ_SSL_CAFILE'),
+                    'local_cert' => null,
+                    'local_key' => null,
+                    'verify_peer' => true,
+                    'passphrase' => null,
+                ],
+            ],
+
+            'worker' => 'default',
         ]);
     }
 
     public function testConnection(): void
     {
-        /** @var AmqpContext $context */
-        $context = $this->connection()->getContext();
-
-        $this->assertInstanceOf(AmqpContext::class, $context);
-        $this->assertInstanceOf(AMQPSSLConnection::class, $context->getLibChannel()->getConnection());
-        $this->assertTrue($context->getLibChannel()->getConnection()->isConnected());
+        $this->assertInstanceOf(AMQPSSLConnection::class, $this->connection()->getChannel()->getConnection());
     }
 }
