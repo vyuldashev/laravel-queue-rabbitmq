@@ -10,14 +10,15 @@ RabbitMQ Queue driver for Laravel
 
 Only the latest version will get new features. Bug fixes will be provided using the following scheme:
 
-| Package Version | Laravel Version | Bug Fixes Until     |
-|-----------------|-----------------|---------------------|
-| 6.0             | 5.5             | August 30th, 2019   |
-| 7.0             | 5.6             | August 7th, 2018    |
-| 7.1             | 5.7             | March 4th, 2019     |
-| 7.2             | 5.8             | August 26th, 2019   |
-| 9               | 6               | September 3rd, 2021 |
-| 10              | 6               | September 3rd, 2021 |
+| Package Version | Laravel Version | Bug Fixes Until     |                                                                                             |
+|-----------------|-----------------|---------------------|---------------------------------------------------------------------------------------------|
+| 6.0             | 5.5             | August 30th, 2019   | [Documentation](https://github.com/vyuldashev/laravel-queue-rabbitmq/blob/v6.0/README.md)   |
+| 7.0             | 5.6             | August 7th, 2018    | [Documentation](https://github.com/vyuldashev/laravel-queue-rabbitmq/blob/v7.0/README.md)   |
+| 7.1             | 5.7             | March 4th, 2019     | [Documentation](https://github.com/vyuldashev/laravel-queue-rabbitmq/blob/v7.0/README.md)   |
+| 7.2             | 5.8             | August 26th, 2019   | [Documentation](https://github.com/vyuldashev/laravel-queue-rabbitmq/blob/v7.0/README.md)   |
+| 8.0             | 5.8             | August 26th, 2019   | [Documentation](https://github.com/vyuldashev/laravel-queue-rabbitmq/blob/v8.0/README.md)   |
+| 9               | 6               | September 3rd, 2021 | [Documentation](https://github.com/vyuldashev/laravel-queue-rabbitmq/blob/v9.0/README.md)   |
+| 10              | 6               | September 3rd, 2021 | [Documentation](https://github.com/vyuldashev/laravel-queue-rabbitmq/blob/master/README.md) |
 
 ## Installation
 
