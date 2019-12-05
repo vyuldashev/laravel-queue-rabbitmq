@@ -28,9 +28,9 @@ You can install this package via composer using this command:
 composer require vladimir-yuldashev/laravel-queue-rabbitmq
 ```
 
-The package will automatically register itself using Laravel auto-discovery.
+The package will automatically register itself.
 
-Setup connection in `config/queue.php`
+Add connection to `config/queue.php`:
 
 ```php
 'connections' => [
