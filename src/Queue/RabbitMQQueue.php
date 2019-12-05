@@ -345,14 +345,6 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->channel->basic_reject($job->getRabbitMQMessage()->getDeliveryTag(), $requeue);
     }
 
-    /**
-     * @throws Exception
-     */
-    public function close(): void
-    {
-        $this->connection->close();
-    }
-
     protected function createMessage($payload, int $attempts = 0): array
     {
         $properties = [
@@ -393,5 +385,13 @@ class RabbitMQQueue extends Queue implements QueueContract
     protected function getRandomId(): string
     {
         return Str::random(32);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function close(): void
+    {
+        $this->connection->close();
     }
 }
