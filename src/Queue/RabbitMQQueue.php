@@ -60,6 +60,13 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     protected $boundQueues = [];
 
+    /**
+     * Current job being processed.
+     *
+     * @var RabbitMQJob
+     */
+    protected $currentJob;
+
     public function __construct(
         AbstractConnection $connection,
         string $default
@@ -198,7 +205,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
             /** @var AMQPMessage|null $message */
             if ($message = $this->channel->basic_get($queue)) {
-                return new RabbitMQJob(
+                return $this->currentJob = new RabbitMQJob(
                     $this->container,
                     $this,
                     $message,
@@ -398,6 +405,10 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     public function close(): void
     {
+        if ($this->currentJob) {
+            $this->reject($this->currentJob);
+        }
+
         $this->connection->close();
     }
 }

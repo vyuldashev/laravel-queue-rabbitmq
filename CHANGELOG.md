@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [10.0.2 (2019-12-13)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.0.1...v10.0.2)
+
+- Finally fix [#235](https://github.com/vyuldashev/laravel-queue-rabbitmq/issues/235)
+
 ## [10.0.1 (2019-12-13)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.0.0...v10.0.1)
 
 - Add missing container instance and connectionName to RabbitMQJob
