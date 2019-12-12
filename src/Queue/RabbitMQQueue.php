@@ -198,7 +198,13 @@ class RabbitMQQueue extends Queue implements QueueContract
 
             /** @var AMQPMessage|null $message */
             if ($message = $this->channel->basic_get($queue)) {
-                return new RabbitMQJob($this, $message, $queue);
+                return new RabbitMQJob(
+                    $this->container,
+                    $this,
+                    $message,
+                    $this->connectionName,
+                    $queue
+                );
             }
         } catch (AMQPProtocolChannelException $exception) {
             // if there is not exchange or queue AMQP will throw exception with code 404

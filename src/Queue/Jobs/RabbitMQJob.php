@@ -2,6 +2,7 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs;
 
+use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Queue\Job as JobContract;
 use Illuminate\Queue\Jobs\Job;
@@ -35,12 +36,16 @@ class RabbitMQJob extends Job implements JobContract
     protected $decoded;
 
     public function __construct(
+        Container $container,
         RabbitMQQueue $rabbitmq,
         AMQPMessage $message,
+        string $connectionName,
         string $queue
     ) {
+        $this->container = $container;
         $this->rabbitmq = $rabbitmq;
         $this->message = $message;
+        $this->connectionName = $connectionName;
         $this->queue = $queue;
         $this->decoded = $this->payload();
     }

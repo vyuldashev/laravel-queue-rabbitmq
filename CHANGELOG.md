@@ -2,7 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [10.0.0 (2019-12-12)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v9.0...master)
+## [10.0.1 (2019-12-13)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.0.0...v10.0.1)
+
+- Add missing container instance and connectionName to RabbitMQJob
+
+## [10.0.0 (2019-12-12)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v9.0...v10.0.0)
 
 - Switch from enqueue to [php-amqplib](https://github.com/php-amqplib/php-amqplib)
 - Fix [#235](https://github.com/vyuldashev/laravel-queue-rabbitmq/issues/235)
