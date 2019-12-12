@@ -2,10 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-## [10.0.0 (2019-xx-xx)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v9.0...master)
+## [10.0.0 (2019-12-12)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v9.0...master)
 
 - Switch from enqueue to [php-amqplib](https://github.com/php-amqplib/php-amqplib)
-- Fix #235
+- Fix [#235](https://github.com/vyuldashev/laravel-queue-rabbitmq/issues/235)
 - Add support for multiple hosts
 - Added `exchange:declare` artisan command
 - Added `queue:bind` artisan command
