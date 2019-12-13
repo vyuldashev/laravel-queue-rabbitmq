@@ -41,6 +41,9 @@
       ]
     }
   },
+  "suggest": {
+    "ext-pcntl": "Required to use all features of the queue consumer."
+  },
   "scripts": {
     "test": [
       "@test:style",

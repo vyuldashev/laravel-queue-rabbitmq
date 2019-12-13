@@ -405,7 +405,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     public function close(): void
     {
-        if ($this->currentJob) {
+        if ($this->currentJob && ! $this->currentJob->isDeletedOrReleased()) {
             $this->reject($this->currentJob);
         }
 
