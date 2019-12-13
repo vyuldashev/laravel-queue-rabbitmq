@@ -35,7 +35,7 @@ class ConsumeCommand extends WorkCommand
         /** @var Consumer $consumer */
         $consumer = $this->worker;
 
-        $consumer->setConsumerTag(config('app.name').'_'.getmygid());
+        $consumer->setConsumerTag(config('app.name').'_'.getmypid());
         $consumer->setNoLocal($this->option('no-local'));
         $consumer->setNoAck($this->option('no-ack'));
         $consumer->setExclusive($this->option('exclusive'));
