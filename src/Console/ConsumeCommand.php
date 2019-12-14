@@ -34,6 +34,7 @@ class ConsumeCommand extends WorkCommand
         /** @var Consumer $consumer */
         $consumer = $this->worker;
 
+        $consumer->setContainer($this->laravel);
         $consumer->setConsumerTag(config('app.name').'_'.getmypid());
         $consumer->setNoLocal($this->option('no-local'));
         $consumer->setNoAck($this->option('no-ack'));

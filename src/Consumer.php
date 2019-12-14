@@ -3,6 +3,7 @@
 namespace VladimirYuldashev\LaravelQueueRabbitMQ;
 
 use Exception;
+use Illuminate\Container\Container;
 use Illuminate\Contracts\Queue\Job;
 use Illuminate\Queue\Worker;
 use Illuminate\Queue\WorkerOptions;
@@ -15,6 +16,9 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class Consumer extends Worker
 {
+    /** @var Container */
+    protected $container;
+
     /** @var string */
     protected $consumerTag;
 
@@ -32,6 +36,11 @@ class Consumer extends Worker
 
     /** @var int */
     protected $prefetchCount;
+
+    public function setContainer(Container $value): void
+    {
+        $this->container = $value;
+    }
 
     public function setConsumerTag(string $value): void
     {
@@ -82,8 +91,6 @@ class Consumer extends Worker
             null
         );
 
-        $container = app();
-
         $channel->basic_consume(
             $queue,
             $this->consumerTag,
@@ -91,9 +98,9 @@ class Consumer extends Worker
             $this->noAck,
             $this->exclusive,
             false,
-            function (AMQPMessage $message) use ($container, $connection, $options, $connectionName, $queue): void {
+            function (AMQPMessage $message) use ($connection, $options, $connectionName, $queue): void {
                 $job = new RabbitMQJob(
-                    $container,
+                    $this->container,
                     $connection,
                     $message,
                     $connectionName,
