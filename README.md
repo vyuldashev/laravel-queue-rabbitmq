@@ -89,6 +89,14 @@ For Lumen usage the service provider should be registered manually as follow in 
 $app->register(VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider::class);
 ```
 
+## Consuming Messages
+
+There are two ways of consuming messages. 
+
+1. `queue:work` command which is Laravel's built-in command. This command utilizes `basic_get`.
+
+2. `rabbitmq:consume` command which is provided by this package. This command utilizes `basic_consume` and is more performant than `basic_get` by ~2x.
+
 ## Testing
 
 Setup RabbitMQ using `docker-compose`:
