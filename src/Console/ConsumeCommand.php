@@ -3,6 +3,7 @@
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Console;
 
 use Illuminate\Queue\Console\WorkCommand;
+use Illuminate\Support\Str;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Consumer;
 
 class ConsumeCommand extends WorkCommand
@@ -20,9 +21,6 @@ class ConsumeCommand extends WorkCommand
                             {--tries=1 : Number of times to attempt a job before logging it failed}
                            
                             {--consumer-tag}
-                            {--no-local}
-                            {--no-ack}
-                            {--exclusive}
                             {--prefetch-size=0}
                             {--prefetch-count=1000}
                            ';
@@ -35,13 +33,19 @@ class ConsumeCommand extends WorkCommand
         $consumer = $this->worker;
 
         $consumer->setContainer($this->laravel);
-        $consumer->setConsumerTag(config('app.name').'_'.getmypid());
-        $consumer->setNoLocal($this->option('no-local'));
-        $consumer->setNoAck($this->option('no-ack'));
-        $consumer->setExclusive($this->option('exclusive'));
+        $consumer->setConsumerTag($this->consumerTag());
         $consumer->setPrefetchSize((int) $this->option('prefetch-size'));
         $consumer->setPrefetchCount((int) $this->option('prefetch-count'));
 
         parent::handle();
+    }
+
+    protected function consumerTag(): string
+    {
+        if ($consumerTag = $this->option('consumer-tag')) {
+            return $consumerTag;
+        }
+
+        return Str::slug(config('app.name', 'laravel'), '_').'_'.getmypid();
     }
 }

@@ -4,6 +4,7 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
+use ErrorException;
 use Exception;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Queue\Queue;
@@ -21,7 +22,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     /**
      * The RabbitMQ connection instance.
      *
-     * @var AMQPChannel
+     * @var AbstractConnection
      */
     protected $connection;
 
@@ -121,7 +122,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         [$message, $correlationId] = $this->createMessage($payload);
 
-        $this->channel->basic_publish($message, $queue, $queue, true, false);
+        $this->getChannel()->basic_publish($message, $queue, $queue, true, false);
 
         return $correlationId;
     }
@@ -163,7 +164,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         [$message, $correlationId] = $this->createMessage($payload, $attempts);
 
-        $this->channel->basic_publish($message, null, $delayedQueue, true, false);
+        $this->getChannel()->basic_publish($message, null, $delayedQueue, true, false);
 
         return $correlationId;
     }
@@ -187,10 +188,10 @@ class RabbitMQQueue extends Queue implements QueueContract
             ]);
             $this->bindQueue($queue, $queue, $queue);
 
-            $this->channel->batch_basic_publish($message, $queue, $queue);
+            $this->getChannel()->batch_basic_publish($message, $queue, $queue);
         }
 
-        $this->channel->publish_batch();
+        $this->getChannel()->publish_batch();
     }
 
     /**
@@ -204,7 +205,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             $queue = $this->getQueue($queue);
 
             /** @var AMQPMessage|null $message */
-            if ($message = $this->channel->basic_get($queue)) {
+            if ($message = $this->getChannel()->basic_get($queue)) {
                 return $this->currentJob = new RabbitMQJob(
                     $this->container,
                     $this,
@@ -274,7 +275,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             return;
         }
 
-        $this->channel->exchange_declare(
+        $this->getChannel()->exchange_declare(
             $name,
             $type,
             false,
@@ -316,7 +317,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             return;
         }
 
-        $this->channel->queue_declare(
+        $this->getChannel()->queue_declare(
             $name,
             false,
             $durable,
@@ -337,7 +338,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             return;
         }
 
-        $this->channel->queue_bind($queue, $exchange, $routingKey);
+        $this->getChannel()->queue_bind($queue, $exchange, $routingKey);
     }
 
     public function purge($queue = null): void
@@ -350,12 +351,12 @@ class RabbitMQQueue extends Queue implements QueueContract
 
     public function ack(RabbitMQJob $job): void
     {
-        $this->channel->basic_ack($job->getRabbitMQMessage()->getDeliveryTag());
+        $this->getChannel()->basic_ack($job->getRabbitMQMessage()->getDeliveryTag());
     }
 
     public function reject(RabbitMQJob $job, bool $requeue = false): void
     {
-        $this->channel->basic_reject($job->getRabbitMQMessage()->getDeliveryTag(), $requeue);
+        $this->getChannel()->basic_reject($job->getRabbitMQMessage()->getDeliveryTag(), $requeue);
     }
 
     protected function createMessage($payload, int $attempts = 0): array
@@ -409,6 +410,10 @@ class RabbitMQQueue extends Queue implements QueueContract
             $this->reject($this->currentJob);
         }
 
-        $this->connection->close();
+        try {
+            $this->connection->close();
+        } catch (ErrorException $exception) {
+            // Ignore the exception
+        }
     }
 }

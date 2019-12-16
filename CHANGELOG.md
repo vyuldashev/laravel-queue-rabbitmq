@@ -2,9 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## [10.1.0 (2019-12-13)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.0.2...v10.1.0)
+## [10.1.0 (2019-12-16)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.0.2...v10.1.0)
 
-- Add `rabbitmq:consume` command which uses `basic_consume` instead of `basic_get` which is used by `queue:work`. [#289](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/289)
+- Add `rabbitmq:consume` command which uses `basic_consume` instead of `basic_get` used by `queue:work`. [#289](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/289)
 
 ## [10.0.2 (2019-12-13)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.0.1...v10.0.2)
 

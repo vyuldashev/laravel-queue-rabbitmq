@@ -7,7 +7,8 @@ use Illuminate\Container\Container;
 use Illuminate\Contracts\Queue\Job;
 use Illuminate\Queue\Worker;
 use Illuminate\Queue\WorkerOptions;
-use PhpAmqpLib\Exception\AMQPTimeoutException;
+use PhpAmqpLib\Channel\AMQPChannel;
+use PhpAmqpLib\Exception\AMQPRuntimeException;
 use PhpAmqpLib\Message\AMQPMessage;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
 use Throwable;
@@ -22,20 +23,14 @@ class Consumer extends Worker
     /** @var string */
     protected $consumerTag;
 
-    /** @var bool */
-    protected $noLocal;
-
-    /** @var bool */
-    protected $noAck;
-
-    /** @var bool */
-    protected $exclusive;
-
     /** @var int */
     protected $prefetchSize;
 
     /** @var int */
     protected $prefetchCount;
+
+    /** @var AMQPChannel */
+    protected $channel;
 
     public function setContainer(Container $value): void
     {
@@ -45,21 +40,6 @@ class Consumer extends Worker
     public function setConsumerTag(string $value): void
     {
         $this->consumerTag = $value;
-    }
-
-    public function setNoLocal(bool $value): void
-    {
-        $this->noLocal = $value;
-    }
-
-    public function setNoAck(bool $value): void
-    {
-        $this->noAck = $value;
-    }
-
-    public function setExclusive(bool $value): void
-    {
-        $this->exclusive = $value;
     }
 
     public function setPrefetchSize(int $value): void
@@ -83,20 +63,20 @@ class Consumer extends Worker
         /** @var RabbitMQQueue $connection */
         $connection = $this->manager->connection($connectionName);
 
-        $channel = $connection->getChannel();
+        $this->channel = $connection->getChannel();
 
-        $channel->basic_qos(
+        $this->channel->basic_qos(
             $this->prefetchSize,
             $this->prefetchCount,
             null
         );
 
-        $channel->basic_consume(
+        $this->channel->basic_consume(
             $queue,
             $this->consumerTag,
-            $this->noLocal,
-            $this->noAck,
-            $this->exclusive,
+            false,
+            false,
+            false,
             false,
             function (AMQPMessage $message) use ($connection, $options, $connectionName, $queue): void {
                 $job = new RabbitMQJob(
@@ -115,7 +95,7 @@ class Consumer extends Worker
             }
         );
 
-        while ($channel->is_consuming()) {
+        while ($this->channel->is_consuming()) {
             // Before reserving any jobs, we will make sure this queue is not paused and
             // if it is we will just pause this worker for a given amount of time and
             // make sure we do not need to kill this worker process off completely.
@@ -128,8 +108,8 @@ class Consumer extends Worker
             // fire off this job for processing. Otherwise, we will need to sleep the
             // worker so no more jobs are processed until they should be processed.
             try {
-                $channel->wait(null, true, $options->timeout);
-            } catch (AMQPTimeoutException $exception) {
+                $this->channel->wait(null, true, (int) $options->timeout);
+            } catch (AMQPRuntimeException $exception) {
                 $this->exceptions->report($exception);
 
                 $this->kill(1);
@@ -178,5 +158,20 @@ class Consumer extends Worker
         if (! $job->isDeletedOrReleased()) {
             $job->getRabbitMQ()->reject($job);
         }
+    }
+
+    /**
+     * Stop listening and bail out of the script.
+     *
+     * @param  int  $status
+     * @return void
+     */
+    public function stop($status = 0): void
+    {
+        // Tell the server you are going to stop consuming.
+        // It will finish up the last message and not send you any more.
+        $this->channel->basic_cancel($this->consumerTag, false, true);
+
+        parent::stop($status);
     }
 }
