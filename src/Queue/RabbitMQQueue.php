@@ -4,6 +4,7 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
+use ErrorException;
 use Exception;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Queue\Queue;
@@ -21,7 +22,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     /**
      * The RabbitMQ connection instance.
      *
-     * @var AMQPChannel
+     * @var AbstractConnection
      */
     protected $connection;
 
@@ -405,10 +406,14 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     public function close(): void
     {
-        if ($this->currentJob) {
+        if ($this->currentJob && ! $this->currentJob->isDeletedOrReleased()) {
             $this->reject($this->currentJob);
         }
 
-        $this->connection->close();
+        try {
+            $this->connection->close();
+        } catch (ErrorException $exception) {
+            // Ignore the exception
+        }
     }
 }
