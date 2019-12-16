@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 - Add `rabbitmq:consume` command which uses `basic_consume` instead of `basic_get` used by `queue:work`. [#289](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/289)
 - Heartbeat disabled globally
+- Shuffle hosts before connecting to get better load balancing
 
 ## [10.0.2 (2019-12-13)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.0.1...v10.0.2)
 
