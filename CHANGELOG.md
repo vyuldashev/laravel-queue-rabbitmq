@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [10.1.1 (2019-12-18)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.1.0...v10.1.1)
+
+- Fix `rabbitmq:exchange-declare` command. [#293](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/293)
+
 ## [10.1.0 (2019-12-16)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.0.2...v10.1.0)
 
 - Add `rabbitmq:consume` command which uses `basic_consume` instead of `basic_get` used by `queue:work`. [#289](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/289)
