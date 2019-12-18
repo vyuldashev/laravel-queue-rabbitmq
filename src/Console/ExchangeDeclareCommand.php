@@ -35,7 +35,7 @@ class ExchangeDeclareCommand extends Command
 
         $queue->declareExchange(
             $this->argument('name'),
-            $this->argument('type'),
+            $this->option('type'),
             (bool) $this->option('durable'),
             (bool) $this->option('auto-delete')
         );
