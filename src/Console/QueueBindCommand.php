@@ -12,7 +12,7 @@ class QueueBindCommand extends Command
                            {queue}
                            {exchange}
                            {connection=rabbitmq : The name of the queue connection to use}
-                           {--routing-key}';
+                           {--routing-key= : Bind queue to exchange via routing key}';
 
     protected $description = 'Bind queue to exchange';
 
