@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [10.1.2 (2019-12-24)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.1.1...v10.1.2)
+
+- Fix `rabbitmq:queue-bind` command. [#294](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/294)
+
 ## [10.1.1 (2019-12-18)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.1.0...v10.1.1)
 
 - Fix `rabbitmq:exchange-declare` command. [#293](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/293)
