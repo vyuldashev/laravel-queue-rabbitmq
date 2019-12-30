@@ -37,7 +37,7 @@ class ConsumeCommand extends WorkCommand
         $consumer->setConsumerTag($this->consumerTag());
         $consumer->setPrefetchSize((int) $this->option('prefetch-size'));
         $consumer->setPrefetchCount((int) $this->option('prefetch-count'));
-        $consumer->setNonBlocking(!$this->option('blocking'));
+        $consumer->setNonBlocking(! $this->option('blocking'));
 
         parent::handle();
     }
