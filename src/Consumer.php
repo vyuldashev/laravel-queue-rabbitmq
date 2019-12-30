@@ -32,6 +32,9 @@ class Consumer extends Worker
     /** @var AMQPChannel */
     protected $channel;
 
+    /** @var bool */
+    protected $nonBlocking = true;
+
     public function setContainer(Container $value): void
     {
         $this->container = $value;
@@ -50,6 +53,11 @@ class Consumer extends Worker
     public function setPrefetchCount(int $value): void
     {
         $this->prefetchCount = $value;
+    }
+
+    public function setNonBlocking(bool $nonBlocking): void
+    {
+        $this->nonBlocking = $nonBlocking;
     }
 
     public function daemon($connectionName, $queue, WorkerOptions $options): void
@@ -108,7 +116,7 @@ class Consumer extends Worker
             // fire off this job for processing. Otherwise, we will need to sleep the
             // worker so no more jobs are processed until they should be processed.
             try {
-                $this->channel->wait(null, true, (int) $options->timeout);
+                $this->channel->wait(null, $this->nonBlocking, (int) $options->timeout);
             } catch (AMQPRuntimeException $exception) {
                 $this->exceptions->report($exception);
 
