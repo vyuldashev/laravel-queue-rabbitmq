@@ -23,6 +23,7 @@ class ConsumeCommand extends WorkCommand
                             {--consumer-tag}
                             {--prefetch-size=0}
                             {--prefetch-count=1000}
+                            {--blocking : Use blocking mode to reduce CPU usage}
                            ';
 
     protected $description = 'Consume messages';
@@ -36,6 +37,7 @@ class ConsumeCommand extends WorkCommand
         $consumer->setConsumerTag($this->consumerTag());
         $consumer->setPrefetchSize((int) $this->option('prefetch-size'));
         $consumer->setPrefetchCount((int) $this->option('prefetch-count'));
+        $consumer->setNonBlocking(!$this->option('blocking'));
 
         parent::handle();
     }
