@@ -32,7 +32,7 @@ class Consumer extends Worker
     /** @var AMQPChannel */
     protected $channel;
 
-    /** @var boolean */
+    /** @var bool */
     protected $gotJob = false;
 
     public function setContainer(Container $value): void
