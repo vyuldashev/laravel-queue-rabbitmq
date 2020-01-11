@@ -32,6 +32,9 @@ class Consumer extends Worker
     /** @var AMQPChannel */
     protected $channel;
 
+    /** @var boolean */
+    protected $gotJob = false;
+
     public function setContainer(Container $value): void
     {
         $this->container = $value;
@@ -79,6 +82,8 @@ class Consumer extends Worker
             false,
             false,
             function (AMQPMessage $message) use ($connection, $options, $connectionName, $queue): void {
+                $this->gotJob = true;
+
                 $job = new RabbitMQJob(
                     $this->container,
                     $connection,
@@ -104,9 +109,7 @@ class Consumer extends Worker
                 continue;
             }
 
-            // If the daemon should run (not in maintenance mode, etc.), then we can run
-            // fire off this job for processing. Otherwise, we will need to sleep the
-            // worker so no more jobs are processed until they should be processed.
+            // If the daemon should run (not in maintenance mode, etc.), then we can wait for a job.
             try {
                 $this->channel->wait(null, true, (int) $options->timeout);
             } catch (AMQPRuntimeException $exception) {
@@ -123,10 +126,17 @@ class Consumer extends Worker
                 $this->stopWorkerIfLostConnection($exception);
             }
 
+            // If no job is got off the queue, we will need to sleep the worker.
+            if (! $this->gotJob) {
+                $this->sleep($options->sleep);
+            }
+
             // Finally, we will check to see if we have exceeded our memory limits or if
             // the queue should restart based on other indications. If so, we'll stop
             // this worker and let whatever is "monitoring" it restart the process.
-            $this->stopIfNecessary($options, $lastRestart, null);
+            $this->stopIfNecessary($options, $lastRestart, $this->gotJob ? true : null);
+
+            $this->gotJob = false;
         }
     }
 
