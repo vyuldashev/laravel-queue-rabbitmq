@@ -36,13 +36,13 @@ class RabbitMQJob extends Job implements JobContract
     protected $decoded;
 
     public function __construct(
-        Container $container,
         RabbitMQQueue $rabbitmq,
         AMQPMessage $message,
         string $connectionName,
         string $queue
     ) {
-        $this->container = $container;
+		// I don't know why but Container injection doesn't work here, so I use static method
+        $this->container = Container::getInstance();
         $this->rabbitmq = $rabbitmq;
         $this->message = $message;
         $this->connectionName = $connectionName;
