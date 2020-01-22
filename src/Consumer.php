@@ -115,7 +115,9 @@ class Consumer extends Worker
 
             // If the daemon should run (not in maintenance mode, etc.), then we can wait for a job.
             try {
-                $this->channel->wait(null, true, (int) $options->timeout);
+                $shouldWait = $options->timeout > 0;
+
+                $this->channel->wait(null, $shouldWait, (int) $options->timeout);
             } catch (AMQPRuntimeException $exception) {
                 $this->exceptions->report($exception);
 
