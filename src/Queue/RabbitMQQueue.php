@@ -201,6 +201,10 @@ class RabbitMQQueue extends Queue implements QueueContract
         try {
             $queue = $this->getQueue($queue);
 
+            $this->declareExchange($queue);
+            $this->declareQueue($queue, true, false);
+            $this->bindQueue($queue, $queue, $queue);
+
             /** @var AMQPMessage|null $message */
             if ($message = $this->channel->basic_get($queue)) {
                 return $this->currentJob = new RabbitMQJob(
