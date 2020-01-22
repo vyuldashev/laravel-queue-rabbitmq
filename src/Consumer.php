@@ -74,6 +74,10 @@ class Consumer extends Worker
             null
         );
 
+        $connection->declareExchange($queue);
+        $connection->declareQueue($queue, true, false);
+        $connection->bindQueue($queue, $queue, $queue);
+
         $this->channel->basic_consume(
             $queue,
             $this->consumerTag,
