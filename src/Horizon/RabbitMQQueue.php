@@ -2,12 +2,14 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Horizon;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Contracts\Events\Dispatcher;
+use Laravel\Horizon\Events\JobDeleted;
+use Laravel\Horizon\Events\JobPushed;
+use Laravel\Horizon\Events\JobReserved;
 use Laravel\Horizon\JobId;
 use Laravel\Horizon\JobPayload;
-use Laravel\Horizon\Events\JobPushed;
-use Laravel\Horizon\Events\JobDeleted;
-use Laravel\Horizon\Events\JobReserved;
-use Illuminate\Contracts\Events\Dispatcher;
+use PhpAmqpLib\Exception\AMQPProtocolChannelException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue as BaseRabbitMQQueue;
 
@@ -23,15 +25,18 @@ class RabbitMQQueue extends BaseRabbitMQQueue
     /**
      * Get the number of queue jobs that are ready to process.
      *
-     * @param  string|null $queue
+     * @param string|null $queue
      * @return int
+     * @throws AMQPProtocolChannelException
      */
     public function readyNow($queue = null): int
     {
         return $this->size($queue);
     }
 
-    /** {@inheritdoc} */
+    /**
+     * {@inheritdoc}
+     */
     public function push($job, $data = '', $queue = null)
     {
         $this->lastPushed = $job;
@@ -39,37 +44,45 @@ class RabbitMQQueue extends BaseRabbitMQQueue
         return parent::push($job, $data, $queue);
     }
 
-    /** {@inheritdoc} */
-    public function pushRaw($payload, $queueName = null, array $options = [])
+    /**
+     * {@inheritdoc}
+     */
+    public function pushRaw($payload, $queue = null, array $options = [])
     {
         $payload = (new JobPayload($payload))->prepare($this->lastPushed)->value;
 
-        return tap(parent::pushRaw($payload, $queueName, $options), function () use ($queueName, $payload) {
-            $this->event($this->getQueueName($queueName), new JobPushed($payload));
+        return tap(parent::pushRaw($payload, $queue, $options), function () use ($queue, $payload): void {
+            $this->event($this->getQueue($queue), new JobPushed($payload));
         });
     }
 
-    /** {@inheritdoc} */
-    public function later($delay, $job, $data = '', $queueName = null)
+    /**
+     * {@inheritdoc}
+     */
+    public function later($delay, $job, $data = '', $queue = null)
     {
         $payload = (new JobPayload($this->createPayload($job, $data)))->prepare($job)->value;
 
-        return tap(parent::pushRaw($payload, $queueName, ['delay' => $this->secondsUntil($delay)]), function () use ($payload, $queueName) {
-            $this->event($this->getQueueName($queueName), new JobPushed($payload));
+        return tap(parent::pushRaw($payload, $queue, ['delay' => $this->secondsUntil($delay)]), function () use ($payload, $queue): void {
+            $this->event($this->getQueue($queue), new JobPushed($payload));
         });
     }
 
-    /** {@inheritdoc} */
-    public function pop($queueName = null)
+    /**
+     * {@inheritdoc}
+     */
+    public function pop($queue = null)
     {
-        return tap(parent::pop($queueName), function ($result) use ($queueName) {
+        return tap(parent::pop($queue), function ($result) use ($queue): void {
             if ($result instanceof RabbitMQJob) {
-                $this->event($queueName ?: $this->queueName, new JobReserved($result->getRawBody()));
+                $this->event($this->getQueue($queue), new JobReserved($result->getRawBody()));
             }
         });
     }
 
-    /** {@inheritdoc} */
+    /**
+     * {@inheritdoc}
+     */
     public function release($delay, $job, $data, $queue, $attempts = 0)
     {
         $this->lastPushed = $job;
@@ -80,14 +93,14 @@ class RabbitMQQueue extends BaseRabbitMQQueue
     /**
      * Fire the job deleted event.
      *
-     * @param  string $queueName
+     * @param  string $queue
      * @param  RabbitMQJob $job
      * @return void
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
-    public function deleteReserved($queueName, $job): void
+    public function deleteReserved($queue, $job): void
     {
-        $this->event($this->getQueueName($queueName), new JobDeleted($job, $job->getRawBody()));
+        $this->event($this->getQueue($queue), new JobDeleted($job, $job->getRawBody()));
     }
 
     /**
@@ -96,7 +109,7 @@ class RabbitMQQueue extends BaseRabbitMQQueue
      * @param  string $queue
      * @param  mixed $event
      * @return void
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     protected function event($queue, $event): void
     {
@@ -107,7 +120,9 @@ class RabbitMQQueue extends BaseRabbitMQQueue
         }
     }
 
-    /** {@inheritdoc} */
+    /**
+     * {@inheritdoc}
+     */
     protected function getRandomId(): string
     {
         return JobId::generate();

@@ -1,6 +1,6 @@
 {
   "name": "vladimir-yuldashev/laravel-queue-rabbitmq",
-  "description": "RabbitMQ driver for Laravel Queue. Supports Laravel Horizon",
+  "description": "RabbitMQ driver for Laravel Queue. Supports Laravel Horizon.",
   "license": "MIT",
   "authors": [
     {
@@ -9,19 +9,17 @@
     }
   ],
   "require": {
-    "php": "^7.1.3",
+    "php": "^7.2",
     "ext-json": "*",
-    "illuminate/database": "5.7.*|5.8.*",
-    "illuminate/support": "5.7.*|5.8.*",
-    "illuminate/queue": "5.7.*|5.8.*",
-    "enqueue/amqp-lib": "0.9.*",
-    "queue-interop/amqp-interop": "0.8.*"
+    "illuminate/queue": "^6.0",
+    "php-amqplib/php-amqplib": "^2.11"
   },
   "require-dev": {
-    "phpunit/phpunit": "^7.0",
-    "illuminate/events": "5.7.*|5.8.*",
+    "phpunit/phpunit": "^8.4",
     "mockery/mockery": "^1.0",
-    "laravel/horizon": "^3.0"
+    "laravel/horizon": "^3.0",
+    "friendsofphp/php-cs-fixer": "^2.16",
+    "orchestra/testbench": "^4.3"
   },
   "autoload": {
     "psr-4": {
@@ -35,7 +33,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "8.0-dev"
+      "dev-master": "10.0-dev"
     },
     "laravel": {
       "providers": [
@@ -43,8 +41,17 @@
       ]
     }
   },
+  "suggest": {
+    "ext-pcntl": "Required to use all features of the queue consumer."
+  },
   "scripts": {
-    "test": "vendor/bin/phpunit"
+    "test": [
+      "@test:style",
+      "@test:unit"
+    ],
+    "test:style": "@php vendor/bin/php-cs-fixer fix --config=.php_cs.dist --allow-risky=yes --dry-run --diff --verbose",
+    "test:unit": "@php vendor/bin/phpunit",
+    "fix:style": "@php vendor/bin/php-cs-fixer fix --config=.php_cs.dist --allow-risky=yes --diff --verbose"
   },
   "minimum-stability": "dev",
   "prefer-stable": true
