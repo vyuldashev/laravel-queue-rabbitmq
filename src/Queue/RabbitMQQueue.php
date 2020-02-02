@@ -120,8 +120,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         [$message, $correlationId] = ($attempts = Arr::get($options, 'attempts'))
             ? $this->createMessage($payload, $attempts)
-            : $this->createMessage($payload)
-        ;
+            : $this->createMessage($payload);
 
         $this->channel->basic_publish($message, $queue, $queue, true, false);
 
@@ -157,7 +156,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             'x-dead-letter-exchange' => $destinationQueue,
             'x-dead-letter-routing-key' => $destinationQueue,
             'x-message-ttl' => $ttl,
-            'x-expires' => $ttl*2
+            'x-expires' => $ttl * 2
         ]);
         $this->bindQueue($destinationQueue, $destinationQueue, $destinationQueue);
 

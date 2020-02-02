@@ -74,14 +74,14 @@ class RabbitMQJob extends Job implements JobContract
         /** @var AMQPTable|null $headers */
         $headers = Arr::get($this->message->get_properties(), 'application_headers');
 
-        if (!$headers) {
+        if (! $headers) {
             return 1;
         }
 
         $data = $headers->getNativeData();
 
-        $laravelAttempts = (int)Arr::get($data, 'laravel.attempts', 0);
-        $xDeathCount = (int)Arr::get($headers->getNativeData(), 'x-death.0.count', 0);
+        $laravelAttempts = (int) Arr::get($data, 'laravel.attempts', 0);
+        $xDeathCount = (int) Arr::get($headers->getNativeData(), 'x-death.0.count', 0);
 
         return ($laravelAttempts + $xDeathCount) + 1;
     }
