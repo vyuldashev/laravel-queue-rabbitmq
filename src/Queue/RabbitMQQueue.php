@@ -115,7 +115,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         $queue = $this->getQueue($queue);
 
         $this->declareExchange($queue);
-        $this->declareQueue($queue, true, false);
+        $this->declareQueue($queue, true, false, ['x-max-priority'=> 100]);
         $this->bindQueue($queue, $queue, $queue);
 
         [$message, $correlationId] = ($attempts = Arr::get($options, 'attempts'))
@@ -151,7 +151,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         $delayedQueue = $this->getQueue($queue).'.delay.'.$ttl;
 
         $this->declareExchange($destinationQueue);
-        $this->declareQueue($destinationQueue, true, false);
+        $this->declareQueue($destinationQueue, true, false, ['x-max-priority'=> 100]);
         $this->declareQueue($delayedQueue, true, false, [
             'x-dead-letter-exchange' => $destinationQueue,
             'x-dead-letter-routing-key' => $destinationQueue,
@@ -180,7 +180,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             );
 
             $this->declareExchange($queue);
-            $this->declareQueue($queue, true, false);
+            $this->declareQueue($queue, true, false, ['x-max-priority'=> 100]);
             $this->bindQueue($queue, $queue, $queue);
 
             $this->channel->batch_basic_publish($message, $queue, $queue);
@@ -363,6 +363,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         if ($correlationId = json_decode($payload, true)['id'] ?? null) {
             $properties['correlation_id'] = $correlationId;
+            $properties['priority'] = $attempts;
         }
 
         $message = new AMQPMessage($payload, $properties);
