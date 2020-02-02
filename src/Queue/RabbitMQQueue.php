@@ -8,6 +8,7 @@ use ErrorException;
 use Exception;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Queue\Queue;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AbstractConnection;
@@ -114,13 +115,13 @@ class RabbitMQQueue extends Queue implements QueueContract
         $queue = $this->getQueue($queue);
 
         $this->declareExchange($queue);
-        $this->declareQueue($queue, true, false, [
-            'x-dead-letter-exchange' => $queue,
-            'x-dead-letter-routing-key' => $queue,
-        ]);
+        $this->declareQueue($queue, true, false);
         $this->bindQueue($queue, $queue, $queue);
 
-        [$message, $correlationId] = $this->createMessage($payload);
+        [$message, $correlationId] = ($attempts = Arr::get($options, 'attempts'))
+            ? $this->createMessage($payload, $attempts)
+            : $this->createMessage($payload)
+        ;
 
         $this->channel->basic_publish($message, $queue, $queue, true, false);
 
@@ -143,22 +144,20 @@ class RabbitMQQueue extends Queue implements QueueContract
     {
         $ttl = $this->secondsUntil($delay) * 1000;
 
-        if ($ttl < 0) {
-            return $this->pushRaw($payload, $queue, []);
+        if ($ttl <= 0) {
+            return $this->pushRaw($payload, $queue, ['attempts' => $attempts]);
         }
 
         $destinationQueue = $this->getQueue($queue);
         $delayedQueue = $this->getQueue($queue).'.delay.'.$ttl;
 
         $this->declareExchange($destinationQueue);
-        $this->declareQueue($destinationQueue, true, false, [
-            'x-dead-letter-exchange' => $destinationQueue,
-            'x-dead-letter-routing-key' => $destinationQueue,
-        ]);
+        $this->declareQueue($destinationQueue, true, false);
         $this->declareQueue($delayedQueue, true, false, [
             'x-dead-letter-exchange' => $destinationQueue,
             'x-dead-letter-routing-key' => $destinationQueue,
             'x-message-ttl' => $ttl,
+            'x-expires' => $ttl*2
         ]);
         $this->bindQueue($destinationQueue, $destinationQueue, $destinationQueue);
 
@@ -182,10 +181,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             );
 
             $this->declareExchange($queue);
-            $this->declareQueue($queue, true, false, [
-                'x-dead-letter-exchange' => $queue,
-                'x-dead-letter-routing-key' => $queue,
-            ]);
+            $this->declareQueue($queue, true, false);
             $this->bindQueue($queue, $queue, $queue);
 
             $this->channel->batch_basic_publish($message, $queue, $queue);
