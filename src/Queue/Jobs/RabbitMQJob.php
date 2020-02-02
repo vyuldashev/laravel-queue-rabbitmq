@@ -108,15 +108,9 @@ class RabbitMQJob extends Job implements JobContract
      */
     public function release($delay = 0): void
     {
-        parent::release($delay);
+        parent::release();
 
-        if ($delay > 0) {
-            $this->rabbitmq->ack($this);
-
-            $this->rabbitmq->laterRaw($delay, $this->message->body, $this->queue, $this->attempts());
-
-            return;
-        }
+        $this->rabbitmq->laterRaw($delay, $this->message->body, $this->queue, $this->attempts());
 
         $this->rabbitmq->reject($this);
     }
