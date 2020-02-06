@@ -289,4 +289,20 @@ abstract class TestCase extends BaseTestCase
         $this->assertSame(0, Queue::size());
         $this->assertNull(Queue::pop());
     }
+
+    public function testFailed(): void
+    {
+        Queue::push(new TestJob());
+
+        $job = Queue::pop();
+
+        $job->fail(new \RuntimeException($job->resolveName().' has an exception.'));
+
+        sleep(1);
+
+        $this->assertSame(true, $job->hasFailed());
+        $this->assertSame(true, $job->isDeleted());
+        $this->assertSame(0, Queue::size());
+        $this->assertNull(Queue::pop());
+    }
 }

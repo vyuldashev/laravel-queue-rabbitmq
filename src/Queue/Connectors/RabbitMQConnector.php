@@ -43,7 +43,8 @@ class RabbitMQConnector implements ConnectorInterface
         $queue = $this->createQueue(
             Arr::get($config, 'worker', 'default'),
             $connection,
-            $config['queue']
+            $config['queue'],
+            Arr::get($config, 'queue_options', [])
         );
 
         if (! $queue instanceof RabbitMQQueue) {
@@ -82,18 +83,33 @@ class RabbitMQConnector implements ConnectorInterface
         );
     }
 
-    protected function createQueue(string $worker, AbstractConnection $connection, string $queue)
+    /**
+     * Create a queue for the worker
+     *
+     * @param string $worker
+     * @param AbstractConnection $connection
+     * @param string $queue
+     * @param array $options
+     * @return HorizonRabbitMQQueue|RabbitMQQueue|Queue
+     */
+    protected function createQueue(string $worker, AbstractConnection $connection, string $queue, array $options = [])
     {
         switch ($worker) {
             case 'default':
-                return new RabbitMQQueue($connection, $queue);
+                return new RabbitMQQueue($connection, $queue, $options);
             case 'horizon':
-                return new HorizonRabbitMQQueue($connection, $queue);
+                return new HorizonRabbitMQQueue($connection, $queue, $options);
             default:
-                return new $worker($connection, $queue);
+                return new $worker($connection, $queue, $options);
         }
     }
 
+    /**
+     * Recursively filter only null values
+     *
+     * @param array $array
+     * @return array
+     */
     private function filter(array $array): array
     {
         foreach ($array as $index => &$value) {
