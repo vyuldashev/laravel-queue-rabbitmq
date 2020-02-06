@@ -319,7 +319,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Declare a exchange in rabbitMQ
+     * Declare a exchange in rabbitMQ.
      *
      * @param string $name
      * @param string $type
@@ -379,7 +379,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Declare a queue in rabbitMQ
+     * Declare a queue in rabbitMQ.
      *
      * @param string $name
      * @param bool $durable
@@ -441,7 +441,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Reject current Job
+     * Reject current Job.
      *
      * @param RabbitMQJob $job
      * @param bool $requeue
@@ -452,7 +452,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Create a AMQP message
+     * Create a AMQP message.
      *
      * @param $payload
      * @param int $attempts
@@ -529,7 +529,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Get the Queue arguments
+     * Get the Queue arguments.
      *
      * @return array
      */
@@ -577,7 +577,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Returns a integer with a default of '100' for when using prioritization on delayed messages
+     * Returns a integer with a default of '100' for when using prioritization on delayed messages.
      *
      * @return int
      */
@@ -599,7 +599,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
     /**
      * Get the routing-key for when you use exchanges
-     * The default routing-key is the given destination
+     * The default routing-key is the given destination.
      *
      * @param string $destination
      * @return string
@@ -610,7 +610,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Get the exchangeType, or AMQPExchangeType::DIRECT as default
+     * Get the exchangeType, or AMQPExchangeType::DIRECT as default.
      *
      * @param string|null $type
      * @return string
@@ -631,7 +631,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Get the exchange for failed messages
+     * Get the exchange for failed messages.
      *
      * @param string|null $exchange
      * @return string|null
@@ -643,7 +643,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
     /**
      * Get the routing-key for failed messages
-     * The default routing-key is the given destination substituted by '.failed'
+     * The default routing-key is the given destination substituted by '.failed'.
      *
      * @param string $destination
      * @return string

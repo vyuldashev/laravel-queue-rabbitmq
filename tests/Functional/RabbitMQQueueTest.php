@@ -2,13 +2,8 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional;
 
-use Illuminate\Support\Facades\Queue;
-use Illuminate\Support\Str;
-use PhpAmqpLib\Exception\AMQPProtocolChannelException;
 use PhpAmqpLib\Exchange\AMQPExchangeType;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks\TestJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional\TestCase as BaseTestCase;
 
 class RabbitMQQueueTest extends BaseTestCase

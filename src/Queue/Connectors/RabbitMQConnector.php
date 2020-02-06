@@ -84,7 +84,7 @@ class RabbitMQConnector implements ConnectorInterface
     }
 
     /**
-     * Create a queue for the worker
+     * Create a queue for the worker.
      *
      * @param string $worker
      * @param AbstractConnection $connection
@@ -105,7 +105,7 @@ class RabbitMQConnector implements ConnectorInterface
     }
 
     /**
-     * Recursively filter only null values
+     * Recursively filter only null values.
      *
      * @param array $array
      * @return array
