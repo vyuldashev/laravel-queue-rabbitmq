@@ -38,13 +38,13 @@ class RabbitMQConnector implements ConnectorInterface
      */
     public function connect(array $config): Queue
     {
-        $connection = $this->createConnection($config);
+        $connection = $this->createConnection(Arr::except($config, 'options.queue'));
 
         $queue = $this->createQueue(
             Arr::get($config, 'worker', 'default'),
             $connection,
             $config['queue'],
-            Arr::get($config, 'queue_options', [])
+            Arr::get($config, 'options.queue', [])
         );
 
         if (! $queue instanceof RabbitMQQueue) {
@@ -72,13 +72,11 @@ class RabbitMQConnector implements ConnectorInterface
         /** @var AbstractConnection $connection */
         $connection = Arr::get($config, 'connection', AMQPLazyConnection::class);
 
-        $hosts = Arr::shuffle(Arr::get($config, 'hosts', []));
-
         // manually disable heartbeat so long-running tasks will not fail
-        $config['options']['heartbeat'] = 0;
+        Arr::set($config,'options.heartbeat', 0);
 
         return $connection::create_connection(
-            $hosts,
+            Arr::shuffle(Arr::get($config, 'hosts', [])),
             $this->filter(Arr::get($config, 'options', []))
         );
     }
