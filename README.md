@@ -76,9 +76,10 @@ Add connection to `config/queue.php`:
 ### Optional Config
 
 Optionally add queue options to the config of a connection. 
-Every queue created with this connection, get's these properties.
+Every queue created for this connection, get's the properties.
 
 When you want to prioritize messages when they were delayed, then this is possible by adding extra options.
+- When max-priority is omitted, the max priority is set with 100.
 
 ```php
 'connections' => [
@@ -87,12 +88,13 @@ When you want to prioritize messages when they were delayed, then this is possib
     'rabbitmq' => [
         // ...
 
-        'queue_options' => [
-            // ...
+        'options' => [
+            'queue' => [
+                // ...
 
-            'prioritize_delayed_messages' =>  false,
-            'queue_max_priority' => 100,
-
+                'prioritize_delayed_messages' =>  false,
+                'queue_max_priority' => 100,
+            ],
         ],
     ],
 
@@ -114,13 +116,14 @@ When you want to publish messages against an exchange with routing-key's, then t
     'rabbitmq' => [
         // ...
 
-        'queue_options' => [
-            // ...
+        'options' => [
+            'queue' => [
+                // ...
 
-            'exchange' => 'application-x',
-            'exchange_type' => 'topic',
-            'exchange_routing_key' => '',
-
+                'exchange' => 'application-x',
+                'exchange_type' => 'topic',
+                'exchange_routing_key' => '',
+            ],
         ],
     ],
 
@@ -143,13 +146,14 @@ When you want to instruct RabbitMQ to reroute failed messages to a exchange or a
     'rabbitmq' => [
         // ...
 
-        'queue_options' => [
-            // ...
+        'options' => [
+            'queue' => [
+                // ...
 
-            'reroute_failed' => true,
-            'failed_exchange' => 'failed-exchange',
-            'failed_routing_key' => 'application-x.%s',
-
+                'reroute_failed' => true,
+                'failed_exchange' => 'failed-exchange',
+                'failed_routing_key' => 'application-x.%s',
+            ],
         ],
     ],
 
