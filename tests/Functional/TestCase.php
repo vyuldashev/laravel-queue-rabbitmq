@@ -61,20 +61,21 @@ abstract class TestCase extends BaseTestCase
                     'verify_peer' => true,
                     'passphrase' => null,
                 ],
+
+                'queue' => [
+                    'prioritize_delayed' => true,
+                    'queue_max_priority' => 20,
+                    'exchange' => 'application-x',
+                    'exchange_type' => 'topic',
+                    'exchange_routing_key' => 'process.%s',
+                    'reroute_failed' => true,
+                    'failed_exchange' => 'failed-exchange',
+                    'failed_routing_key' => 'application-x.%s.failed',
+                ],
             ],
 
             'worker' => 'default',
 
-            'queue_options' => [
-                'prioritize_delayed' => true,
-                'queue_max_priority' => 20,
-                'exchange' => 'application-x',
-                'exchange_type' => 'topic',
-                'exchange_routing_key' => 'process.%s',
-                'reroute_failed' => true,
-                'failed_exchange' => 'failed-exchange',
-                'failed_routing_key' => 'application-x.%s.failed',
-            ],
         ]);
         $app['config']->set('queue.connections.rabbitmq-with-options-empty', [
             'driver' => 'rabbitmq',
@@ -99,20 +100,21 @@ abstract class TestCase extends BaseTestCase
                     'verify_peer' => true,
                     'passphrase' => null,
                 ],
+
+                'queue' => [
+                    'prioritize_delayed' => '',
+                    'queue_max_priority' => '',
+                    'exchange' => '',
+                    'exchange_type' => '',
+                    'exchange_routing_key' => '',
+                    'reroute_failed' => '',
+                    'failed_exchange' => '',
+                    'failed_routing_key' => '',
+                ],
             ],
 
             'worker' => 'default',
 
-            'queue_options' => [
-                'prioritize_delayed' => '',
-                'queue_max_priority' => '',
-                'exchange' => '',
-                'exchange_type' => '',
-                'exchange_routing_key' => '',
-                'reroute_failed' => '',
-                'failed_exchange' => '',
-                'failed_routing_key' => '',
-            ],
         ]);
     }
 
