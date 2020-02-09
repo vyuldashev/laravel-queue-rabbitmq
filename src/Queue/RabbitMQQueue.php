@@ -537,6 +537,9 @@ class RabbitMQQueue extends Queue implements QueueContract
     {
         $arguments = [];
 
+        // Messages without a priority property are treated as if their priority were 0.
+        // Messages with a priority which is higher than the queue's maximum, are treated as if they were
+        // published with the maximum priority.
         if ($this->isPrioritizeDelayed()) {
             $arguments['x-max-priority'] = $this->getQueueMaxPriority();
         }
@@ -577,13 +580,16 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Returns a integer with a default of '100' for when using prioritization on delayed messages.
+     * Returns a integer with a default of '2' for when using prioritization on delayed messages.
+     * If priority queues are desired, we recommend using between 1 and 10.
+     * Using more priority layers, will consume more CPU resources and would affect runtimes.
      *
+     * @see https://www.rabbitmq.com/priority.html
      * @return int
      */
     protected function getQueueMaxPriority(): int
     {
-        return intval(Arr::get($this->options, 'queue_max_priority') ?: 100);
+        return intval(Arr::get($this->options, 'queue_max_priority') ?: 2);
     }
 
     /**

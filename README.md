@@ -79,7 +79,7 @@ Optionally add queue options to the config of a connection.
 Every queue created for this connection, get's the properties.
 
 When you want to prioritize messages when they were delayed, then this is possible by adding extra options.
-- When max-priority is omitted, the max priority is set with 100.
+- When max-priority is omitted, the max priority is set with 2 when used.
 
 ```php
 'connections' => [
@@ -93,7 +93,7 @@ When you want to prioritize messages when they were delayed, then this is possib
                 // ...
 
                 'prioritize_delayed_messages' =>  false,
-                'queue_max_priority' => 100,
+                'queue_max_priority' => 10,
             ],
         ],
     ],
