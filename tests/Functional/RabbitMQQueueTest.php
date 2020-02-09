@@ -52,7 +52,7 @@ class RabbitMQQueueTest extends BaseTestCase
         /** @var $queue RabbitMQQueue */
         $queue = $this->connection();
         $this->assertIsInt($this->callMethod($queue, 'getQueueMaxPriority'));
-        $this->assertSame(100, $this->callMethod($queue, 'getQueueMaxPriority'));
+        $this->assertSame(2, $this->callMethod($queue, 'getQueueMaxPriority'));
 
         $queue = $this->connection('rabbitmq-with-options');
         $this->assertIsInt($this->callMethod($queue, 'getQueueMaxPriority'));
@@ -60,7 +60,7 @@ class RabbitMQQueueTest extends BaseTestCase
 
         $queue = $this->connection('rabbitmq-with-options-empty');
         $this->assertIsInt($this->callMethod($queue, 'getQueueMaxPriority'));
-        $this->assertSame(100, $this->callMethod($queue, 'getQueueMaxPriority'));
+        $this->assertSame(2, $this->callMethod($queue, 'getQueueMaxPriority'));
     }
 
     public function testExchangeType(): void
