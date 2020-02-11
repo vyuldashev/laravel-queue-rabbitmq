@@ -40,6 +40,6 @@ class ExchangeDeclareCommand extends Command
             (bool) $this->option('auto-delete')
         );
 
-        $this->warn('Exchange declared successfully.');
+        $this->info('Exchange declared successfully.');
     }
 }

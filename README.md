@@ -73,6 +73,94 @@ Add connection to `config/queue.php`:
 ],
 ```
 
+### Optional Config
+
+Optionally add queue options to the config of a connection. 
+Every queue created for this connection, get's the properties.
+
+When you want to prioritize messages when they were delayed, then this is possible by adding extra options.
+- When max-priority is omitted, the max priority is set with 2 when used.
+
+```php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        'options' => [
+            'queue' => [
+                // ...
+
+                'prioritize_delayed_messages' =>  false,
+                'queue_max_priority' => 10,
+            ],
+        ],
+    ],
+
+    // ...    
+],
+```
+
+When you want to publish messages against an exchange with routing-key's, then this is possible by adding extra options.
+- When the exchange is omitted, RabbitMQ will use the `amq.direct` exchange for the routing-key
+- When routing-key is omitted the routing-key by default is the `queue` name.
+- When using `%s` in the routing-key the queue_name will be substituted.
+
+> Note: when using exchange with routing-key, u probably create your queues with bindings yourself.
+  
+```php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        'options' => [
+            'queue' => [
+                // ...
+
+                'exchange' => 'application-x',
+                'exchange_type' => 'topic',
+                'exchange_routing_key' => '',
+            ],
+        ],
+    ],
+
+    // ...    
+],
+```
+
+In Laravel failed jobs are stored into the database. But maybe you want to instruct some other process to also do something with the message.
+When you want to instruct RabbitMQ to reroute failed messages to a exchange or a specific queue, then this is possible by adding extra options.
+- When the exchange is omitted, RabbitMQ will use the `amq.direct` exchange for the routing-key
+- When routing-key is omitted, the routing-key by default the `queue` name is substituted with `'.failed'`.
+- When using `%s` in the routing-key the queue_name will be substituted.
+
+> Note: When using failed_job exchange with routing-key, u probably need to create your exchange/queue with bindings yourself.
+  
+```php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        'options' => [
+            'queue' => [
+                // ...
+
+                'reroute_failed' => true,
+                'failed_exchange' => 'failed-exchange',
+                'failed_routing_key' => 'application-x.%s',
+            ],
+        ],
+    ],
+
+    // ...    
+],
+```
+
 ## Laravel Usage
 
 Once you completed the configuration you can use Laravel Queue API. If you used other queue drivers you do not need to change anything else. If you do not know how to use Queue API, please refer to the official Laravel documentation: http://laravel.com/docs/queues

@@ -8,6 +8,7 @@ use ErrorException;
 use Exception;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Queue\Queue;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AbstractConnection;
@@ -68,13 +69,27 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     protected $currentJob;
 
+    /**
+     * @var array
+     */
+    protected $options;
+
+    /**
+     * RabbitMQQueue constructor.
+     *
+     * @param AbstractConnection $connection
+     * @param string $default
+     * @param array $options
+     */
     public function __construct(
         AbstractConnection $connection,
-        string $default
+        string $default,
+        array $options = []
     ) {
         $this->connection = $connection;
         $this->channel = $connection->channel();
         $this->default = $default;
+        $this->options = $options;
     }
 
     /**
@@ -100,6 +115,8 @@ class RabbitMQQueue extends Queue implements QueueContract
 
     /**
      * {@inheritdoc}
+     *
+     * @throws AMQPProtocolChannelException
      */
     public function push($job, $data = '', $queue = null)
     {
@@ -108,27 +125,38 @@ class RabbitMQQueue extends Queue implements QueueContract
 
     /**
      * {@inheritdoc}
+     *
+     * @throws AMQPProtocolChannelException
      */
     public function pushRaw($payload, $queue = null, array $options = [])
     {
-        $queue = $this->getQueue($queue);
+        $destination = $this->getQueue($queue);
+        $exchange = $this->getExchange();
 
-        $this->declareExchange($queue);
-        $this->declareQueue($queue, true, false, [
-            'x-dead-letter-exchange' => $queue,
-            'x-dead-letter-routing-key' => $queue,
-        ]);
-        $this->bindQueue($queue, $queue, $queue);
+        // When a exchange is defined and no exchange is present in RabbitMQ, create an exchange.
+        if ($exchange && ! $this->isExchangeExists($exchange)) {
+            $this->declareExchange($exchange, $this->getExchangeType());
+        }
 
-        [$message, $correlationId] = $this->createMessage($payload);
+        // When no exchange is defined, create a queue for amq.direct publishing, but only if it not already present.
+        if (! $exchange && ! $this->isQueueExists($destination)) {
+            $this->declareQueue($destination, true, false, $this->getQueueArguments($destination));
+        }
 
-        $this->channel->basic_publish($message, $queue, $queue, true, false);
+        [$message, $correlationId] = ($attempts = Arr::get($options, 'attempts'))
+            ? $this->createMessage($payload, $attempts)
+            : $this->createMessage($payload);
+
+        // Publish the message
+        $this->channel->basic_publish($message, $exchange, $this->getRoutingKey($destination), true, false);
 
         return $correlationId;
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @throws AMQPProtocolChannelException
      */
     public function later($delay, $job, $data = '', $queue = null)
     {
@@ -139,56 +167,62 @@ class RabbitMQQueue extends Queue implements QueueContract
         );
     }
 
+    /**
+     * @param $delay
+     * @param $payload
+     * @param null $queue
+     * @param int $attempts
+     * @return mixed
+     *
+     * @throws AMQPProtocolChannelException
+     */
     public function laterRaw($delay, $payload, $queue = null, $attempts = 0)
     {
         $ttl = $this->secondsUntil($delay) * 1000;
 
-        if ($ttl < 0) {
-            return $this->pushRaw($payload, $queue, []);
+        // When no ttl just publish a new message to the exchange or queue
+        if ($ttl <= 0) {
+            return $this->pushRaw($payload, $queue, ['delay' => $delay, 'attempts' => $attempts]);
         }
 
-        $destinationQueue = $this->getQueue($queue);
-        $delayedQueue = $this->getQueue($queue).'.delay.'.$ttl;
+        $destination = $this->getQueue($queue).'.delay.'.$ttl;
 
-        $this->declareExchange($destinationQueue);
-        $this->declareQueue($destinationQueue, true, false, [
-            'x-dead-letter-exchange' => $destinationQueue,
-            'x-dead-letter-routing-key' => $destinationQueue,
-        ]);
-        $this->declareQueue($delayedQueue, true, false, [
-            'x-dead-letter-exchange' => $destinationQueue,
-            'x-dead-letter-routing-key' => $destinationQueue,
-            'x-message-ttl' => $ttl,
-        ]);
-        $this->bindQueue($destinationQueue, $destinationQueue, $destinationQueue);
+        $this->declareQueue($destination, true, false, $this->getDelayQueueArguments($this->getQueue($queue), $ttl));
 
         [$message, $correlationId] = $this->createMessage($payload, $attempts);
 
-        $this->channel->basic_publish($message, null, $delayedQueue, true, false);
+        // Publish directly on the delayQueue, no need to publish trough an exchange.
+        $this->channel->basic_publish($message, null, $destination, true, false);
 
         return $correlationId;
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @throws AMQPProtocolChannelException
      */
     public function bulk($jobs, $data = '', $queue = null): void
     {
-        $queue = $this->getQueue($queue);
+        $destination = $this->getQueue($queue);
+        $exchange = $this->getExchange();
+
+        // When a exchange is defined and no exchange is present in RabbitMQ, create an exchange.
+        if ($exchange && ! $this->isExchangeExists($exchange)) {
+            $this->declareExchange($exchange, $this->getExchangeType());
+        }
+
+        // When no exchange is defined, create a queue for amq.direct publishing, but only if it not already present.
+        if (! $exchange && ! $this->isQueueExists($destination)) {
+            $this->declareQueue($destination, true, false, $this->getQueueArguments($destination));
+        }
 
         foreach ((array) $jobs as $job) {
             [$message] = $this->createMessage(
                 $this->createPayload($job, $queue, $data)
             );
 
-            $this->declareExchange($queue);
-            $this->declareQueue($queue, true, false, [
-                'x-dead-letter-exchange' => $queue,
-                'x-dead-letter-routing-key' => $queue,
-            ]);
-            $this->bindQueue($queue, $queue, $queue);
-
-            $this->channel->batch_basic_publish($message, $queue, $queue);
+            $this->channel->batch_basic_publish($message, $exchange, $destination);
         }
 
         $this->channel->publish_batch();
@@ -215,9 +249,14 @@ class RabbitMQQueue extends Queue implements QueueContract
                 );
             }
         } catch (AMQPProtocolChannelException $exception) {
-            // if there is not exchange or queue AMQP will throw exception with code 404
-            // we need to catch it and return null
+            // If there is not exchange or queue AMQP will throw exception with code 404
+            // We need to catch it and return null
             if ($exception->amqp_reply_code === 404) {
+
+                // Because of the channel exception the channel was closed and removed.
+                // We have to open a new channel. Because else the worker(s) are stuck in a loop, without processing.
+                $this->channel = $this->connection->channel();
+
                 return null;
             }
 
@@ -227,22 +266,36 @@ class RabbitMQQueue extends Queue implements QueueContract
         return null;
     }
 
+    /**
+     * @return AbstractConnection
+     */
     public function getConnection(): AbstractConnection
     {
         return $this->connection;
     }
 
+    /**
+     * @return AMQPChannel
+     */
     public function getChannel(): AMQPChannel
     {
         return $this->channel;
     }
 
+    /**
+     * Gets a queue/destination, by default the queue option set on the connection.
+     * @param null $queue
+     * @return string
+     */
     public function getQueue($queue = null)
     {
         return $queue ?: $this->default;
     }
 
     /**
+     * Checks if the given exchange already present/defined in RabbitMQ.
+     * Returns false when when the exchange is missing.
+     *
      * @param string $exchange
      * @return bool
      * @throws AMQPProtocolChannelException
@@ -265,11 +318,21 @@ class RabbitMQQueue extends Queue implements QueueContract
         }
     }
 
+    /**
+     * Declare a exchange in rabbitMQ.
+     *
+     * @param string $name
+     * @param string $type
+     * @param bool $durable
+     * @param bool $autoDelete
+     * @param array $arguments
+     */
     public function declareExchange(
         string $name,
         string $type = AMQPExchangeType::DIRECT,
         bool $durable = true,
-        bool $autoDelete = false
+        bool $autoDelete = false,
+        array $arguments = []
     ): void {
         if (in_array($name, $this->exchanges, true)) {
             return;
@@ -282,11 +345,15 @@ class RabbitMQQueue extends Queue implements QueueContract
             $durable,
             $autoDelete,
             false,
-            true
+            true,
+            new AMQPTable($arguments)
         );
     }
 
     /**
+     * Checks if the given queue already present/defined in RabbitMQ.
+     * Returns false when when the queue is missing.
+     *
      * @param string $name
      * @return bool
      * @throws AMQPProtocolChannelException
@@ -311,6 +378,14 @@ class RabbitMQQueue extends Queue implements QueueContract
         }
     }
 
+    /**
+     * Declare a queue in rabbitMQ.
+     *
+     * @param string $name
+     * @param bool $durable
+     * @param bool $autoDelete
+     * @param array $arguments
+     */
     public function declareQueue(string $name, bool $durable = true, bool $autoDelete = false, array $arguments = []): void
     {
         if (in_array($name, $this->queues, true)) {
@@ -328,6 +403,11 @@ class RabbitMQQueue extends Queue implements QueueContract
         );
     }
 
+    /**
+     * @param string $queue
+     * @param string $exchange
+     * @param string $routingKey
+     */
     public function bindQueue(string $queue, string $exchange, string $routingKey = ''): void
     {
         if (in_array(
@@ -341,6 +421,9 @@ class RabbitMQQueue extends Queue implements QueueContract
         $this->channel->queue_bind($queue, $exchange, $routingKey);
     }
 
+    /**
+     * @param null $queue
+     */
     public function purge($queue = null): void
     {
         // create a temporary channel, so the main channel will not be closed on exception
@@ -349,16 +432,32 @@ class RabbitMQQueue extends Queue implements QueueContract
         $channel->close();
     }
 
+    /**
+     * @param RabbitMQJob $job
+     */
     public function ack(RabbitMQJob $job): void
     {
         $this->channel->basic_ack($job->getRabbitMQMessage()->getDeliveryTag());
     }
 
+    /**
+     * Reject current Job.
+     *
+     * @param RabbitMQJob $job
+     * @param bool $requeue
+     */
     public function reject(RabbitMQJob $job, bool $requeue = false): void
     {
         $this->channel->basic_reject($job->getRabbitMQMessage()->getDeliveryTag(), $requeue);
     }
 
+    /**
+     * Create a AMQP message.
+     *
+     * @param $payload
+     * @param int $attempts
+     * @return array
+     */
     protected function createMessage($payload, int $attempts = 0): array
     {
         $properties = [
@@ -368,6 +467,10 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         if ($correlationId = json_decode($payload, true)['id'] ?? null) {
             $properties['correlation_id'] = $correlationId;
+        }
+
+        if ($this->isPrioritizeDelayed()) {
+            $properties['priority'] = $attempts;
         }
 
         $message = new AMQPMessage($payload, $properties);
@@ -384,6 +487,14 @@ class RabbitMQQueue extends Queue implements QueueContract
         ];
     }
 
+    /**
+     * Create a payload array from the given job and data.
+     *
+     * @param object|string $job
+     * @param string $queue
+     * @param string $data
+     * @return array
+     */
     protected function createPayloadArray($job, $queue, $data = '')
     {
         return array_merge(parent::createPayloadArray($job, $queue, $data), [
@@ -415,5 +526,136 @@ class RabbitMQQueue extends Queue implements QueueContract
         } catch (ErrorException $exception) {
             // Ignore the exception
         }
+    }
+
+    /**
+     * Get the Queue arguments.
+     *
+     * @return array
+     */
+    protected function getQueueArguments(string $destination): array
+    {
+        $arguments = [];
+
+        // Messages without a priority property are treated as if their priority were 0.
+        // Messages with a priority which is higher than the queue's maximum, are treated as if they were
+        // published with the maximum priority.
+        if ($this->isPrioritizeDelayed()) {
+            $arguments['x-max-priority'] = $this->getQueueMaxPriority();
+        }
+
+        if ($this->isRerouteFailed()) {
+            $arguments['x-dead-letter-exchange'] = $this->getFailedExchange() ?? '';
+            $arguments['x-dead-letter-routing-key'] = $this->getFailedRoutingKey($destination);
+        }
+
+        return $arguments;
+    }
+
+    /**
+     * Get the Delay queue arguments.
+     *
+     * @param string $destination
+     * @param int $ttl
+     * @return array
+     */
+    protected function getDelayQueueArguments(string $destination, int $ttl): array
+    {
+        return [
+            'x-dead-letter-exchange' => $this->getExchange() ?? '',
+            'x-dead-letter-routing-key' => $this->getRoutingKey($destination),
+            'x-message-ttl' => $ttl,
+            'x-expires' => $ttl * 2,
+        ];
+    }
+
+    /**
+     * Returns &true;, if delayed messages should be prioritized.
+     *
+     * @return bool
+     */
+    protected function isPrioritizeDelayed(): bool
+    {
+        return boolval(Arr::get($this->options, 'prioritize_delayed') ?: false);
+    }
+
+    /**
+     * Returns a integer with a default of '2' for when using prioritization on delayed messages.
+     * If priority queues are desired, we recommend using between 1 and 10.
+     * Using more priority layers, will consume more CPU resources and would affect runtimes.
+     *
+     * @see https://www.rabbitmq.com/priority.html
+     * @return int
+     */
+    protected function getQueueMaxPriority(): int
+    {
+        return intval(Arr::get($this->options, 'queue_max_priority') ?: 2);
+    }
+
+    /**
+     * Get the exchange name, or &null; as default value.
+     *
+     * @param string $exchange
+     * @return string|null
+     */
+    protected function getExchange(string $exchange = null): ?string
+    {
+        return $exchange ?: Arr::get($this->options, 'exchange') ?: null;
+    }
+
+    /**
+     * Get the routing-key for when you use exchanges
+     * The default routing-key is the given destination.
+     *
+     * @param string $destination
+     * @return string
+     */
+    protected function getRoutingKey(string $destination): string
+    {
+        return ltrim(sprintf(Arr::get($this->options, 'exchange_routing_key') ?: '%s', $destination), '.');
+    }
+
+    /**
+     * Get the exchangeType, or AMQPExchangeType::DIRECT as default.
+     *
+     * @param string|null $type
+     * @return string
+     */
+    protected function getExchangeType(string $type = null): string
+    {
+        return @constant(AMQPExchangeType::class.'::'.Str::upper($type ?: Arr::get($this->options, 'exchange_type') ?: 'direct')) ?: AMQPExchangeType::DIRECT;
+    }
+
+    /**
+     * Returns &true;, if failed messages should be rerouted.
+     *
+     * @return bool
+     */
+    protected function isRerouteFailed(): bool
+    {
+        return boolval(Arr::get($this->options, 'reroute_failed') ?: false);
+    }
+
+    /**
+     * Get the exchange for failed messages.
+     *
+     * @param string|null $exchange
+     * @return string|null
+     */
+    protected function getFailedExchange(string $exchange = null): ?string
+    {
+        return $exchange ?: Arr::get($this->options, 'failed_exchange') ?: null;
+    }
+
+    /**
+     * Get the routing-key for failed messages
+     * The default routing-key is the given destination substituted by '.failed'.
+     *
+     * @param string $destination
+     * @return string
+     */
+    protected function getFailedRoutingKey(string $destination): string
+    {
+        return ltrim(sprintf(Arr::get($this->options, 'failed_routing_key') ?: '%s.failed', $destination), '.');
     }
 }

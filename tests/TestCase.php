@@ -50,8 +50,8 @@ abstract class TestCase extends BaseTestCase
         ]);
     }
 
-    protected function connection(): RabbitMQQueue
+    protected function connection(string $name = null): RabbitMQQueue
     {
-        return Queue::connection();
+        return Queue::connection($name);
     }
 }
