@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.1.3...master)
+
 ## [10.1.3 (2020-01-12)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.1.2...v10.1.3)
 
 - Fix 100% CPU usage of `rabbitmq:consume` command by adding sleep to consumer when no messages are got from the queue.
