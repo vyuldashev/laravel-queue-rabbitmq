@@ -319,22 +319,26 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Declare a exchange in rabbitMQ.
+     * Declare a exchange in rabbitMQ, when not already declared or exchange does not already exists in rabbitMQ.
      *
      * @param string $name
      * @param string $type
      * @param bool $durable
      * @param bool $autoDelete
      * @param array $arguments
+     *
+     * @throws AMQPProtocolChannelException
      */
-    public function declareExchange(
-        string $name,
-        string $type = AMQPExchangeType::DIRECT,
-        bool $durable = true,
-        bool $autoDelete = false,
-        array $arguments = []
-    ): void {
-        if (in_array($name, $this->exchanges, true)) {
+    public function declareExchange(string $name, string $type = AMQPExchangeType::DIRECT, bool $durable = true, bool $autoDelete = false, array $arguments = []): void
+    {
+        if ($this->isExchangeDeclared($name)) {
+            return;
+        }
+
+        if ($this->isExchangeExists($name)) {
+            // Add the exchange to the declared exchanges
+            $this->exchanges[] = $name;
+
             return;
         }
 
@@ -348,6 +352,9 @@ class RabbitMQQueue extends Queue implements QueueContract
             true,
             new AMQPTable($arguments)
         );
+
+        // Add the exchange to the declared exchanges
+        $this->exchanges[] = $name;
     }
 
     /**
@@ -379,16 +386,25 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Declare a queue in rabbitMQ.
+     * Declare a queue in rabbitMQ, when not already declared or queue does not already exists in rabbitMQ.
      *
      * @param string $name
      * @param bool $durable
      * @param bool $autoDelete
      * @param array $arguments
+     *
+     * @throws AMQPProtocolChannelException
      */
     public function declareQueue(string $name, bool $durable = true, bool $autoDelete = false, array $arguments = []): void
     {
-        if (in_array($name, $this->queues, true)) {
+        if ($this->isQueueDeclared($name)) {
+            return;
+        }
+
+        if ($this->isQueueExists($name)) {
+            // Add the queue to the declared queues
+            $this->queues[] = $name;
+
             return;
         }
 
@@ -401,6 +417,9 @@ class RabbitMQQueue extends Queue implements QueueContract
             false,
             new AMQPTable($arguments)
         );
+
+        // Add the queue to the declared queues
+        $this->queues[] = $name;
     }
 
     /**
@@ -531,6 +550,8 @@ class RabbitMQQueue extends Queue implements QueueContract
     /**
      * Get the Queue arguments.
      *
+     * @param string $destination
+     *
      * @return array
      */
     protected function getQueueArguments(string $destination): array
@@ -657,5 +678,25 @@ class RabbitMQQueue extends Queue implements QueueContract
     protected function getFailedRoutingKey(string $destination): string
     {
         return ltrim(sprintf(Arr::get($this->options, 'failed_routing_key') ?: '%s.failed', $destination), '.');
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return bool
+     */
+    protected function isExchangeDeclared(string $name): bool
+    {
+        return in_array($name, $this->exchanges, true);
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return bool
+     */
+    protected function isQueueDeclared(string $name): bool
+    {
+        return in_array($name, $this->queues, true);
     }
 }
