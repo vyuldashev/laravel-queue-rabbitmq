@@ -14,7 +14,7 @@ abstract class TestCase extends BaseTestCase
     /**
      * @throws AMQPProtocolChannelException
      */
-    protected function setUp(): void
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -62,7 +62,6 @@ abstract class TestCase extends BaseTestCase
         $this->assertNull($job->getJobId());
 
         $job->delete();
-
         $this->assertSame(0, Queue::size());
     }
 
@@ -88,6 +87,9 @@ abstract class TestCase extends BaseTestCase
         $this->assertNull($payload['timeout']);
         $this->assertNull($payload['timeoutAt']);
         $this->assertSame($job->getJobId(), $payload['id']);
+
+        $job->delete();
+        $this->assertSame(0, Queue::size());
     }
 
     public function testLaterRaw(): void
@@ -117,7 +119,6 @@ abstract class TestCase extends BaseTestCase
         $this->assertSame($data, $body['data']);
 
         $job->delete();
-
         $this->assertSame(0, Queue::size());
     }
 
@@ -145,7 +146,6 @@ abstract class TestCase extends BaseTestCase
         $this->assertNotNull($job->getJobId());
 
         $job->delete();
-
         $this->assertSame(0, Queue::size());
     }
 
@@ -186,6 +186,9 @@ abstract class TestCase extends BaseTestCase
 
             $this->assertSame($attempt, $job->attempts());
         }
+
+        $job->delete();
+        $this->assertSame(0, Queue::size());
     }
 
     public function testRelease(): void
@@ -209,6 +212,9 @@ abstract class TestCase extends BaseTestCase
 
             $this->assertSame($attempt, $job->attempts());
         }
+
+        $job->delete();
+        $this->assertSame(0, Queue::size());
     }
 
     public function testReleaseWithDelayRaw(): void
@@ -237,6 +243,9 @@ abstract class TestCase extends BaseTestCase
 
             $this->assertSame($attempt, $job->attempts());
         }
+
+        $job->delete();
+        $this->assertSame(0, Queue::size());
     }
 
     public function testReleaseInThePast(): void
@@ -248,7 +257,10 @@ abstract class TestCase extends BaseTestCase
 
         sleep(1);
 
-        $this->assertInstanceOf(RabbitMQJob::class, Queue::pop());
+        $this->assertInstanceOf(RabbitMQJob::class, $job = Queue::pop());
+
+        $job->delete();
+        $this->assertSame(0, Queue::size());
     }
 
     public function testReleaseAndReleaseWithDelayAttempts(): void
@@ -272,8 +284,10 @@ abstract class TestCase extends BaseTestCase
         sleep(4);
 
         $this->assertNotNull($job = Queue::pop());
-
         $this->assertSame(3, $job->attempts());
+
+        $job->delete();
+        $this->assertSame(0, Queue::size());
     }
 
     public function testDelete(): void
