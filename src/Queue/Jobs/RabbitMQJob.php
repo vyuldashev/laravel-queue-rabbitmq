@@ -86,16 +86,17 @@ class RabbitMQJob extends Job implements JobContract
     }
 
     /**
-     * @param null $e
+     * {@inheritdoc}
+     *
      */
-    public function fail($e = null): void
+    public function markAsFailed()
     {
+        parent::markAsFailed();
+
         // We must tel rabbitMQ this Job is failed
         // The message must be rejected when the Job marked as failed, in case rabbitMQ wants to do some extra magic.
         // like: Death lettering the message to an other exchange/routing-key.
         $this->rabbitmq->reject($this);
-
-        parent::fail($e);
     }
 
     /**
