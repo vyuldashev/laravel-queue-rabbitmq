@@ -428,7 +428,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Bind a queue to an exchange
+     * Bind a queue to an exchange.
      *
      * @param string $queue
      * @param string $exchange
@@ -449,7 +449,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Purge the queue of messages
+     * Purge the queue of messages.
      *
      * @param string $queue
      * @return void
@@ -463,7 +463,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Acknowledge the message
+     * Acknowledge the message.
      *
      * @param RabbitMQJob $job
      * @return void
@@ -751,7 +751,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * Determine all publish properties
+     * Determine all publish properties.
      *
      * @param $queue
      * @param array $options

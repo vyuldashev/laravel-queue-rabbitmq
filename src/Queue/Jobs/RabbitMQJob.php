@@ -83,7 +83,6 @@ class RabbitMQJob extends Job implements JobContract
 
     /**
      * {@inheritdoc}
-     *
      */
     public function markAsFailed(): void
     {
