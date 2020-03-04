@@ -13,7 +13,6 @@ use Interop\Amqp\AmqpMessage;
 use Interop\Amqp\Impl\AmqpBind;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
-use Illuminate\Support\Facades\Queue as QueueFacade;
 
 class RabbitMQQueue extends Queue implements QueueContract
 {
@@ -31,7 +30,12 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @var array
      */
-    protected $lastPushed;
+    protected $lastPush = [];
+
+    /**
+     * @var array
+     */
+    protected $lastPop = [];
 
 
     /**
@@ -77,8 +81,6 @@ class RabbitMQQueue extends Queue implements QueueContract
     /** {@inheritdoc} */
     public function push($job, $data = '', $queue = null)
     {
-        $this->lastPushed = func_get_args();
-
         return $this->pushRaw($this->createPayload($job, $queue, $data), $queue, []);
     }
 
@@ -86,6 +88,9 @@ class RabbitMQQueue extends Queue implements QueueContract
     public function pushRaw($payload, $queueName = null, array $options = [])
     {
         try {
+
+            $this->lastPush = func_get_args();
+
             /**
              * @var AmqpTopic
              * @var AmqpQueue $queue
@@ -176,6 +181,9 @@ class RabbitMQQueue extends Queue implements QueueContract
     public function pop($queueName = null)
     {
         try {
+
+            $this->lastPop = func_get_args();
+
             /** @var AmqpQueue $queue */
             [$queue] = $this->declareEverything($queueName);
 
@@ -313,8 +321,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         $logger->error('AMQP error while attempting '.$action.': '.$e->getMessage());
 
         //If we have fallback connection lets try send job
-        if ($this->fallbackConnectionName && $this->lastPushed) {
-            QueueFacade::connection($this->fallbackConnectionName)->push(...$this->lastPushed);
+        if ($this->fallbackConnectionHandler($action)) {
             return;
         }
 
@@ -326,4 +333,44 @@ class RabbitMQQueue extends Queue implements QueueContract
         // Sleep so that we don't flood the log file
         sleep($this->sleepOnError);
     }
+
+
+    /**
+     * Try send job to the "fallback" connection
+     *
+     * @param string $action
+     * @return bool
+     */
+    protected function fallbackConnectionHandler(string $action): bool
+    {
+        if (!$this->fallbackConnectionName) {
+            return false;
+        }
+
+        /** @var \Illuminate\Queue\QueueManager $queueManager */
+        $queueManager = $this->container['queue'];
+        $queue = $queueManager->connection($this->fallbackConnectionName);
+
+        if ($action == 'pushRaw' &&
+            !empty($this->lastPush)) {
+
+            $queue->pushRaw(...$this->lastPush);
+            $this->lastPush = [];
+
+            return true;
+        }
+
+        if ($action == 'pop' &&
+            !empty($this->lastPop)) {
+
+            $queue->pop(...$this->lastPop);
+            $this->lastPop = [];
+
+            return true;
+        }
+
+        return false;
+    }
+
+
 }
