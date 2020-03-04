@@ -13,6 +13,7 @@ use Interop\Amqp\AmqpMessage;
 use Interop\Amqp\Impl\AmqpBind;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
+use Illuminate\Support\Facades\Queue as QueueFacade;
 
 class RabbitMQQueue extends Queue implements QueueContract
 {
@@ -24,6 +25,22 @@ class RabbitMQQueue extends Queue implements QueueContract
 
     protected $declaredExchanges = [];
     protected $declaredQueues = [];
+
+    /**
+     * The job that last pushed to queue via the "push" method.
+     *
+     * @var array
+     */
+    protected $lastPushed;
+
+
+    /**
+     * Name of fallback connection
+     *
+     * @var string|null
+     */
+    protected $fallbackConnectionName;
+
 
     /**
      * @var AmqpContext
@@ -45,6 +62,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             json_decode($this->exchangeOptions['arguments'], true) : [];
 
         $this->sleepOnError = $config['sleep_on_error'] ?? 5;
+        $this->fallbackConnectionName = $config['fallback_connection_name'] ?? null;
     }
 
     /** {@inheritdoc} */
@@ -59,6 +77,8 @@ class RabbitMQQueue extends Queue implements QueueContract
     /** {@inheritdoc} */
     public function push($job, $data = '', $queue = null)
     {
+        $this->lastPushed = func_get_args();
+
         return $this->pushRaw($this->createPayload($job, $queue, $data), $queue, []);
     }
 
@@ -291,6 +311,12 @@ class RabbitMQQueue extends Queue implements QueueContract
         $logger = $this->container['log'];
 
         $logger->error('AMQP error while attempting '.$action.': '.$e->getMessage());
+
+        //If we have fallback connection lets try send job
+        if ($this->fallbackConnectionName && $this->lastPushed) {
+            QueueFacade::connection($this->fallbackConnectionName)->push(...$this->lastPushed);
+            return;
+        }
 
         // If it's set to false, throw an error rather than waiting
         if ($this->sleepOnError === false) {

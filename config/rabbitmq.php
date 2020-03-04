@@ -83,6 +83,13 @@ return [
      */
     'sleep_on_error' => env('RABBITMQ_ERROR_SLEEP', 5),
 
+    /**
+     * Set another "fallback" connection for queue.
+     * If current connection was failed job will be send there.
+     * For example it can be database worker.
+     */
+    'fallback_connection_name' => env('RABBITMQ_FALLBACK_CONNECTION_NAME', null),
+
     /*
      * Optional SSL params if an SSL connection is used
      */
