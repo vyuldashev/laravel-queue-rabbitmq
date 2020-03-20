@@ -74,6 +74,11 @@ return [
             'exclusive' => env('RABBITMQ_QUEUE_EXCLUSIVE', false),
             'auto_delete' => env('RABBITMQ_QUEUE_AUTODELETE', false),
             'arguments' => env('RABBITMQ_QUEUE_ARGUMENTS'),
+            'default_job' => '',
+
+            'job_mapping' => [
+
+            ]
         ],
     ],
 
@@ -94,5 +99,7 @@ return [
         'verify_peer' => env('RABBITMQ_SSL_VERIFY_PEER', true),
         'passphrase' => env('RABBITMQ_SSL_PASSPHRASE', null),
     ],
+
+
 
 ];

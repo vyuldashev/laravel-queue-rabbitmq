@@ -72,6 +72,18 @@ class RabbitMQJob extends Job implements JobContract
     }
 
     /**
+     * Get the name of the queued job class.
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        $defaultJob = $this->queue->getOption('default_job');
+        $jobMapping = $this->queue->getOption('job_mapping');
+        $action = $this->payload()['action'];
+        return isset($jobMapping[$action]) ? $jobMapping[$action] : $defaultJob;
+    }
+    /**
      * Get the number of times the job has been attempted.
      *
      * @return int

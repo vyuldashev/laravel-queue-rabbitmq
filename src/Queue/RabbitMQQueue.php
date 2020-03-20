@@ -300,4 +300,9 @@ class RabbitMQQueue extends Queue implements QueueContract
         // Sleep so that we don't flood the log file
         sleep($this->sleepOnError);
     }
+
+    public function getOption($name)
+    {
+        return $this->queueOptions[$name] ?? null;
+    }
 }
