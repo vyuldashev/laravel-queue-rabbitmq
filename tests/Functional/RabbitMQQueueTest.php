@@ -2,6 +2,7 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional;
 
+use Illuminate\Support\Str;
 use PhpAmqpLib\Exchange\AMQPExchangeType;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional\TestCase as BaseTestCase;
@@ -139,13 +140,105 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertSame('test.failed', $this->callMethod($queue, 'getFailedRoutingKey', ['test']));
     }
 
+    public function testDeclareDeleteExchange(): void
+    {
+        /** @var $queue RabbitMQQueue */
+        $queue = $this->connection();
+
+        $name = Str::random();
+
+        $this->assertFalse($queue->isExchangeExists($name));
+
+        $queue->declareExchange($name);
+        $this->assertTrue($queue->isExchangeExists($name));
+
+        $queue->deleteExchange($name);
+        $this->assertFalse($queue->isExchangeExists($name));
+    }
+
+    public function testDeclareDeleteQueue(): void
+    {
+        /** @var $queue RabbitMQQueue */
+        $queue = $this->connection();
+
+        $name = Str::random();
+
+        $this->assertFalse($queue->isQueueExists($name));
+
+        $queue->declareQueue($name);
+        $this->assertTrue($queue->isQueueExists($name));
+
+        $queue->deleteQueue($name);
+        $this->assertFalse($queue->isQueueExists($name));
+    }
+
     public function testQueueArguments(): void
     {
-        $this->assertTrue(true);
+        $name = Str::random();
+
+        /** @var $queue RabbitMQQueue */
+        $queue = $this->connection();
+        $actual = $this->callMethod($queue, 'getQueueArguments', [$name]);
+        $expected = [];
+        $this->assertEquals(array_keys($expected), array_keys($actual));
+        $this->assertEquals(array_values($expected), array_values($actual));
+
+        $queue = $this->connection('rabbitmq-with-options');
+        $actual = $this->callMethod($queue, 'getQueueArguments', [$name]);
+        $expected = [
+            'x-max-priority' => 20,
+            'x-dead-letter-exchange' => 'failed-exchange',
+            'x-dead-letter-routing-key' => sprintf('application-x.%s.failed', $name),
+        ];
+
+        $this->assertEquals(array_keys($expected), array_keys($actual));
+        $this->assertEquals(array_values($expected), array_values($actual));
+
+        $queue = $this->connection('rabbitmq-with-options-empty');
+        $actual = $this->callMethod($queue, 'getQueueArguments', [$name]);
+        $expected = [];
+
+        $this->assertEquals(array_keys($expected), array_keys($actual));
+        $this->assertEquals(array_values($expected), array_values($actual));
     }
 
     public function testDelayQueueArguments(): void
     {
-        $this->assertTrue(true);
+        $name = Str::random();
+        $ttl = 12000;
+
+        /** @var $queue RabbitMQQueue */
+        $queue = $this->connection();
+        $actual = $this->callMethod($queue, 'getDelayQueueArguments', [$name, $ttl]);
+        $expected = [
+            'x-dead-letter-exchange' => '',
+            'x-dead-letter-routing-key' => $name,
+            'x-message-ttl' => $ttl,
+            'x-expires' => $ttl * 2,
+        ];
+        $this->assertEquals(array_keys($expected), array_keys($actual));
+        $this->assertEquals(array_values($expected), array_values($actual));
+
+        $queue = $this->connection('rabbitmq-with-options');
+        $actual = $this->callMethod($queue, 'getDelayQueueArguments', [$name, $ttl]);
+        $expected = [
+            'x-dead-letter-exchange' => 'application-x',
+            'x-dead-letter-routing-key' => sprintf('process.%s', $name),
+            'x-message-ttl' => $ttl,
+            'x-expires' => $ttl * 2,
+        ];
+        $this->assertEquals(array_keys($expected), array_keys($actual));
+        $this->assertEquals(array_values($expected), array_values($actual));
+
+        $queue = $this->connection('rabbitmq-with-options-empty');
+        $actual = $this->callMethod($queue, 'getDelayQueueArguments', [$name, $ttl]);
+        $expected = [
+            'x-dead-letter-exchange' => '',
+            'x-dead-letter-routing-key' => $name,
+            'x-message-ttl' => $ttl,
+            'x-expires' => $ttl * 2,
+        ];
+        $this->assertEquals(array_keys($expected), array_keys($actual));
+        $this->assertEquals(array_values($expected), array_values($actual));
     }
 }
