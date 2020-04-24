@@ -2,7 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.1.3...master)
+## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.2.0...master)
+
+## [10.2.0 (2020-04-24)](https://github.com/vyuldashev/la
+
+Huge thanks to [adm-bone](https://github.com/adm-bome) for this release.
+
+- Added support for Laravel 7.0 [#319](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/319)
+- Added `rabbitmq:exchange-delete` artisan command [#317](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/317)
+- Added `rabbitmq:queue-delete` artisan command [#317](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/317)
+- Failed jobs can be rerouted to another exchange [#317](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/317)
+- Exchange type is configurable [#317](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/317)
+- Job attempts are fixed [#304](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/304)
+- Added prioritization for failed jobs [#304](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/304)
+- Fixed: if delay is not set when releasing a job, job will be lost [#304](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/304)
+- Fix loosing messages when forced to close connection [#311](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/311)
+- Fixed unacked message when class not found [#314](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/314)
 
 ## [10.1.3 (2020-01-12)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.1.2...v10.1.3)
 
