@@ -73,7 +73,7 @@ class RabbitMQConnector implements ConnectorInterface
         $connection = Arr::get($config, 'connection', AMQPLazyConnection::class);
 
         // manually disable heartbeat so long-running tasks will not fail
-        Arr::set($config, 'options.heartbeat', 0);
+        Arr::add($config, 'options.heartbeat', 0);
 
         return $connection::create_connection(
             Arr::shuffle(Arr::get($config, 'hosts', [])),
