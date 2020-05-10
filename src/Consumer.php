@@ -154,23 +154,6 @@ class Consumer extends Worker
     }
 
     /**
-     * Mark the given job as failed if it has exceeded the maximum allowed attempts.
-     *
-     * @param string $connectionName
-     * @param Job|RabbitMQJob $job
-     * @param int $maxTries
-     * @param Exception $e
-     */
-    protected function markJobAsFailedIfWillExceedMaxAttempts($connectionName, $job, $maxTries, $e): void
-    {
-        parent::markJobAsFailedIfWillExceedMaxAttempts($connectionName, $job, $maxTries, $e);
-
-        if (! $job->isDeletedOrReleased()) {
-            $job->getRabbitMQ()->reject($job);
-        }
-    }
-
-    /**
      * Stop listening and bail out of the script.
      *
      * @param  int  $status
