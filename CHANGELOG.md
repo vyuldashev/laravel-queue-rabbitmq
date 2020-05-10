@@ -2,9 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.2.0...master)
+## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.2.1...master)
 
-## [10.2.0 (2020-04-24)](https://github.com/vyuldashev/la
+## [10.2.1 (2020-05-11)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.2.0...v10.2.1)
+
+- Fix: When a job fails it tries to reject it twice [#322](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/322)
+
+## [10.2.0 (2020-04-24)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.1.3...v10.2.0)
 
 Huge thanks to [adm-bone](https://github.com/adm-bome) for this release.
 
