@@ -18,7 +18,7 @@ Only the latest version will get new features. Bug fixes will be provided using 
 | 7.2             | 5.8             | August 26th, 2019   | [Documentation](https://github.com/vyuldashev/laravel-queue-rabbitmq/blob/v7.0/README.md)   |
 | 8.0             | 5.8             | August 26th, 2019   | [Documentation](https://github.com/vyuldashev/laravel-queue-rabbitmq/blob/v8.0/README.md)   |
 | 9               | 6               | September 3rd, 2021 | [Documentation](https://github.com/vyuldashev/laravel-queue-rabbitmq/blob/v9.0/README.md)   |
-| 10              | 6               | September 3rd, 2021 | [Documentation](https://github.com/vyuldashev/laravel-queue-rabbitmq/blob/master/README.md) |
+| 10              | 6, 7            | September 3rd, 2021 | [Documentation](https://github.com/vyuldashev/laravel-queue-rabbitmq/blob/master/README.md) |
 
 ## Installation
 
