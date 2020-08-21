@@ -13,6 +13,7 @@ use PhpAmqpLib\Message\AMQPMessage;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
 use Throwable;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJobFactory;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class Consumer extends Worker
@@ -84,7 +85,8 @@ class Consumer extends Worker
             function (AMQPMessage $message) use ($connection, $options, $connectionName, $queue): void {
                 $this->gotJob = true;
 
-                $job = new RabbitMQJob(
+                /** @var RabbitMQJob $job */
+                $job = app(RabbitMQJobFactory::class)->create(
                     $this->container,
                     $connection,
                     $message,

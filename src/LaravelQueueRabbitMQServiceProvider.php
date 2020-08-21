@@ -7,6 +7,7 @@ use Illuminate\Queue\QueueManager;
 use Illuminate\Support\ServiceProvider;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Console\ConsumeCommand;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJobFactory;
 
 class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
 {
@@ -42,6 +43,8 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
                     $app['cache.store']
                 );
             });
+
+            $this->app->bind(RabbitMQJobFactory::class);
 
             $this->commands([
                 Console\ConsumeCommand::class,

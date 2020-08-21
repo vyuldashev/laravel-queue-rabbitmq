@@ -17,6 +17,7 @@ use PhpAmqpLib\Exchange\AMQPExchangeType;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJobFactory;
 
 class RabbitMQQueue extends Queue implements QueueContract
 {
@@ -230,7 +231,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
             /** @var AMQPMessage|null $message */
             if ($message = $this->channel->basic_get($queue)) {
-                return $this->currentJob = new RabbitMQJob(
+                return app(RabbitMQJobFactory::class)->create(
                     $this->container,
                     $this,
                     $message,
