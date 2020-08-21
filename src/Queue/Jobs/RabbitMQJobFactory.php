@@ -14,8 +14,7 @@ class RabbitMQJobFactory implements RabbitMQJobFactoryInterface
         AMQPMessage $message,
         string $connectionName,
         string $queue
-    )
-    {
+    ) {
         return new RabbitMQJob(
             $container,
             $rabbitmq,
