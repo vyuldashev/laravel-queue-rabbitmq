@@ -97,8 +97,7 @@ class Consumer extends Worker
                 }
 
                 $this->runJob($job, $connectionName, $options);
-                
-                
+
                 if ($this->supportsAsyncSignals()) {
                     $this->resetTimeoutHandler();
                 }
