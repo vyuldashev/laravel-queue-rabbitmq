@@ -579,8 +579,8 @@ class RabbitMQQueue extends Queue implements QueueContract
         // Messages without a priority property are treated as if their priority were 0.
         // Messages with a priority which is higher than the queue's maximum, are treated as if they were
         // published with the maximum priority.
-        // If declared queue is quorum queue, argument will be ignored by RabbitMQ.
-        if ($this->isPrioritizeDelayed()) {
+        // Quorum queues does not support priority.
+        if ($this->isPrioritizeDelayed() && !$this->isQuorum()) {
             $arguments['x-max-priority'] = $this->getQueueMaxPriority();
         }
 
