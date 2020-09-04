@@ -12,7 +12,8 @@ class QueueDeclareCommand extends Command
                            {name : The name of the queue to declare}
                            {connection=rabbitmq : The name of the queue connection to use}
                            {--durable=1}
-                           {--auto-delete=0}';
+                           {--auto-delete=0}
+                           {--quorum=0}';
 
     protected $description = 'Declare queue';
 
@@ -32,10 +33,15 @@ class QueueDeclareCommand extends Command
             return;
         }
 
+        $arguments = (bool) $this->option('quorum')
+            ? ['x-queue-type' => 'quorum']
+            : [];
+
         $queue->declareQueue(
             $this->argument('name'),
             (bool) $this->option('durable'),
-            (bool) $this->option('auto-delete')
+            (bool) $this->option('auto-delete'),
+            $arguments
         );
 
         $this->info('Queue declared successfully.');

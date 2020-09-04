@@ -71,6 +71,7 @@ abstract class TestCase extends BaseTestCase
                     'reroute_failed' => true,
                     'failed_exchange' => 'failed-exchange',
                     'failed_routing_key' => 'application-x.%s.failed',
+                    'quorum' => true,
                 ],
             ],
 
@@ -110,6 +111,7 @@ abstract class TestCase extends BaseTestCase
                     'reroute_failed' => '',
                     'failed_exchange' => '',
                     'failed_routing_key' => '',
+                    'quorum' => '',
                 ],
             ],
 

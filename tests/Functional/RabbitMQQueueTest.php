@@ -140,6 +140,19 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertSame('test.failed', $this->callMethod($queue, 'getFailedRoutingKey', ['test']));
     }
 
+    public function testQuorumQueueType(): void
+    {
+        /** @var $queue RabbitMQQueue */
+        $queue = $this->connection();
+        $this->assertFalse($this->callMethod($queue, 'isQuorum'));
+
+        $queue = $this->connection('rabbitmq-with-options');
+        $this->assertTrue($this->callMethod($queue, 'isQuorum'));
+
+        $queue = $this->connection('rabbitmq-with-options-empty');
+        $this->assertFalse($this->callMethod($queue, 'isQuorum'));
+    }
+
     public function testDeclareDeleteExchange(): void
     {
         /** @var $queue RabbitMQQueue */
@@ -189,6 +202,7 @@ class RabbitMQQueueTest extends BaseTestCase
             'x-max-priority' => 20,
             'x-dead-letter-exchange' => 'failed-exchange',
             'x-dead-letter-routing-key' => sprintf('application-x.%s.failed', $name),
+            'x-queue-type' => 'quorum',
         ];
 
         $this->assertEquals(array_keys($expected), array_keys($actual));
