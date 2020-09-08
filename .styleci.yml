@@ -1,4 +1,2 @@
 preset: laravel
 
-disabled:
-  - simplified_null_return
