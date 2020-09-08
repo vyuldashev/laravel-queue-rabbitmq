@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.2.2...master)
+## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.2.2...v10.0)
 
 ## [10.2.2 (2020-07-18)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.2.1...v10.2.2)
 
