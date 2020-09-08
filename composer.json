@@ -11,7 +11,7 @@
   "require": {
     "php": "^7.2",
     "ext-json": "*",
-    "illuminate/queue": "^6.0|^7.0",
+    "illuminate/queue": "^6.0|^7.0|^8.0",
     "php-amqplib/php-amqplib": "^2.11"
   },
   "require-dev": {
@@ -49,9 +49,9 @@
       "@test:style",
       "@test:unit"
     ],
-    "test:style": "@php vendor/bin/php-cs-fixer fix --config=.php_cs.dist --allow-risky=yes --dry-run --diff --verbose",
-    "test:unit": "@php vendor/bin/phpunit",
-    "fix:style": "@php vendor/bin/php-cs-fixer fix --config=.php_cs.dist --allow-risky=yes --diff --verbose"
+    "test:style": "php-cs-fixer fix --config=.php_cs.dist --allow-risky=yes --dry-run --diff --verbose",
+    "test:unit": "phpunit",
+    "fix:style": "php-cs-fixer fix --config=.php_cs.dist --allow-risky=yes --diff --verbose"
   },
   "minimum-stability": "dev",
   "prefer-stable": true
