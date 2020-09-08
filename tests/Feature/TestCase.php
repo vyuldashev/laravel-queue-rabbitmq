@@ -32,7 +32,7 @@ abstract class TestCase extends BaseTestCase
             $this->connection()->purge();
         }
 
-        $this->assertSame(0, Queue::size());
+        self::assertSame(0, Queue::size());
 
         parent::tearDown();
     }
@@ -83,9 +83,9 @@ abstract class TestCase extends BaseTestCase
         $this->assertSame(TestJob::class, $payload['displayName']);
         $this->assertSame('Illuminate\Queue\CallQueuedHandler@call', $payload['job']);
         $this->assertNull($payload['maxTries']);
-        $this->assertNull($payload['delay']);
+        $this->assertNull($payload['backoff']);
         $this->assertNull($payload['timeout']);
-        $this->assertNull($payload['timeoutAt']);
+        $this->assertNull($payload['retryUntil']);
         $this->assertSame($job->getJobId(), $payload['id']);
 
         $job->delete();

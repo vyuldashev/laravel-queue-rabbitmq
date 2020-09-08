@@ -9,17 +9,17 @@
     }
   ],
   "require": {
-    "php": "^7.2",
+    "php": "^7.3",
     "ext-json": "*",
-    "illuminate/queue": "^6.0|^7.0",
-    "php-amqplib/php-amqplib": "^2.11"
+    "illuminate/queue": "^8.0",
+    "php-amqplib/php-amqplib": "^2.12"
   },
   "require-dev": {
-    "phpunit/phpunit": "^8.4",
+    "phpunit/phpunit": "^9.3",
     "mockery/mockery": "^1.0",
-    "laravel/horizon": "^3.0",
+    "laravel/horizon": "^5.0",
     "friendsofphp/php-cs-fixer": "^2.16",
-    "orchestra/testbench": "^4.3"
+    "orchestra/testbench": "^6.0"
   },
   "autoload": {
     "psr-4": {
@@ -33,7 +33,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "10.0-dev"
+      "dev-master": "11.0-dev"
     },
     "laravel": {
       "providers": [
