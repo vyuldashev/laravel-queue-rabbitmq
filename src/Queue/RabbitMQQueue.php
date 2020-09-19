@@ -544,7 +544,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     protected function getRandomId(): string
     {
-        return Str::random(32);
+        return Str::uuid();
     }
 
     /**
