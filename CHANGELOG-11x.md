@@ -2,7 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.0.0...master)
+## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.0.1...master)
+
+## [11.0.1 (2020-09-19)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.0.0...v11.0.1)
+
+- Fix rabbitmq:consume name option does not exist [#363](https://github.com/vyuldashev/laravel-queue-rabbitmq/issues/363)
+- Fix Class 'Laravel\Horizon\JobId' not found [#362](https://github.com/vyuldashev/laravel-queue-rabbitmq/issues/362)
 
 ## [11.0.0 (2020-09-09)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.2.2...v11.0.0)
 
