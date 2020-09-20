@@ -2,7 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.0.1...master)
+## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.0.2...master)
+
+## [11.0.2 (2020-09-20)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.0.1...v11.0.2)
+
+- Add missing options to rabbitmq:consume command [#363](https://github.com/vyuldashev/laravel-queue-rabbitmq/issues/363)
 
 ## [11.0.1 (2020-09-19)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.0.0...v11.0.1)
 

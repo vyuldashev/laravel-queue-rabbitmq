@@ -14,7 +14,10 @@ class ConsumeCommand extends WorkCommand
                             {--queue= : The names of the queues to work}
                             {--once : Only process the next job on the queue}
                             {--stop-when-empty : Stop when the queue is empty}
-                            {--delay=0 : The number of seconds to delay failed jobs}
+                            {--delay=0 : The number of seconds to delay failed jobs (Deprecated)}
+                            {--backoff=0 : The number of seconds to wait before retrying a job that encountered an uncaught exception}
+                            {--max-jobs=0 : The number of jobs to process before stopping}
+                            {--max-time=0 : The maximum number of seconds the worker should run}
                             {--force : Force the worker to run even in maintenance mode}
                             {--memory=128 : The memory limit in megabytes}
                             {--sleep=3 : Number of seconds to sleep when no job is available}
