@@ -231,7 +231,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
             /** @var AMQPMessage|null $message */
             if ($message = $this->channel->basic_get($queue)) {
-                return app(RabbitMQJobFactory::class)->create(
+                return $this->currentJob = app(RabbitMQJobFactory::class)->create(
                     $this->container,
                     $this,
                     $message,
