@@ -178,7 +178,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         $this->declareQueue($destination, true, false, $this->getDelayQueueArguments($this->getQueue($queue), $ttl));
 
-        if (!$contentType) {
+        if (! $contentType) {
             $contentType = $this->getContentType([]);
         }
         if ($this->mustHeadersDefault()) {
@@ -703,7 +703,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     protected function mustHeadersDefault(): bool
     {
-        return !boolval(Arr::get($this->options, 'no_header_default') ?: false);
+        return ! boolval(Arr::get($this->options, 'no_header_default') ?: false);
     }
 
     /**
@@ -718,6 +718,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         $headers['laravel'] = [
             'attempts' => $attempts,
         ];
+
         return $headers;
     }
 
