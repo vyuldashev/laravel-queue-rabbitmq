@@ -130,11 +130,11 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     public function pushRaw($payload, $queue = null, array $options = [])
     {
-        [$destination, $exchange, $exchangeType, $attempts] = $this->publishProperties($queue, $options);
+        [$destination, $exchange, $exchangeType, $attempts, $contentType, $headers] = $this->publishProperties($queue, $options);
 
         $this->declareDestination($destination, $exchange, $exchangeType);
 
-        [$message, $correlationId] = $this->createMessage($payload, $attempts);
+        [$message, $correlationId] = $this->createMessage($payload, $attempts, $contentType, $headers);
 
         $this->channel->basic_publish($message, $exchange, $destination, true, false);
 
@@ -160,10 +160,12 @@ class RabbitMQQueue extends Queue implements QueueContract
      * @param $payload
      * @param null $queue
      * @param int $attempts
+     * @param string|null $contentType
+     * @param array $headers
      * @return mixed
      * @throws AMQPProtocolChannelException
      */
-    public function laterRaw($delay, $payload, $queue = null, $attempts = 0)
+    public function laterRaw($delay, $payload, $queue = null, int $attempts = 0, string $contentType = null, array $headers = [])
     {
         $ttl = $this->secondsUntil($delay) * 1000;
 
@@ -176,7 +178,14 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         $this->declareQueue($destination, true, false, $this->getDelayQueueArguments($this->getQueue($queue), $ttl));
 
-        [$message, $correlationId] = $this->createMessage($payload, $attempts);
+        if (!$contentType) {
+            $contentType = $this->getContentType([]);
+        }
+        if ($this->mustHeadersDefault()) {
+            $headers = $this->addHeadersDefault($headers, $attempts);
+        }
+
+        [$message, $correlationId] = $this->createMessage($payload, $attempts, $contentType, $headers);
 
         // Publish directly on the delayQueue, no need to publish trough an exchange.
         $this->channel->basic_publish($message, null, $destination, true, false);
@@ -207,11 +216,11 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     public function bulkRaw(string $payload, $queue = null, array $options = [])
     {
-        [$destination, $exchange, $exchangeType, $attempts] = $this->publishProperties($queue, $options);
+        [$destination, $exchange, $exchangeType, $attempts, $contentType, $headers] = $this->publishProperties($queue, $options);
 
         $this->declareDestination($destination, $exchange, $exchangeType);
 
-        [$message, $correlationId] = $this->createMessage($payload, $attempts);
+        [$message, $correlationId] = $this->createMessage($payload, $attempts, $contentType, $headers);
 
         $this->channel->batch_basic_publish($message, $exchange, $destination);
 
@@ -491,14 +500,18 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @param $payload
      * @param int $attempts
+     * @param string|null $contentType
+     * @param array $headers
      * @return array
      */
-    protected function createMessage($payload, int $attempts = 0): array
+    protected function createMessage($payload, int $attempts = 0, string $contentType = null, array $headers = []): array
     {
         $properties = [
-            'content_type' => 'application/json',
             'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT,
         ];
+        if ($contentType) {
+            $properties['content_type'] = $contentType;
+        }
 
         if ($correlationId = json_decode($payload, true)['id'] ?? null) {
             $properties['correlation_id'] = $correlationId;
@@ -510,11 +523,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         $message = new AMQPMessage($payload, $properties);
 
-        $message->set('application_headers', new AMQPTable([
-            'laravel' => [
-                'attempts' => $attempts,
-            ],
-        ]));
+        $message->set('application_headers', new AMQPTable($headers));
 
         return [
             $message,
@@ -544,7 +553,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     protected function getRandomId(): string
     {
-        return Str::uuid();
+        return Str::random(32);
     }
 
     /**
@@ -666,6 +675,53 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
+     * Get the contentType from options, or '' as default.
+     *
+     * @param array $options
+     * @return string
+     */
+    protected function getContentType(array $options = []): string
+    {
+        return Arr::get($options, 'content_type') ?? Arr::get($this->options, 'content_type') ?? 'application/json';
+    }
+
+    /**
+     * Get the Headers from options, and add attempts as default.
+     *
+     * @param array $options
+     * @return array
+     */
+    protected function getHeaders(array $options = []): array
+    {
+        return Arr::get($options, 'headers') ?? Arr::get($this->options, 'headers') ?? [];
+    }
+
+    /**
+     * Get the Headers defatul from attempts.
+     *
+     * @return bool
+     */
+    protected function mustHeadersDefault(): bool
+    {
+        return !boolval(Arr::get($this->options, 'no_header_default') ?: false);
+    }
+
+    /**
+     * Get the Headers default from attempts.
+     *
+     * @param array $headers
+     * @param int $attempts
+     * @return array
+     */
+    protected function addHeadersDefault(array $headers, int $attempts): array
+    {
+        $headers['laravel'] = [
+            'attempts' => $attempts,
+        ];
+        return $headers;
+    }
+
+    /**
      * Returns &true;, if failed messages should be rerouted.
      *
      * @return bool
@@ -765,7 +821,12 @@ class RabbitMQQueue extends Queue implements QueueContract
         $destination = $this->getRoutingKey($queue);
         $exchange = $this->getExchange();
         $exchangeType = $this->getExchangeType();
+        $contentType = $this->getContentType($options);
+        $headers = $this->getHeaders($options);
+        if ($this->mustHeadersDefault()) {
+            $headers = $this->addHeadersDefault($headers, $attempts);
+        }
 
-        return [$destination, $exchange, $exchangeType, $attempts];
+        return [$destination, $exchange, $exchangeType, $attempts, $contentType, $headers];
     }
 }
