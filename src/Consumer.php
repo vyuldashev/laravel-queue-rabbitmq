@@ -5,8 +5,10 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ;
 use Exception;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Queue\Job;
+use Illuminate\Support\Arr;
 use Illuminate\Queue\Worker;
 use Illuminate\Queue\WorkerOptions;
+use Illuminate\Support\Facades\Config;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Exception\AMQPRuntimeException;
 use PhpAmqpLib\Message\AMQPMessage;
@@ -75,8 +77,7 @@ class Consumer extends Worker
             null
         );
 
-        $jobFactory = app(RabbitMQJobFactory::class);
-
+        $jobFactory = $connection->getFactory();
         $this->channel->basic_consume(
             $queue,
             $this->consumerTag,
