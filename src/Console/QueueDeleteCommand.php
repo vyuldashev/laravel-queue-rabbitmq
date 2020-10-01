@@ -14,7 +14,7 @@ class QueueDeleteCommand extends Command
                            {--unused=0 : Check if queue has no consumers}
                            {--empty=0 : Check if queue is empty}';
 
-    protected $description = 'Declare queue';
+    protected $description = 'Delete queue';
 
     /**
      * @param RabbitMQConnector $connector
