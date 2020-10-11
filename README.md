@@ -161,7 +161,87 @@ When you want to instruct RabbitMQ to reroute failed messages to a exchange or a
     // ...    
 ],
 ```
+### Use your own RabbitMQJob class
+Sometimes you have to work with messages published by another application.  
+Those messages probably won't respect the laravel QueueApi payload schema.
+The problem with these messages is that, laravel workers won't be able to determine the actual job or class to execute. 
 
+You can extend the build-in `RabbitMQJob::class` and within the queue connection config, you can add your own class.
+When you specify an `job` key in the config, with your own class name, every message retrieved from the broker will get wrapped by your own class.  
+
+An example for the config:
+```php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        'options' => [
+            'queue' => [
+                // ...
+
+                'job' => \App\Queue\Jobs\RabbitMQJob::class,
+            ],
+        ],
+    ],
+
+    // ...    
+],
+```
+An example of your own job class:
+```php
+<?php
+
+namespace App\Queue\Jobs;
+
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob as BaseJob;
+
+class RabbitMQJob extends BaseJob
+{
+
+    /**
+     * Fire the job.
+     *
+     * @return void
+     */
+    public function fire()
+    {
+        $payload = $this->payload();
+
+        $class = WhatheverClassNameToExecute::class;
+        $method = 'handle';
+
+        ($this->instance = $this->resolve($class))->{$method}($this, $payload);
+    }
+}
+
+```
+Or maybe you want to add extra properties to the payload.
+```php
+<?php
+
+namespace App\Queue\Jobs;
+
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob as BaseJob;
+
+class RabbitMQJob extends BaseJob
+{
+
+   /**
+     * Get the decoded body of the job.
+     *
+     * @return array
+     */
+    public function payload()
+    {
+        $decoded = json_decode($this->getRawBody(), true);
+        $decoded['job'] = $decoded['job'] ?? 'WhatheverFullyQualifiedClassNameToExecute@handle';
+        
+        return $decoded;
+    }
+}
+```
 ## Laravel Usage
 
 Once you completed the configuration you can use Laravel Queue API. If you used other queue drivers you do not need to change anything else. If you do not know how to use Queue API, please refer to the official Laravel documentation: http://laravel.com/docs/queues
