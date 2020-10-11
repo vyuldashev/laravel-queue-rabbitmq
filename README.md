@@ -226,7 +226,6 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob as BaseJob;
 
 class RabbitMQJob extends BaseJob
 {
-
    /**
      * Get the decoded body of the job.
      *
@@ -234,10 +233,10 @@ class RabbitMQJob extends BaseJob
      */
     public function payload()
     {
-        $decoded = json_decode($this->getRawBody(), true);
-        $decoded['job'] = $decoded['job'] ?? 'WhatheverFullyQualifiedClassNameToExecute@handle';
-        
-        return $decoded;
+        return [
+            'job'  => 'WhatheverFullyQualifiedClassNameToExecute@handle',
+            'data' => json_decode($this->getRawBody(), true)
+        ];
     }
 }
 ```
