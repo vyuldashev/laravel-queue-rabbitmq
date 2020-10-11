@@ -12,7 +12,6 @@ use PhpAmqpLib\Exception\AMQPRuntimeException;
 use PhpAmqpLib\Message\AMQPMessage;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
 use Throwable;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class Consumer extends Worker
@@ -74,7 +73,12 @@ class Consumer extends Worker
             null
         );
 
-        $jobClass = $connection->getJobClass();
+        try {
+            $jobClass = $connection->getJobClass();
+        } catch (Throwable $exception) {
+            report($exception);
+            $this->kill(2);
+        }
 
         $this->channel->basic_consume(
             $queue,

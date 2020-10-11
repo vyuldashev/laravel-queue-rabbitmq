@@ -276,7 +276,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
     /**
      * Gets the Job class from config or returns the default job class
-     * when the job class does not extend the default job class an exception is thrown
+     * when the job class does not extend the default job class an exception is thrown.
      *
      * @return array|\ArrayAccess|mixed
      * @throws \Throwable
