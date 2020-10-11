@@ -73,12 +73,7 @@ class Consumer extends Worker
             null
         );
 
-        try {
-            $jobClass = $connection->getJobClass();
-        } catch (Throwable $exception) {
-            report($exception);
-            $this->kill(2);
-        }
+        $jobClass = $connection->getJobClass();
 
         $this->channel->basic_consume(
             $queue,
