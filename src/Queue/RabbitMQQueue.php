@@ -228,9 +228,11 @@ class RabbitMQQueue extends Queue implements QueueContract
         try {
             $queue = $this->getQueue($queue);
 
+            $job = $this->getJobClass();
+
             /** @var AMQPMessage|null $message */
             if ($message = $this->channel->basic_get($queue)) {
-                return $this->currentJob = new RabbitMQJob(
+                return $this->currentJob = new $job(
                     $this->container,
                     $this,
                     $message,
@@ -270,6 +272,21 @@ class RabbitMQQueue extends Queue implements QueueContract
     public function getChannel(): AMQPChannel
     {
         return $this->channel;
+    }
+
+    /**
+     * Gets the Job class from config or returns the default job class
+     * when the job class does not extend the default job class an exception is thrown
+     *
+     * @return array|\ArrayAccess|mixed
+     * @throws \Throwable
+     */
+    public function getJobClass()
+    {
+        $job = Arr::get($this->options, 'job', RabbitMQJob::class);
+        throw_if(! is_a($job, RabbitMQJob::class, true), Exception::class, sprintf('Class %s must extend: %s', $job, RabbitMQJob::class));
+
+        return $job;
     }
 
     /**

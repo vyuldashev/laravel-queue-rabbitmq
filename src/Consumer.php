@@ -74,6 +74,8 @@ class Consumer extends Worker
             null
         );
 
+        $jobClass = $connection->getJobClass();
+
         $this->channel->basic_consume(
             $queue,
             $this->consumerTag,
@@ -81,10 +83,10 @@ class Consumer extends Worker
             false,
             false,
             false,
-            function (AMQPMessage $message) use ($connection, $options, $connectionName, $queue): void {
+            function (AMQPMessage $message) use ($connection, $options, $connectionName, $queue, $jobClass): void {
                 $this->gotJob = true;
 
-                $job = new RabbitMQJob(
+                $job = new $jobClass(
                     $this->container,
                     $connection,
                     $message,
