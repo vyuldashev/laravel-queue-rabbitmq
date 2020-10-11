@@ -220,13 +220,13 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
-     * @return RabbitMQJobFactoryInterface
+     * @return string
      */
-    public function getFactory()
+    public function getJobName()
     {
-        $jobFactoryClass = Arr::get($this->options, 'job_factory', RabbitMQJobFactory::class);
+        $jobFactoryClass = Arr::get($this->options, 'job', RabbitMQJob::class);
 
-        return new $jobFactoryClass;
+        return $jobFactoryClass;
     }
 
     /**
@@ -241,9 +241,9 @@ class RabbitMQQueue extends Queue implements QueueContract
 
             /** @var AMQPMessage|null $message */
             if ($message = $this->channel->basic_get($queue)) {
-                $jobFactory = $this->getFactory();
+                $jobClass = $this->getJobName();
 
-                return $this->currentJob = $jobFactory->create(
+                return $this->currentJob = new $jobClass(
                     $this->container,
                     $this,
                     $message,
