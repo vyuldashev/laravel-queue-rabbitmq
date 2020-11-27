@@ -9,7 +9,7 @@
     }
   ],
   "require": {
-    "php": "^7.3",
+    "php": "^7.3|^8.0",
     "ext-json": "*",
     "illuminate/queue": "^8.0",
     "php-amqplib/php-amqplib": "^2.12"
