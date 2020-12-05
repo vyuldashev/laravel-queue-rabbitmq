@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.1.0...master)
 
-## [11.1.2 (2020-12-05)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.0.2...v11.1.0)
+## [11.1.0 (2020-12-05)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.0.2...v11.1.0)
 
 - Custom job class [#370](https://github.com/vyuldashev/laravel-queue-rabbitmq/issues/370)
 
