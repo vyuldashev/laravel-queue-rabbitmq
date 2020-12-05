@@ -2,11 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.1.0...master)
-
-## [11.1.0 (2020-12-05)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.0.2...v11.1.0)
-
-- PHP 8 Support [#378](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/378)
+## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.0.2...master)
 
 ## [11.0.2 (2020-09-20)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.0.1...v11.0.2)
 
