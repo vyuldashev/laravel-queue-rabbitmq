@@ -10,12 +10,15 @@ use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Queue\Queue;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use JsonException;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AbstractConnection;
 use PhpAmqpLib\Exception\AMQPProtocolChannelException;
 use PhpAmqpLib\Exchange\AMQPExchangeType;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
+use Throwable;
+use Throwabler;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 class RabbitMQQueue extends Queue implements QueueContract
@@ -101,7 +104,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     {
         $queue = $this->getQueue($queue);
 
-        if (! $this->isQueueExists($queue)) {
+        if (!$this->isQueueExists($queue)) {
             return 0;
         }
 
@@ -172,7 +175,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             return $this->pushRaw($payload, $queue, ['delay' => $delay, 'attempts' => $attempts]);
         }
 
-        $destination = $this->getQueue($queue).'.delay.'.$ttl;
+        $destination = $this->getQueue($queue) . '.delay.' . $ttl;
 
         $this->declareQueue($destination, true, false, $this->getDelayQueueArguments($this->getQueue($queue), $ttl));
 
@@ -191,7 +194,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     public function bulk($jobs, $data = '', $queue = null): void
     {
-        foreach ((array) $jobs as $job) {
+        foreach ((array)$jobs as $job) {
             $this->bulkRaw($this->createPayload($job, $queue, $data), $queue, ['job' => $job]);
         }
 
@@ -221,16 +224,18 @@ class RabbitMQQueue extends Queue implements QueueContract
     /**
      * {@inheritdoc}
      *
-     * @throws Exception
+     * @throws Throwable
      */
     public function pop($queue = null)
     {
         try {
             $queue = $this->getQueue($queue);
 
+            $job = $this->getJobClass();
+
             /** @var AMQPMessage|null $message */
             if ($message = $this->channel->basic_get($queue)) {
-                return $this->currentJob = new RabbitMQJob(
+                return $this->currentJob = new $job(
                     $this->container,
                     $this,
                     $message,
@@ -242,7 +247,6 @@ class RabbitMQQueue extends Queue implements QueueContract
             // If there is not exchange or queue AMQP will throw exception with code 404
             // We need to catch it and return null
             if ($exception->amqp_reply_code === 404) {
-
                 // Because of the channel exception the channel was closed and removed.
                 // We have to open a new channel. Because else the worker(s) are stuck in a loop, without processing.
                 $this->channel = $this->connection->channel();
@@ -273,12 +277,31 @@ class RabbitMQQueue extends Queue implements QueueContract
     }
 
     /**
+     * Job class to use.
+     *
+     * @return string
+     * @throws \Throwable
+     */
+    public function getJobClass(): string
+    {
+        $job = Arr::get($this->options, 'job', RabbitMQJob::class);
+
+        throw_if(
+            !is_a($job, RabbitMQJob::class, true),
+            Exception::class,
+            sprintf('Class %s must extend: %s', $job, RabbitMQJob::class)
+        );
+
+        return $job;
+    }
+
+    /**
      * Gets a queue/destination, by default the queue option set on the connection.
      *
      * @param null $queue
      * @return string
      */
-    public function getQueue($queue = null)
+    public function getQueue($queue = null): string
     {
         return $queue ?: $this->default;
     }
@@ -319,8 +342,13 @@ class RabbitMQQueue extends Queue implements QueueContract
      * @param array $arguments
      * @return void
      */
-    public function declareExchange(string $name, string $type = AMQPExchangeType::DIRECT, bool $durable = true, bool $autoDelete = false, array $arguments = []): void
-    {
+    public function declareExchange(
+        string $name,
+        string $type = AMQPExchangeType::DIRECT,
+        bool $durable = true,
+        bool $autoDelete = false,
+        array $arguments = []
+    ): void {
         if ($this->isExchangeDeclared($name)) {
             return;
         }
@@ -347,7 +375,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     public function deleteExchange(string $name, bool $unused = false): void
     {
-        if (! $this->isExchangeExists($name)) {
+        if (!$this->isExchangeExists($name)) {
             return;
         }
 
@@ -361,7 +389,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      * Checks if the given queue already present/defined in RabbitMQ.
      * Returns false when when the queue is missing.
      *
-     * @param string $name
+     * @param string|null $name
      * @return bool
      * @throws AMQPProtocolChannelException
      */
@@ -392,8 +420,12 @@ class RabbitMQQueue extends Queue implements QueueContract
      * @param array $arguments
      * @return void
      */
-    public function declareQueue(string $name, bool $durable = true, bool $autoDelete = false, array $arguments = []): void
-    {
+    public function declareQueue(
+        string $name,
+        bool $durable = true,
+        bool $autoDelete = false,
+        array $arguments = []
+    ): void {
         if ($this->isQueueDeclared($name)) {
             return;
         }
@@ -420,7 +452,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     public function deleteQueue(string $name, bool $if_unused = false, bool $if_empty = false): void
     {
-        if (! $this->isQueueExists($name)) {
+        if (!$this->isQueueExists($name)) {
             return;
         }
 
@@ -451,7 +483,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     /**
      * Purge the queue of messages.
      *
-     * @param string $queue
+     * @param string|null $queue
      * @return void
      */
     public function purge(string $queue = null): void
@@ -492,6 +524,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      * @param $payload
      * @param int $attempts
      * @return array
+     * @throws JsonException
      */
     protected function createMessage($payload, int $attempts = 0): array
     {
@@ -500,7 +533,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT,
         ];
 
-        if ($correlationId = json_decode($payload, true)['id'] ?? null) {
+        if ($correlationId = json_decode($payload, true, 512)['id'] ?? null) {
             $properties['correlation_id'] = $correlationId;
         }
 
@@ -525,12 +558,12 @@ class RabbitMQQueue extends Queue implements QueueContract
     /**
      * Create a payload array from the given job and data.
      *
-     * @param object|string $job
+     * @param string|object $job
      * @param string $queue
-     * @param string $data
+     * @param mixed $data
      * @return array
      */
-    protected function createPayloadArray($job, $queue, $data = '')
+    protected function createPayloadArray($job, $queue, $data = ''): array
     {
         return array_merge(parent::createPayloadArray($job, $queue, $data), [
             'id' => $this->getRandomId(),
@@ -555,7 +588,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     public function close(): void
     {
-        if ($this->currentJob && ! $this->currentJob->isDeletedOrReleased()) {
+        if ($this->currentJob && !$this->currentJob->isDeletedOrReleased()) {
             $this->reject($this->currentJob, true);
         }
 
@@ -615,7 +648,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     protected function isPrioritizeDelayed(): bool
     {
-        return boolval(Arr::get($this->options, 'prioritize_delayed') ?: false);
+        return (bool)(Arr::get($this->options, 'prioritize_delayed') ?: false);
     }
 
     /**
@@ -628,13 +661,13 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     protected function getQueueMaxPriority(): int
     {
-        return intval(Arr::get($this->options, 'queue_max_priority') ?: 2);
+        return (int)(Arr::get($this->options, 'queue_max_priority') ?: 2);
     }
 
     /**
      * Get the exchange name, or &null; as default value.
      *
-     * @param string $exchange
+     * @param string|null $exchange
      * @return string|null
      */
     protected function getExchange(string $exchange = null): ?string
@@ -662,7 +695,8 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     protected function getExchangeType(?string $type = null): string
     {
-        return @constant(AMQPExchangeType::class.'::'.Str::upper($type ?: Arr::get($this->options, 'exchange_type') ?: 'direct')) ?: AMQPExchangeType::DIRECT;
+        return @constant(AMQPExchangeType::class . '::' . Str::upper($type ?: Arr::get($this->options,
+                'exchange_type') ?: 'direct')) ?: AMQPExchangeType::DIRECT;
     }
 
     /**
@@ -672,7 +706,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     protected function isRerouteFailed(): bool
     {
-        return boolval(Arr::get($this->options, 'reroute_failed') ?: false);
+        return (bool)(Arr::get($this->options, 'reroute_failed') ?: false);
     }
 
     /**
@@ -729,10 +763,13 @@ class RabbitMQQueue extends Queue implements QueueContract
      * @return void
      * @throws AMQPProtocolChannelException
      */
-    protected function declareDestination(string $destination, ?string $exchange = null, string $exchangeType = AMQPExchangeType::DIRECT): void
-    {
+    protected function declareDestination(
+        string $destination,
+        ?string $exchange = null,
+        string $exchangeType = AMQPExchangeType::DIRECT
+    ): void {
         // When a exchange is provided and no exchange is present in RabbitMQ, create an exchange.
-        if ($exchange && ! $this->isExchangeExists($exchange)) {
+        if ($exchange && !$this->isExchangeExists($exchange)) {
             $this->declareExchange($exchange, $exchangeType);
         }
 

@@ -74,7 +74,7 @@ class RabbitMQQueue extends BaseRabbitMQQueue
     public function pop($queue = null)
     {
         return tap(parent::pop($queue), function ($result) use ($queue): void {
-            if ($result instanceof RabbitMQJob) {
+            if (is_a($result, RabbitMQJob::class, true)) {
                 $this->event($this->getQueue($queue), new JobReserved($result->getRawBody()));
             }
         });

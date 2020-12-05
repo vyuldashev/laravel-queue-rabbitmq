@@ -61,6 +61,9 @@ Add connection to `config/queue.php`:
                'verify_peer' => env('RABBITMQ_SSL_VERIFY_PEER', true),
                'passphrase' => env('RABBITMQ_SSL_PASSPHRASE', null),
            ],
+           'queue' => [
+               'job' => VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob::class,
+           ],
        ],
    
        /*
@@ -160,6 +163,92 @@ When you want to instruct RabbitMQ to reroute failed messages to a exchange or a
 
     // ...    
 ],
+```
+
+### Use your own RabbitMQJob class
+Sometimes you have to work with messages published by another application.  
+Those messages probably won't respect Laravel's job payload schema.
+The problem with these messages is that, Laravel workers won't be able to determine the actual job or class to execute. 
+
+You can extend the build-in `RabbitMQJob::class` and within the queue connection config, you can define your own class.
+When you specify an `job` key in the config, with your own class name, every message retrieved from the broker will get wrapped by your own class.  
+
+An example for the config:
+
+```php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        'options' => [
+            'queue' => [
+                // ...
+
+                'job' => \App\Queue\Jobs\RabbitMQJob::class,
+            ],
+        ],
+    ],
+
+    // ...    
+],
+```
+
+An example of your own job class:
+
+```php
+<?php
+
+namespace App\Queue\Jobs;
+
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob as BaseJob;
+
+class RabbitMQJob extends BaseJob
+{
+
+    /**
+     * Fire the job.
+     *
+     * @return void
+     */
+    public function fire()
+    {
+        $payload = $this->payload();
+
+        $class = WhatheverClassNameToExecute::class;
+        $method = 'handle';
+
+        ($this->instance = $this->resolve($class))->{$method}($this, $payload);
+    }
+}
+
+```
+
+Or maybe you want to add extra properties to the payload:
+
+```php
+<?php
+
+namespace App\Queue\Jobs;
+
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob as BaseJob;
+
+class RabbitMQJob extends BaseJob
+{
+   /**
+     * Get the decoded body of the job.
+     *
+     * @return array
+     */
+    public function payload()
+    {
+        return [
+            'job'  => 'WhatheverFullyQualifiedClassNameToExecute@handle',
+            'data' => json_decode($this->getRawBody(), true)
+        ];
+    }
+}
 ```
 
 ## Laravel Usage
