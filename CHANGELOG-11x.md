@@ -2,7 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.1.0...master)
+## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.1.1...master)
+
+## [11.1.1 (2020-12-07)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.1.0...v11.1.1)
+
+- Fix worker is stopped by timeout when no new jobs available [#352](https://github.com/vyuldashev/laravel-queue-rabbitmq/issues/352)
 
 ## [11.1.0 (2020-12-05)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.0.2...v11.1.0)
 
