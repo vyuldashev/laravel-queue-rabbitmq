@@ -49,4 +49,5 @@ jobs:
           vendor/bin/php-cs-fixer fix --config=.php_cs.dist --allow-risky=yes --dry-run --diff --verbose
 
       - name: Execute tests
+        if: ${{ success() && matrix.php != 8.0 }}
         run: vendor/bin/phpunit --verbose
