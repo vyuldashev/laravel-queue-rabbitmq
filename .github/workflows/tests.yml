@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php: [7.3, 7.4, 8.0]
+        php: [7.3, 7.4]
         stability: [prefer-lowest, prefer-stable]
 
     name: PHP ${{ matrix.php }} - ${{ matrix.stability }}
@@ -43,11 +43,7 @@ jobs:
         run: composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
 
       - name: Run PHP CS Fixer
-        if: ${{ matrix.php != 8.0 }}
-        run: |
-          composer require friendsofphp/php-cs-fixer:^2.16 --dev --prefer-dist --no-interaction --no-progress --update-with-all-dependencies
-          vendor/bin/php-cs-fixer fix --config=.php_cs.dist --allow-risky=yes --dry-run --diff --verbose
+        run: vendor/bin/php-cs-fixer fix --config=.php_cs.dist --allow-risky=yes --dry-run --diff --verbose
 
       - name: Execute tests
-        if: ${{ success() && matrix.php != 8.0 }}
         run: vendor/bin/phpunit --verbose
