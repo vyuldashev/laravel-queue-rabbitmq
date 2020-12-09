@@ -5,6 +5,7 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Feature;
 use Illuminate\Queue\QueueManager;
 use PhpAmqpLib\Connection\AMQPLazyConnection;
 use PhpAmqpLib\Connection\AMQPSSLConnection;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class ConnectorTest extends \VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCase
@@ -90,5 +91,23 @@ class ConnectorTest extends \VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCa
         $this->assertInstanceOf(AMQPSSLConnection::class, $connection->getConnection());
         $this->assertTrue($connection->getConnection()->isConnected());
         $this->assertTrue($connection->getChannel()->is_open());
+    }
+
+    public function testAfterCreatingConnection(): void
+    {
+        $called = false;
+        $callback = function () use (&$called): void {
+            $called = true;
+        };
+
+        /** @var QueueManager $queue */
+        $queue = $this->app['queue'];
+
+        RabbitMQConnector::afterCreatingConnection($callback);
+
+        /** @var RabbitMQQueue $connection */
+        $queue->connection('rabbitmq');
+
+        self::assertTrue($called);
     }
 }

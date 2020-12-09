@@ -2,6 +2,7 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors;
 
+use Closure;
 use Exception;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Queue\Queue;
@@ -21,7 +22,9 @@ class RabbitMQConnector implements ConnectorInterface
     /**
      * @var Dispatcher
      */
-    private $dispatcher;
+    protected $dispatcher;
+
+    protected static $afterConnectionCreatingCallbacks = [];
 
     public function __construct(Dispatcher $dispatcher)
     {
@@ -39,6 +42,8 @@ class RabbitMQConnector implements ConnectorInterface
     public function connect(array $config): Queue
     {
         $connection = $this->createConnection(Arr::except($config, 'options.queue'));
+
+        $this->callAfterCreatingConnection($connection);
 
         $queue = $this->createQueue(
             Arr::get($config, 'worker', 'default'),
@@ -62,6 +67,11 @@ class RabbitMQConnector implements ConnectorInterface
         return $queue;
     }
 
+    public static function afterCreatingConnection(Closure $callback): void
+    {
+        static::$afterConnectionCreatingCallbacks[] = $callback;
+    }
+
     /**
      * @param array $config
      * @return AbstractConnection
@@ -79,6 +89,13 @@ class RabbitMQConnector implements ConnectorInterface
             Arr::shuffle(Arr::get($config, 'hosts', [])),
             $this->filter(Arr::get($config, 'options', []))
         );
+    }
+
+    protected function callAfterCreatingConnection(AbstractConnection $connection): void
+    {
+        foreach (static::$afterConnectionCreatingCallbacks as $callback) {
+            $callback($connection);
+        }
     }
 
     /**
