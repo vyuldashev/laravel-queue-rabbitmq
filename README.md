@@ -250,6 +250,72 @@ class RabbitMQJob extends BaseJob
     }
 }
 ```
+### PhpAmqpLib Connection - Created event (hook)
+For every defined rabbitmq connection in the `queue.connections` config, a connection is created. 
+After the connection was successfully created an `ConnectionCreated` Event is fired, with the parameters `connection` and `tags`.
+
+Tagging a connection in the config via the property `connection_tags`, makes it possible to run your Listeners only for specific connections.   
+When not tagging your connection there is no way of knowing which connection was created or manage your listeners in executing. 
+
+An example for sending a heartbeat signal against the created connection:
+> On a `AMQPLazyConnection` it is not possible to register the heartbeat sender
+
+```php 
+#/config/queue.php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+        
+        'connection' => PhpAmqpLib\Connection\AMQPStreamConnection::class,
+        'connection_tags' => [\App\Listeners\RegisterPCNTLHeartbeatSender::TAG],
+        
+        // ...
+    ],
+
+    // ...    
+],
+```
+
+An example of your own listener class:
+
+```php
+<?php
+
+namespace App\Listeners;
+
+use PhpAmqpLib\Connection\Heartbeat\PCNTLHeartbeatSender;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Events\ConnectionCreated;
+
+class RegisterPCNTLHeartbeatSender
+{
+    public const TAG = 'RegisterPCNTLHeartbeatSender';
+    
+    /**
+     * Handle the event.
+     *
+     * @param ConnectionCreated $event
+     * @return void
+     */
+    public function handle(ConnectionCreated $event): void
+    {
+        // Grab the event properties
+        $connection = $event->connection;
+        $tags = $event->tags;
+        
+        // Validate if this listener should be executed
+        if (!in_array(self::TAG, $tags)) {
+            return;
+        }
+        
+        // Run your code
+        $sender = new PCNTLHeartbeatSender($connection);
+        $sender->register();
+    }
+}
+
+```
 
 ## Laravel Usage
 
