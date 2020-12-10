@@ -2,7 +2,6 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors;
 
-use Closure;
 use Exception;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Queue\Queue;
@@ -13,6 +12,7 @@ use Illuminate\Support\Arr;
 use InvalidArgumentException;
 use PhpAmqpLib\Connection\AbstractConnection;
 use PhpAmqpLib\Connection\AMQPLazyConnection;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Events\ConnectionCreated;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\Listeners\RabbitMQFailedEvent;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\RabbitMQQueue as HorizonRabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
@@ -23,8 +23,6 @@ class RabbitMQConnector implements ConnectorInterface
      * @var Dispatcher
      */
     protected $dispatcher;
-
-    protected static $afterConnectionCreatingCallbacks = [];
 
     public function __construct(Dispatcher $dispatcher)
     {
@@ -43,7 +41,7 @@ class RabbitMQConnector implements ConnectorInterface
     {
         $connection = $this->createConnection(Arr::except($config, 'options.queue'));
 
-        $this->callAfterCreatingConnection($connection);
+        $this->dispatcher->dispatch(new ConnectionCreated($connection, Arr::wrap(Arr::get($config, 'connection_tags', []))));
 
         $queue = $this->createQueue(
             Arr::get($config, 'worker', 'default'),
@@ -67,11 +65,6 @@ class RabbitMQConnector implements ConnectorInterface
         return $queue;
     }
 
-    public static function afterCreatingConnection(Closure $callback): void
-    {
-        static::$afterConnectionCreatingCallbacks[] = $callback;
-    }
-
     /**
      * @param array $config
      * @return AbstractConnection
@@ -89,13 +82,6 @@ class RabbitMQConnector implements ConnectorInterface
             Arr::shuffle(Arr::get($config, 'hosts', [])),
             $this->filter(Arr::get($config, 'options', []))
         );
-    }
-
-    protected function callAfterCreatingConnection(AbstractConnection $connection): void
-    {
-        foreach (static::$afterConnectionCreatingCallbacks as $callback) {
-            $callback($connection);
-        }
     }
 
     /**
