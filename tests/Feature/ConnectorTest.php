@@ -2,10 +2,12 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Feature;
 
+use Illuminate\Events\Dispatcher;
 use Illuminate\Queue\QueueManager;
 use PhpAmqpLib\Connection\AMQPLazyConnection;
 use PhpAmqpLib\Connection\AMQPSSLConnection;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connectors\RabbitMQConnector;
+use PhpAmqpLib\Connection\AMQPStreamConnection;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Events\ConnectionCreated;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class ConnectorTest extends \VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCase
@@ -16,6 +18,7 @@ class ConnectorTest extends \VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCa
             'driver' => 'rabbitmq',
             'queue' => env('RABBITMQ_QUEUE', 'default'),
             'connection' => AMQPLazyConnection::class,
+            'connection_tags' => ['test'],
 
             'hosts' => [
                 [
@@ -93,21 +96,54 @@ class ConnectorTest extends \VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCa
         $this->assertTrue($connection->getChannel()->is_open());
     }
 
-    public function testAfterCreatingConnection(): void
+    public function testConnectionCreatedEvent(): void
     {
         $called = false;
-        $callback = function () use (&$called): void {
+        $tagged = false;
+
+        $this->app['config']->set('queue.connections.rabbitmq', [
+            'driver' => 'rabbitmq',
+            'queue' => env('RABBITMQ_QUEUE', 'default'),
+            'connection' => AMQPStreamConnection::class,
+            'connection_tags' => ['test'],
+
+            'hosts' => [
+                [
+                    'host' => getenv('HOST'),
+                    'port' => getenv('PORT'),
+                    'user' => 'guest',
+                    'password' => 'guest',
+                    'vhost' => '/',
+                ],
+            ],
+
+            'options' => [
+                'ssl_options' => [
+                    'cafile' => env('RABBITMQ_SSL_CAFILE', null),
+                    'local_cert' => env('RABBITMQ_SSL_LOCALCERT', null),
+                    'local_key' => env('RABBITMQ_SSL_LOCALKEY', null),
+                    'verify_peer' => env('RABBITMQ_SSL_VERIFY_PEER', true),
+                    'passphrase' => env('RABBITMQ_SSL_PASSPHRASE', null),
+                ],
+            ],
+
+            'worker' => env('RABBITMQ_WORKER', 'default'),
+        ]);
+
+        /** @var Dispatcher $dispatcher */
+        $dispatcher = $this->app['events'];
+        $dispatcher->listen(ConnectionCreated::class, static function (ConnectionCreated $event) use (&$called, &$tagged): void {
             $called = true;
-        };
+            if (in_array('test', $event->tags)) {
+                $tagged = true;
+            }
+        });
 
         /** @var QueueManager $queue */
         $queue = $this->app['queue'];
-
-        RabbitMQConnector::afterCreatingConnection($callback);
-
-        /** @var RabbitMQQueue $connection */
         $queue->connection('rabbitmq');
 
         self::assertTrue($called);
+        self::assertTrue($tagged);
     }
 }
