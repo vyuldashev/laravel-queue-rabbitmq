@@ -42,10 +42,5 @@ jobs:
       - name: Install dependencies
         run: composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
 
-      - name: Run PHP CS Fixer
-        run: vendor/bin/php-cs-fixer fix --config=.php_cs.dist --allow-risky=yes --dry-run --diff --verbose
-        with:
-          php-version: '7.4'
-
       - name: Execute tests
         run: vendor/bin/phpunit --verbose
