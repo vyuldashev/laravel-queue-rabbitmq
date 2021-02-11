@@ -2,7 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.2.2...v10.0)
+## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.2.3...v10.0)
+
+## [10.2.3 (2021-02-12)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.2.2...v10.2.3)
+
+- Fix Worker is getting killed by timeout when no more jobs available [#404](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/404)
 
 ## [10.2.2 (2020-07-18)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v10.2.1...v10.2.2)
 
