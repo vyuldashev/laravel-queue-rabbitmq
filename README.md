@@ -91,7 +91,7 @@ When you want to prioritize messages when they were delayed, then this is possib
             'queue' => [
                 // ...
 
-                'prioritize_delayed_messages' =>  false,
+                'prioritize_delayed' =>  false,
                 'queue_max_priority' => 10,
             ],
         ],
