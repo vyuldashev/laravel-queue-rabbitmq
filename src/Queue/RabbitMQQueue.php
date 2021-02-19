@@ -315,11 +315,16 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     public function isExchangeExists(string $exchange): bool
     {
+        if ($this->isExchangeDeclared($exchange)) {
+            return true;
+        }
         try {
             // create a temporary channel, so the main channel will not be closed on exception
             $channel = $this->connection->channel();
             $channel->exchange_declare($exchange, '', true);
             $channel->close();
+
+            $this->exchanges[] = $exchange;
 
             return true;
         } catch (AMQPProtocolChannelException $exception) {
