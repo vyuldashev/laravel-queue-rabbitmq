@@ -54,7 +54,15 @@ class Consumer extends Worker
         $this->prefetchCount = $value;
     }
 
-    public function daemon($connectionName, $queue, WorkerOptions $options): void
+    /**
+     * Listen to the given queue in a loop.
+     *
+     * @param  string  $connectionName
+     * @param  string  $queue
+     * @param  \Illuminate\Queue\WorkerOptions  $options
+     * @return int
+     */
+    public function daemon($connectionName, $queue, WorkerOptions $options)
     {
         if ($this->supportsAsyncSignals()) {
             $this->listenForSignals();
