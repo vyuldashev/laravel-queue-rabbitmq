@@ -2,7 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.1.1...master)
+## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.1.2...master)
+
+## [11.1.2 (2021-03-07)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.1.1...v11.1.2)
+
+- Update Consumer to stop when stopIfNecessary() returns exit code [#409](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/409)
 
 ## [11.1.1 (2020-12-07)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.1.0...v11.1.1)
 
