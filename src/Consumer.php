@@ -4,13 +4,11 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ;
 
 use Exception;
 use Illuminate\Container\Container;
-use Illuminate\Contracts\Queue\Job;
 use Illuminate\Queue\Worker;
 use Illuminate\Queue\WorkerOptions;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Exception\AMQPRuntimeException;
 use PhpAmqpLib\Message\AMQPMessage;
-use Symfony\Component\Debug\Exception\FatalThrowableError;
 use Throwable;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
@@ -31,8 +29,8 @@ class Consumer extends Worker
     /** @var AMQPChannel */
     protected $channel;
 
-    /** @var bool */
-    protected $gotJob = false;
+    /** @var object|null */
+    protected $currentJob;
 
     public function setContainer(Container $value): void
     {
@@ -54,13 +52,24 @@ class Consumer extends Worker
         $this->prefetchCount = $value;
     }
 
-    public function daemon($connectionName, $queue, WorkerOptions $options): void
+    /**
+     * Listen to the given queue in a loop.
+     *
+     * @param string $connectionName
+     * @param string $queue
+     * @param WorkerOptions $options
+     * @return int
+     * @throws Throwable
+     */
+    public function daemon($connectionName, $queue, WorkerOptions $options)
     {
         if ($this->supportsAsyncSignals()) {
             $this->listenForSignals();
         }
 
         $lastRestart = $this->getTimestampOfLastQueueRestart();
+
+        [$startTime, $jobsProcessed] = [hrtime(true) / 1e9, 0];
 
         /** @var RabbitMQQueue $connection */
         $connection = $this->manager->connection($connectionName);
@@ -82,9 +91,7 @@ class Consumer extends Worker
             false,
             false,
             false,
-            function (AMQPMessage $message) use ($connection, $options, $connectionName, $queue, $jobClass): void {
-                $this->gotJob = true;
-
+            function (AMQPMessage $message) use ($connection, $options, $connectionName, $queue, $jobClass, &$jobsProcessed): void {
                 $job = new $jobClass(
                     $this->container,
                     $connection,
@@ -93,9 +100,13 @@ class Consumer extends Worker
                     $queue
                 );
 
+                $this->currentJob = $job;
+
                 if ($this->supportsAsyncSignals()) {
                     $this->registerTimeoutHandler($job, $options);
                 }
+
+                $jobsProcessed++;
 
                 $this->runJob($job, $connectionName, $options);
 
@@ -121,27 +132,33 @@ class Consumer extends Worker
                 $this->exceptions->report($exception);
 
                 $this->kill(1);
-            } catch (Exception $exception) {
+            } catch (Exception | Throwable $exception) {
                 $this->exceptions->report($exception);
-
-                $this->stopWorkerIfLostConnection($exception);
-            } catch (Throwable $exception) {
-                $this->exceptions->report($exception = new FatalThrowableError($exception));
 
                 $this->stopWorkerIfLostConnection($exception);
             }
 
             // If no job is got off the queue, we will need to sleep the worker.
-            if (! $this->gotJob) {
+            if ($this->currentJob === null) {
                 $this->sleep($options->sleep);
             }
 
             // Finally, we will check to see if we have exceeded our memory limits or if
             // the queue should restart based on other indications. If so, we'll stop
             // this worker and let whatever is "monitoring" it restart the process.
-            $this->stopIfNecessary($options, $lastRestart, $this->gotJob ? true : null);
+            $status = $this->stopIfNecessary(
+                $options,
+                $lastRestart,
+                $startTime,
+                $jobsProcessed,
+                $this->currentJob
+            );
 
-            $this->gotJob = false;
+            if (! is_null($status)) {
+                return $this->stop($status);
+            }
+
+            $this->currentJob = null;
         }
     }
 
@@ -162,14 +179,14 @@ class Consumer extends Worker
      * Stop listening and bail out of the script.
      *
      * @param  int  $status
-     * @return void
+     * @return int
      */
-    public function stop($status = 0): void
+    public function stop($status = 0): int
     {
         // Tell the server you are going to stop consuming.
         // It will finish up the last message and not send you any more.
         $this->channel->basic_cancel($this->consumerTag, false, true);
 
-        parent::stop($status);
+        return parent::stop($status);
     }
 }
