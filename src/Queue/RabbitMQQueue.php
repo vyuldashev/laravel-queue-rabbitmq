@@ -279,7 +279,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      * Job class to use.
      *
      * @return string
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function getJobClass(): string
     {

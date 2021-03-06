@@ -5,6 +5,7 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Feature;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 use PhpAmqpLib\Exception\AMQPProtocolChannelException;
+use RuntimeException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks\TestJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCase as BaseTestCase;
@@ -310,7 +311,7 @@ abstract class TestCase extends BaseTestCase
 
         $job = Queue::pop();
 
-        $job->fail(new \RuntimeException($job->resolveName().' has an exception.'));
+        $job->fail(new RuntimeException($job->resolveName().' has an exception.'));
 
         sleep(1);
 
