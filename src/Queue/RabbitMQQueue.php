@@ -383,6 +383,8 @@ class RabbitMQQueue extends Queue implements QueueContract
             return;
         }
 
+        unset($this->exchanges[$name]);
+
         $this->channel->exchange_delete(
             $name,
             $unused
