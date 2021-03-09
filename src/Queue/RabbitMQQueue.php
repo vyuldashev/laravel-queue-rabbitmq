@@ -383,7 +383,8 @@ class RabbitMQQueue extends Queue implements QueueContract
             return;
         }
 
-        unset($this->exchanges[$name]);
+        $idx = array_search($name, $this->exchanges);
+        unset($this->exchanges[$idx]);
 
         $this->channel->exchange_delete(
             $name,
