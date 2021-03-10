@@ -12,7 +12,7 @@
     "php": "^7.3 || ^8.0",
     "ext-json": "*",
     "illuminate/queue": "^8.0",
-    "php-amqplib/php-amqplib": "3.0.0-rc1"
+    "php-amqplib/php-amqplib": "^2.12 || ^3.0"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.3",
@@ -53,6 +53,6 @@
     "test:unit": "@php vendor/bin/phpunit",
     "fix:style": "@php vendor/bin/php-cs-fixer fix --config=.php_cs.dist --allow-risky=yes --diff --verbose"
   },
-  "minimum-stability": "dev",
+  "minimum-stability": "RC",
   "prefer-stable": true
 }

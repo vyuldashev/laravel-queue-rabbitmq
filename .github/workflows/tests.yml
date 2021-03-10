@@ -29,6 +29,10 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip
           coverage: none
 
+      - name: Configure composer stability
+        if: matrix.php == '8.0'
+        run: composer config minimum-stability RC
+
       - name: Set up Docker
         run: |
           sudo rm /usr/local/bin/docker-compose
