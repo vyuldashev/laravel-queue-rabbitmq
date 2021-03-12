@@ -27,9 +27,9 @@ class Consumer extends Worker
     /** @var int */
     protected $prefetchCount;
 
-	/** @var bool */
-	protected $nonblocking=true;
-		
+    /** @var bool */
+    protected $nonblocking=true;
+
     /** @var AMQPChannel */
     protected $channel;
 
@@ -55,8 +55,8 @@ class Consumer extends Worker
     {
         $this->prefetchCount = $value;
     }
-	
-	public function setNonblocking(bool $value): void
+
+    public function setNonblocking(bool $value): void
     {
         $this->nonblocking = $value;
     }
@@ -137,7 +137,7 @@ class Consumer extends Worker
             // If the daemon should run (not in maintenance mode, etc.), then we can wait for a job.
             try {
                 $this->channel->wait(null, $this->nonblocking, (int) $options->timeout);
-            } catch (AMQPTimeoutException $exception) {	
+            } catch (AMQPTimeoutException $exception) {
             } catch (AMQPRuntimeException $exception) {
                 $this->exceptions->report($exception);
 
