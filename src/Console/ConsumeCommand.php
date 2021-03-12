@@ -64,6 +64,7 @@ class ConsumeCommand extends WorkCommand
         $consumer->setMaxPriority((int) $this->option('max-priority'));
         $consumer->setPrefetchSize((int) $this->option('prefetch-size'));
         $consumer->setPrefetchCount((int) $this->option('prefetch-count'));
+        $consumer->setNonblocking((bool) $this->option('non-blocking')=='false'?false:true);
 
         parent::handle();
     }
