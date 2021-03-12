@@ -28,7 +28,7 @@ class Consumer extends Worker
     protected $prefetchCount;
 
     /** @var bool */
-    protected $nonblocking=true;
+    protected $nonblocking = true;
 
     /** @var AMQPChannel */
     protected $channel;
