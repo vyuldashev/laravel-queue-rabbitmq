@@ -13,8 +13,10 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php: [7.3, 7.4, 8.0]
+        php: ['7.3', '7.4', '8.0']
         stability: [prefer-lowest, prefer-stable]
+
+    if: matrix.php != '8.0 && matrix.stability != 'prefer-lowest'
 
     name: PHP ${{ matrix.php }} - ${{ matrix.stability }}
 
