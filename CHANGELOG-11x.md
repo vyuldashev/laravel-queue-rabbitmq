@@ -2,7 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.1.2...master)
+## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.2.0...master)
+
+## [11.2.0 (2021-03-16)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.1.2...v11.2.0)
+
+- PHP 8 support
+- Fix missing rest option in `php artisan rabbitmq:consume` command [#416](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/416)
 
 ## [11.1.2 (2021-03-07)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.1.1...v11.1.2)
 
