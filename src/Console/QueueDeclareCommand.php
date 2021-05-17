@@ -34,7 +34,7 @@ class QueueDeclareCommand extends Command
         }
         $maxPriority = (int) $this->option('max-priority');
         $arguments = [
-            'x-max-priority' => $maxPriority
+            'x-max-priority' => $maxPriority,
         ];
         $queue->declareQueue(
             $this->argument('name'),
