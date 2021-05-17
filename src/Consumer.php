@@ -47,7 +47,7 @@ class Consumer extends Worker
 
     public function setMaxPriority(int $value): void
     {
-        $this->maxPriority = $value ?? 1;
+        $this->maxPriority = $value;
     }
 
     public function setPrefetchSize(int $value): void
