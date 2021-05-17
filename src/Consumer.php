@@ -24,6 +24,9 @@ class Consumer extends Worker
     protected $prefetchSize;
 
     /** @var int */
+    protected $maxPriority;
+
+    /** @var int */
     protected $prefetchCount;
 
     /** @var AMQPChannel */
@@ -40,6 +43,11 @@ class Consumer extends Worker
     public function setConsumerTag(string $value): void
     {
         $this->consumerTag = $value;
+    }
+
+    public function setMaxPriority(int $value): void
+    {
+        $this->maxPriority = $value ?? 1;
     }
 
     public function setPrefetchSize(int $value): void
@@ -113,7 +121,9 @@ class Consumer extends Worker
                 if ($this->supportsAsyncSignals()) {
                     $this->resetTimeoutHandler();
                 }
-            }
+            },
+            null,
+            ['priority' => ['I', $this->maxPriority]]
         );
 
         while ($this->channel->is_consuming()) {
