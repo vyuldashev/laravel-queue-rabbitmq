@@ -542,8 +542,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             $properties['priority'] = $attempts;
         }
         $commandData = unserialize($currentPayload['data']['command']);
-        if(property_exists($commandData, 'priority'))
-        {
+        if(property_exists($commandData, 'priority')) {
             $properties['priority'] = $commandData->priority;
         }
         $message = new AMQPMessage($payload, $properties);
