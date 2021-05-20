@@ -93,7 +93,7 @@ class Consumer extends Worker
         $jobClass = $connection->getJobClass();
         $arguments = [];
         if ($this->maxPriority) {
-           $arguments['priority'] = ['I', $this->maxPriority];
+            $arguments['priority'] = ['I', $this->maxPriority];
         }
 
         $this->channel->basic_consume(
