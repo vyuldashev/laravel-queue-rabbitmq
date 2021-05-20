@@ -25,7 +25,7 @@ class ConsumeCommand extends WorkCommand
                             {--tries=1 : Number of times to attempt a job before logging it failed}
                             {--rest=0 : Number of seconds to rest between jobs}
 
-                            {--max-priority=4}
+                            {--max-priority}
                             {--consumer-tag}
                             {--prefetch-size=0}
                             {--prefetch-count=1000}

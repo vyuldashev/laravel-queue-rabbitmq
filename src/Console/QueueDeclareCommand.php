@@ -12,7 +12,7 @@ class QueueDeclareCommand extends Command
                            {name : The name of the queue to declare}
                            {connection=rabbitmq : The name of the queue connection to use}
                            {--durable=1}
-                           {--max-priority=4}
+                           {--max-priority}
                            {--auto-delete=0}';
 
     protected $description = 'Declare queue';
@@ -32,10 +32,13 @@ class QueueDeclareCommand extends Command
 
             return;
         }
+
+        $arguments = [];
         $maxPriority = (int) $this->option('max-priority');
-        $arguments = [
-            'x-max-priority' => $maxPriority,
-        ];
+        if ($maxPriority) {
+            $arguments['x-max-priority'] = $maxPriority;
+        }
+
         $queue->declareQueue(
             $this->argument('name'),
             (bool) $this->option('durable'),
