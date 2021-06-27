@@ -136,7 +136,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         $this->declareDestination($destination, $exchange, $exchangeType);
 
-        [$message, $correlationId] = $this->createMessage($payload, $attempts);
+        [$message, $correlationId] = $this->createMessage($payload, $attempts, $options);
 
         $this->channel->basic_publish($message, $exchange, $destination, true, false);
 
@@ -522,23 +522,26 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @param $payload
      * @param int $attempts
+     * @param array $options
      * @return array
      * @throws JsonException
      */
-    protected function createMessage($payload, int $attempts = 0): array
+    protected function createMessage($payload, int $attempts = 0, $options = []): array
     {
         $properties = [
             'content_type' => 'application/json',
             'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT,
         ];
 
-        if ($correlationId = json_decode($payload, true, 512)['id'] ?? null) {
+        if ($correlationId = $options['correlation_id'] ?? json_decode($payload, true, 512)['id'] ?? null) {
             $properties['correlation_id'] = $correlationId;
         }
 
         if ($this->isPrioritizeDelayed()) {
             $properties['priority'] = $attempts;
         }
+
+        $properties += $options;
 
         $message = new AMQPMessage($payload, $properties);
 
