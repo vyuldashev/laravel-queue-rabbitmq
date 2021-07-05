@@ -41,7 +41,7 @@ return PhpCsFixer\Config::create()
         'full_opening_tag' => true,
         'blank_line_before_statement' => true,
         'no_trailing_comma_in_singleline_array' => true,
-        'trailing_comma_in_multiline' => true,
+        'trailing_comma_in_multiline_array' => true,
         'array_indentation' => true,
         'binary_operator_spaces' => [
             'operators' => [
