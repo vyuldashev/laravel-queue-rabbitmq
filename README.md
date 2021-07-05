@@ -215,6 +215,8 @@ class RabbitMQJob extends BaseJob
         $method = 'handle';
 
         ($this->instance = $this->resolve($class))->{$method}($this, $payload);
+
+        $this->delete();
     }
 }
 
