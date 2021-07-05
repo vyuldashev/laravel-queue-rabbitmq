@@ -110,6 +110,45 @@ abstract class TestCase extends BaseTestCase
                     'reroute_failed' => '',
                     'failed_exchange' => '',
                     'failed_routing_key' => '',
+                    'quorum' => '',
+                ],
+            ],
+
+            'worker' => 'default',
+
+        ]);
+        $app['config']->set('queue.connections.rabbitmq-with-quorum-options', [
+            'driver' => 'rabbitmq',
+            'queue' => 'order',
+            'connection' => AMQPLazyConnection::class,
+
+            'hosts' => [
+                [
+                    'host' => getenv('HOST'),
+                    'port' => getenv('PORT'),
+                    'vhost' => '/',
+                    'user' => 'guest',
+                    'password' => 'guest',
+                ],
+            ],
+
+            'options' => [
+                'ssl_options' => [
+                    'cafile' => null,
+                    'local_cert' => null,
+                    'local_key' => null,
+                    'verify_peer' => true,
+                    'passphrase' => null,
+                ],
+
+                'queue' => [
+                    'exchange' => 'application-x',
+                    'exchange_type' => 'topic',
+                    'exchange_routing_key' => 'process.%s',
+                    'reroute_failed' => true,
+                    'failed_exchange' => 'failed-exchange',
+                    'failed_routing_key' => 'application-x.%s.failed',
+                    'quorum' => true,
                 ],
             ],
 

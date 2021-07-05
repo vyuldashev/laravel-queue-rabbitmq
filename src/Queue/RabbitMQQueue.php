@@ -611,13 +611,18 @@ class RabbitMQQueue extends Queue implements QueueContract
         // Messages without a priority property are treated as if their priority were 0.
         // Messages with a priority which is higher than the queue's maximum, are treated as if they were
         // published with the maximum priority.
-        if ($this->isPrioritizeDelayed()) {
+        // Quorum queues does not support priority.
+        if ($this->isPrioritizeDelayed() && ! $this->isQuorum()) {
             $arguments['x-max-priority'] = $this->getQueueMaxPriority();
         }
 
         if ($this->isRerouteFailed()) {
             $arguments['x-dead-letter-exchange'] = $this->getFailedExchange() ?? '';
             $arguments['x-dead-letter-routing-key'] = $this->getFailedRoutingKey($destination);
+        }
+
+        if ($this->isQuorum()) {
+            $arguments['x-queue-type'] = 'quorum';
         }
 
         return $arguments;
@@ -708,6 +713,16 @@ class RabbitMQQueue extends Queue implements QueueContract
     protected function isRerouteFailed(): bool
     {
         return (bool) (Arr::get($this->options, 'reroute_failed') ?: false);
+    }
+
+    /**
+     * Returns &true;, if declared queue must be quorum queue.
+     *
+     * @return bool
+     */
+    protected function isQuorum(): bool
+    {
+        return (bool) (Arr::get($this->options, 'quorum') ?: false);
     }
 
     /**
