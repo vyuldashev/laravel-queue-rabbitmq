@@ -7,7 +7,7 @@ return PhpCsFixer\Config::create()
     ->setUsingCache(false)
     ->setFinder($finder)
     ->setRules([
-        'psr0' => false,
+        'psr_autoloading' => false,
         '@PSR2' => true,
         'blank_line_after_namespace' => true,
         'braces' => true,
@@ -17,10 +17,10 @@ return PhpCsFixer\Config::create()
         'function_declaration' => true,
         'indentation_type' => true,
         'line_ending' => true,
-        'lowercase_constants' => true,
+        'constant_case' => true,
         'lowercase_keywords' => true,
         'method_argument_space' => [
-            'ensure_fully_multiline' => true,
+            'on_multiline' => 'ensure_fully_multiline',
         ],
         'no_break_comment' => true,
         'no_closing_tag' => true,
@@ -39,9 +39,9 @@ return PhpCsFixer\Config::create()
         'visibility_required' => true,
         'encoding' => true,
         'full_opening_tag' => true,
-        'blank_line_before_return' => true,
+        'blank_line_before_statement' => true,
         'no_trailing_comma_in_singleline_array' => true,
-        'trailing_comma_in_multiline_array' => true,
+        'trailing_comma_in_multiline' => true,
         'array_indentation' => true,
         'binary_operator_spaces' => [
             'operators' => [

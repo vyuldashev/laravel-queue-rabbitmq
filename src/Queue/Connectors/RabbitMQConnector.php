@@ -113,12 +113,14 @@ class RabbitMQConnector implements ConnectorInterface
         foreach ($array as $index => &$value) {
             if (is_array($value)) {
                 $value = $this->filter($value);
+
                 continue;
             }
 
             // If the value is null then remove it.
             if ($value === null) {
                 unset($array[$index]);
+
                 continue;
             }
         }

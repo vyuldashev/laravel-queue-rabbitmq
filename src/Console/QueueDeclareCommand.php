@@ -41,7 +41,7 @@ class QueueDeclareCommand extends Command
             $arguments['x-max-priority'] = $maxPriority;
         }
 
-        if($this->option('quorum')) {
+        if ($this->option('quorum')) {
             $arguments['x-queue-type'] = 'quorum';
         }
 

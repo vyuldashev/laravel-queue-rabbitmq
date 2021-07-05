@@ -136,6 +136,7 @@ class Consumer extends Worker
             // make sure we do not need to kill this worker process off completely.
             if (! $this->daemonShouldRun($options, $connectionName, $queue)) {
                 $this->pauseWorker($options, $lastRestart);
+
                 continue;
             }
 

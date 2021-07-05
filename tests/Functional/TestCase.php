@@ -2,7 +2,10 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional;
 
+use Exception;
 use PhpAmqpLib\Connection\AMQPLazyConnection;
+use ReflectionClass;
+use ReflectionException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -162,15 +165,15 @@ abstract class TestCase extends BaseTestCase
      * @param string $method
      * @param array $parameters
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     protected function callMethod($object, string $method, array $parameters = [])
     {
         try {
             $className = get_class($object);
-            $reflection = new \ReflectionClass($className);
-        } catch (\ReflectionException $e) {
-            throw new \Exception($e->getMessage());
+            $reflection = new ReflectionClass($className);
+        } catch (ReflectionException $e) {
+            throw new Exception($e->getMessage());
         }
 
         $method = $reflection->getMethod($method);
