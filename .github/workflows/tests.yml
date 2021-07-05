@@ -50,4 +50,4 @@ jobs:
         run: vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --allow-risky=yes --dry-run --diff --verbose
 
       - name: Execute tests
-        run: vendor/bin/phpunit --verbose
+        run: sleep 10 && vendor/bin/phpunit --verbose
