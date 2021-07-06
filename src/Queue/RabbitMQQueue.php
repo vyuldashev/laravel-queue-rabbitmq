@@ -824,8 +824,8 @@ class RabbitMQQueue extends Queue implements QueueContract
         $attempts = Arr::get($options, 'attempts') ?: 0;
 
         $destination = $this->getRoutingKey($queue);
-        $exchange = $this->getExchange();
-        $exchangeType = $this->getExchangeType();
+        $exchange = $this->getExchange(Arr::get($options, 'exchange'));
+        $exchangeType = $this->getExchangeType(Arr::get($options, 'exchange_type'));
 
         return [$destination, $exchange, $exchangeType, $attempts];
     }
