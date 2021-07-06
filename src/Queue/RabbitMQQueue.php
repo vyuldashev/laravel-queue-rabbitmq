@@ -318,6 +318,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         if ($this->isExchangeDeclared($exchange)) {
             return true;
         }
+
         try {
             // create a temporary channel, so the main channel will not be closed on exception
             $channel = $this->connection->channel();

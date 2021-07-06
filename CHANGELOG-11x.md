@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 
 - Quorum queues support [#359](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/359)
 - max-priority support [#422](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/422)
+- Ability to specify exchange and exchange_type when using pushRaw()[#420](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/420)
+-  Remember exchanges once they have been verified [#407](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/407)
 
 ## [11.2.0 (2021-03-16)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.1.2...v11.2.0)
 
