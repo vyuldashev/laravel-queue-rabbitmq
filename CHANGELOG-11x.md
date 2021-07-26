@@ -2,14 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.3.0...master)
+## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.4.0...master)
+
+## [11.4.0 (2021-07-27)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.3.0...v11.4.0)
+
+- Randomize consumer tag [#432](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/432)
 
 ## [11.3.0 (2021-07-06)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.2.0...v11.3.0)
 
 - Quorum queues support [#359](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/359)
 - max-priority support [#422](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/422)
 - Ability to specify exchange and exchange_type when using pushRaw() [#420](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/420)
--  Remember exchanges once they have been verified [#407](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/407)
+- Remember exchanges once they have been verified [#407](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/407)
 
 ## [11.2.0 (2021-03-16)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v11.1.2...v11.2.0)
 
