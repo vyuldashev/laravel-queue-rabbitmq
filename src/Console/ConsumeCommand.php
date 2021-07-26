@@ -54,6 +54,12 @@ class ConsumeCommand extends WorkCommand
             return $consumerTag;
         }
 
-        return Str::slug(config('app.name', 'laravel'), '_').'_'.getmypid();
+        $consumerTag = implode('_', [
+            Str::slug(config('app.name', 'laravel')),
+            Str::slug($this->option('name')),
+            md5(serialize($this->options()).Str::random(16).getmypid()),
+        ]);
+
+        return Str::substr($consumerTag, 0, 255);
     }
 }
