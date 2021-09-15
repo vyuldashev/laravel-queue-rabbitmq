@@ -1,5 +1,5 @@
 {
-  "name": "hr-d/laravel-queue-rabbitmq",
+  "name": "hr-d/laravel-rabbitmq",
   "version": "5.1.1",
   "description": "RabbitMQ driver for Laravel Queue",
   "license": "MIT",
@@ -17,7 +17,7 @@
   },
   "autoload": {
     "psr-0": {
-      "HRD\\LaravelQueueRabbitMQ": "src/"
+      "HRD\\LaravelRabbitMQ": "src/"
     }
   },
   "minimum-stability": "dev"
