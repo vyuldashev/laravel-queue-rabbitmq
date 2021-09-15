@@ -25,6 +25,8 @@ return [
         'durable'     		=> env('RABBITMQ_QUEUE_DURABLE', true),
         'exclusive'   		=> env('RABBITMQ_QUEUE_EXCLUSIVE', false),
         'auto_delete' 		=> env('RABBITMQ_QUEUE_AUTODELETE', false),
+        'max_priority'      => env('RABBITMQ_QUEUE_MAX_PRIORITY', 10),
+        'priority'          => env('RABBITMQ_QUEUE_PRIORITY', 2),
     ],
     'exchange_params' 		=> [
         'type'        		=> env('RABBITMQ_EXCHANGE_TYPE', 'direct'), // more info at http://www.rabbitmq.com/tutorials/amqp-concepts.html

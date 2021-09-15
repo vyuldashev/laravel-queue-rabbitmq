@@ -1,6 +1,6 @@
 {
-  "name": "vladimir-yuldashev/laravel-queue-rabbitmq",
-  "version": "5.1",
+  "name": "hr-d/laravel-queue-rabbitmq",
+  "version": "5.1.1",
   "description": "RabbitMQ driver for Laravel Queue",
   "license": "MIT",
   "authors": [
@@ -17,7 +17,7 @@
   },
   "autoload": {
     "psr-0": {
-      "VladimirYuldashev\\LaravelQueueRabbitMQ": "src/"
+      "HRD\\LaravelQueueRabbitMQ": "src/"
     }
   },
   "minimum-stability": "dev"

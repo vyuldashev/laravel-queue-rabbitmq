@@ -6,7 +6,7 @@ RabbitMQ Queue driver for Laravel
 
 Require this package in your composer.json and run composer update (IMPORTANT! DO NOT USE "dev-master"):
 
-	"vladimir-yuldashev/laravel-queue-rabbitmq": "5.1"
+	"hr-d/laravel-queue-rabbitmq": "5.1.1"
     
 After composer update is finished you need to add ServiceProvider to your `providers` array in `app.php`:
 				
@@ -34,6 +34,8 @@ Add these lines to your `app/config/queue.php` file to `connections` array:
 			'durable'     		=> env('RABBITMQ_QUEUE_DURABLE', true),
 			'exclusive'   		=> env('RABBITMQ_QUEUE_EXCLUSIVE', false),
 			'auto_delete' 		=> env('RABBITMQ_QUEUE_AUTODELETE', false),
+			'max_priority'      => env('RABBITMQ_QUEUE_MAX_PRIORITY', 10),
+			'priority'          => env('RABBITMQ_QUEUE_PRIORITY', 2),
 		],
 
 		'exchange_params' 		=> [
