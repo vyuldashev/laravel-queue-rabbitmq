@@ -3,7 +3,7 @@ version: '3.7'
 services:
 
   rabbitmq:
-    image: rabbitmq
+    image: rabbitmq:3.8
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASSWORD: guest
