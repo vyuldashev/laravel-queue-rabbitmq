@@ -550,6 +550,12 @@ class RabbitMQQueue extends Queue implements QueueContract
             $properties['priority'] = $attempts;
         }
 
+        $encoding = $this->options['content_encoding'] ?? '';
+        if ($encoding === 'gzip') {
+            $properties['content_encoding'] = 'gzip';
+            $payload = gzdeflate($payload);
+        }
+
         if (isset($currentPayload['data']['command'])) {
             $commandData = unserialize($currentPayload['data']['command']);
             if (property_exists($commandData, 'priority')) {

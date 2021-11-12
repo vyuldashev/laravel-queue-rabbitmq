@@ -36,6 +36,13 @@ class RabbitMQJob extends Job implements JobContract
      */
     protected $decoded;
 
+    /**
+     * The raw body from the message
+     *
+     * @var string
+     */
+    protected $rawBody;
+
     public function __construct(
         Container $container,
         RabbitMQQueue $rabbitmq,
@@ -48,6 +55,7 @@ class RabbitMQJob extends Job implements JobContract
         $this->message = $message;
         $this->connectionName = $connectionName;
         $this->queue = $queue;
+        $this->rawBody = $this->decodeRawBody();
         $this->decoded = $this->payload();
     }
 
@@ -59,12 +67,22 @@ class RabbitMQJob extends Job implements JobContract
         return $this->decoded['id'] ?? null;
     }
 
+    protected function decodeRawBody() : string
+    {
+        $encoding = $this->message->get_properties()['content_encoding'] ?? '';
+        if ($encoding === 'gzip') {
+            return gzinflate($this->message->getBody());
+        }
+
+        return $this->message->getBody();
+    }
+
     /**
      * {@inheritdoc}
      */
     public function getRawBody(): string
     {
-        return $this->message->getBody();
+        return $this->rawBody;
     }
 
     /**
