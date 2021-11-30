@@ -5,6 +5,7 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Console;
 use Illuminate\Queue\Console\WorkCommand;
 use Illuminate\Support\Str;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Consumer;
+use Illuminate\Support\Facades\Artisan;
 
 class ConsumeCommand extends WorkCommand
 {
@@ -29,12 +30,19 @@ class ConsumeCommand extends WorkCommand
                             {--consumer-tag}
                             {--prefetch-size=0}
                             {--prefetch-count=1000}
+
+                            {--auto-create-queue=0}
                            ';
 
     protected $description = 'Consume messages';
 
     public function handle(): void
     {
+        $autoCreateQueue = (bool) $this->option('auto-created-queue');
+        $queue = $this->option('queue');
+        if ($autoCreateQueue && $queue) {
+            Artisan::call('rabbitmq:queue-declare', ['name' => $queue]);
+        }
         /** @var Consumer $consumer */
         $consumer = $this->worker;
 
