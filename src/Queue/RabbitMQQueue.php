@@ -13,7 +13,10 @@ use Illuminate\Support\Str;
 use JsonException;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AbstractConnection;
+use PhpAmqpLib\Exception\AMQPChannelClosedException;
+use PhpAmqpLib\Exception\AMQPConnectionClosedException;
 use PhpAmqpLib\Exception\AMQPProtocolChannelException;
+use PhpAmqpLib\Exception\AMQPRuntimeException;
 use PhpAmqpLib\Exchange\AMQPExchangeType;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
@@ -254,6 +257,16 @@ class RabbitMQQueue extends Queue implements QueueContract
             }
 
             throw $exception;
+        } catch (AMQPChannelClosedException|AMQPConnectionClosedException $exception) {
+            // Queue::pop used by worker to receive new job
+            // Thrown exception is checked by Illuminate\Database\DetectsLostConnections::causedByLostConnection
+            // Is has to contain one of the several phrases in exception message in order to restart worker
+            // Otherwise worker continues to work with broken connection
+            throw new AMQPRuntimeException(
+                'Lost connection: '.$exception->getMessage(),
+                $exception->getCode(),
+                $exception
+            );
         }
 
         return null;
