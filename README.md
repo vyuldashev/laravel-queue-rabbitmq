@@ -233,6 +233,18 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob as BaseJob;
 
 class RabbitMQJob extends BaseJob
 {
+    /**
+     * Fire the job.
+     *
+     * @return void
+     */
+    public function fire()
+    {
+        parent::fire();
+
+        $this->delete();
+    }
+
    /**
      * Get the decoded body of the job.
      *
@@ -244,6 +256,30 @@ class RabbitMQJob extends BaseJob
             'job'  => 'WhatheverFullyQualifiedClassNameToExecute@handle',
             'data' => json_decode($this->getRawBody(), true)
         ];
+    }
+}
+```
+
+So Executed class:
+
+```php
+<?php
+
+namespace App\Jobs;
+
+use Illuminate\Contracts\Queue\ShouldQueue;
+
+class ProcessPodcast implements ShouldQueue
+{
+    /**
+    * Execute the job.
+     *
+     * @param App\Queue\Jobs\RabbitMQJob $job
+     * @param array $data
+     */
+    public function handle($job, $data)
+    {
+        // ...
     }
 }
 ```
