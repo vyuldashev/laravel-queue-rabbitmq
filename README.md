@@ -106,7 +106,7 @@ When you want to publish messages against an exchange with routing-key's, then t
 - When routing-key is omitted the routing-key by default is the `queue` name.
 - When using `%s` in the routing-key the queue_name will be substituted.
 
-> Note: when using exchange with routing-key, u probably create your queues with bindings yourself.
+> Note: when using exchange with routing-key, you probably create your queues with bindings yourself.
   
 ```php
 'connections' => [
@@ -136,7 +136,7 @@ When you want to instruct RabbitMQ to reroute failed messages to a exchange or a
 - When routing-key is omitted, the routing-key by default the `queue` name is substituted with `'.failed'`.
 - When using `%s` in the routing-key the queue_name will be substituted.
 
-> Note: When using failed_job exchange with routing-key, u probably need to create your exchange/queue with bindings yourself.
+> Note: When using failed_job exchange with routing-key, you probably need to create your exchange/queue with bindings yourself.
   
 ```php
 'connections' => [
