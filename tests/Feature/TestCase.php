@@ -9,6 +9,7 @@ use RuntimeException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks\TestJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCase as BaseTestCase;
+use Illuminate\Database\DatabaseTransactionsManager;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -88,6 +89,32 @@ abstract class TestCase extends BaseTestCase
         $this->assertNull($payload['timeout']);
         $this->assertNull($payload['retryUntil']);
         $this->assertSame($job->getJobId(), $payload['id']);
+
+        $job->delete();
+        $this->assertSame(0, Queue::size());
+    }
+
+    public function testPushAfterCommit(): void
+    {
+        $transaction = new DatabaseTransactionsManager;
+
+        $this->app->singleton('db.transactions', function ($app) use ($transaction) {
+            $transaction->begin('FakeDBConnection', 1);
+            return $transaction;
+        });
+
+        TestJob::dispatch()->afterCommit();
+
+        sleep(1);
+        $this->assertSame(0, Queue::size());
+        $this->assertNull(Queue::pop());
+
+        $transaction->commit('FakeDBConnection');
+
+        sleep(1);
+
+        $this->assertSame(1, Queue::size());
+        $this->assertNotNull($job = Queue::pop());
 
         $job->delete();
         $this->assertSame(0, Queue::size());
