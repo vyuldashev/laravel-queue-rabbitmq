@@ -270,7 +270,7 @@ There are two ways of consuming messages.
 
 1. `queue:work` command which is Laravel's built-in command. This command utilizes `basic_get`.
 
-2. `rabbitmq:consume` command which is provided by this package. This command utilizes `basic_consume` and is more performant than `basic_get` by ~2x.
+2. `rabbitmq:consume` command which is provided by this package. This command utilizes `basic_consume` and is more performant than `basic_get` by ~2x, but does not support multiple queues.
 
 ## Testing
 
