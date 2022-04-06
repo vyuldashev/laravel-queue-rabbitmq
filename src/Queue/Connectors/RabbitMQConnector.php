@@ -31,9 +31,9 @@ class RabbitMQConnector implements ConnectorInterface
     /**
      * Establish a queue connection.
      *
-     * @param array $config
-     *
+     * @param  array  $config
      * @return RabbitMQQueue
+     *
      * @throws Exception
      */
     public function connect(array $config): Queue
@@ -63,8 +63,9 @@ class RabbitMQConnector implements ConnectorInterface
     }
 
     /**
-     * @param array $config
+     * @param  array  $config
      * @return AbstractConnection
+     *
      * @throws Exception
      */
     protected function createConnection(array $config): AbstractConnection
@@ -84,10 +85,10 @@ class RabbitMQConnector implements ConnectorInterface
     /**
      * Create a queue for the worker.
      *
-     * @param string $worker
-     * @param AbstractConnection $connection
-     * @param string $queue
-     * @param array $options
+     * @param  string  $worker
+     * @param  AbstractConnection  $connection
+     * @param  string  $queue
+     * @param  array  $options
      * @return HorizonRabbitMQQueue|RabbitMQQueue|Queue
      */
     protected function createQueue(string $worker, AbstractConnection $connection, string $queue, array $options = [])
@@ -105,7 +106,7 @@ class RabbitMQConnector implements ConnectorInterface
     /**
      * Recursively filter only null values.
      *
-     * @param array $array
+     * @param  array  $array
      * @return array
      */
     private function filter(array $array): array

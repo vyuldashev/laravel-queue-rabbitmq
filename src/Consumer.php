@@ -63,10 +63,11 @@ class Consumer extends Worker
     /**
      * Listen to the given queue in a loop.
      *
-     * @param string $connectionName
-     * @param string $queue
-     * @param WorkerOptions $options
+     * @param  string  $connectionName
+     * @param  string  $queue
+     * @param  WorkerOptions  $options
      * @return int
+     *
      * @throws Throwable
      */
     public function daemon($connectionName, $queue, WorkerOptions $options)
@@ -147,7 +148,7 @@ class Consumer extends Worker
                 $this->exceptions->report($exception);
 
                 $this->kill(1);
-            } catch (Exception | Throwable $exception) {
+            } catch (Exception|Throwable $exception) {
                 $this->exceptions->report($exception);
 
                 $this->stopWorkerIfLostConnection($exception);
@@ -180,9 +181,9 @@ class Consumer extends Worker
     /**
      * Determine if the daemon should process on this iteration.
      *
-     * @param WorkerOptions $options
-     * @param string $connectionName
-     * @param string $queue
+     * @param  WorkerOptions  $options
+     * @param  string  $connectionName
+     * @param  string  $queue
      * @return bool
      */
     protected function daemonShouldRun(WorkerOptions $options, $connectionName, $queue): bool

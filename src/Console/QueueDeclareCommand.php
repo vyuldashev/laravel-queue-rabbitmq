@@ -19,7 +19,8 @@ class QueueDeclareCommand extends Command
     protected $description = 'Declare queue';
 
     /**
-     * @param RabbitMQConnector $connector
+     * @param  RabbitMQConnector  $connector
+     *
      * @throws Exception
      */
     public function handle(RabbitMQConnector $connector): void

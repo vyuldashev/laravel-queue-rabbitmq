@@ -16,7 +16,8 @@ class ExchangeDeleteCommand extends Command
     protected $description = 'Delete exchange';
 
     /**
-     * @param RabbitMQConnector $connector
+     * @param  RabbitMQConnector  $connector
+     *
      * @throws Exception
      */
     public function handle(RabbitMQConnector $connector): void
