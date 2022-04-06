@@ -25,8 +25,9 @@ class RabbitMQQueue extends BaseRabbitMQQueue
     /**
      * Get the number of queue jobs that are ready to process.
      *
-     * @param string|null $queue
+     * @param  string|null  $queue
      * @return int
+     *
      * @throws AMQPProtocolChannelException
      */
     public function readyNow($queue = null): int
@@ -93,9 +94,10 @@ class RabbitMQQueue extends BaseRabbitMQQueue
     /**
      * Fire the job deleted event.
      *
-     * @param  string $queue
-     * @param  RabbitMQJob $job
+     * @param  string  $queue
+     * @param  RabbitMQJob  $job
      * @return void
+     *
      * @throws BindingResolutionException
      */
     public function deleteReserved($queue, $job): void
@@ -106,9 +108,10 @@ class RabbitMQQueue extends BaseRabbitMQQueue
     /**
      * Fire the given event if a dispatcher is bound.
      *
-     * @param  string $queue
-     * @param  mixed $event
+     * @param  string  $queue
+     * @param  mixed  $event
      * @return void
+     *
      * @throws BindingResolutionException
      */
     protected function event($queue, $event): void
