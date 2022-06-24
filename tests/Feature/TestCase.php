@@ -2,6 +2,7 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Feature;
 
+use Illuminate\Database\DatabaseTransactionsManager;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 use PhpAmqpLib\Exception\AMQPProtocolChannelException;
@@ -88,6 +89,33 @@ abstract class TestCase extends BaseTestCase
         $this->assertNull($payload['timeout']);
         $this->assertNull($payload['retryUntil']);
         $this->assertSame($job->getJobId(), $payload['id']);
+
+        $job->delete();
+        $this->assertSame(0, Queue::size());
+    }
+
+    public function testPushAfterCommit(): void
+    {
+        $transaction = new DatabaseTransactionsManager;
+
+        $this->app->singleton('db.transactions', function ($app) use ($transaction) {
+            $transaction->begin('FakeDBConnection', 1);
+
+            return $transaction;
+        });
+
+        TestJob::dispatch()->afterCommit();
+
+        sleep(1);
+        $this->assertSame(0, Queue::size());
+        $this->assertNull(Queue::pop());
+
+        $transaction->commit('FakeDBConnection');
+
+        sleep(1);
+
+        $this->assertSame(1, Queue::size());
+        $this->assertNotNull($job = Queue::pop());
 
         $job->delete();
         $this->assertSame(0, Queue::size());

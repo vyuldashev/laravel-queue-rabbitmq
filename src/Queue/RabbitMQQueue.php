@@ -84,17 +84,20 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @param  AbstractConnection  $connection
      * @param  string  $default
+     * @param  bool  $dispatchAfterCommit
      * @param  array  $options
      */
     public function __construct(
         AbstractConnection $connection,
         string $default,
+        $dispatchAfterCommit = false,
         array $options = []
     ) {
         $this->connection = $connection;
         $this->channel = $connection->channel();
         $this->default = $default;
         $this->options = $options;
+        $this->dispatchAfterCommit = $dispatchAfterCommit;
     }
 
     /**
@@ -125,7 +128,15 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     public function push($job, $data = '', $queue = null)
     {
-        return $this->pushRaw($this->createPayload($job, $queue, $data), $queue, []);
+        return $this->enqueueUsing(
+            $job,
+            $this->createPayload($job, $this->getQueue($queue), $data),
+            $queue,
+            null,
+            function ($payload, $queue) {
+                return $this->pushRaw($payload, $queue);
+            }
+        );
     }
 
     /**
@@ -153,10 +164,14 @@ class RabbitMQQueue extends Queue implements QueueContract
      */
     public function later($delay, $job, $data = '', $queue = null)
     {
-        return $this->laterRaw(
+        return $this->enqueueUsing(
+            $job,
+            $this->createPayload($job, $this->getQueue($queue), $data),
+            $queue,
             $delay,
-            $this->createPayload($job, $queue, $data),
-            $queue
+            function ($payload, $queue, $delay) {
+                return $this->laterRaw($delay, $payload, $queue);
+            }
         );
     }
 
