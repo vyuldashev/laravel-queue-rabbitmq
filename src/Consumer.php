@@ -15,22 +15,22 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 class Consumer extends Worker
 {
     /** @var Container */
-    protected $container;
+    protected Container $container;
 
     /** @var string */
-    protected $consumerTag;
+    protected string $consumerTag;
 
     /** @var int */
-    protected $prefetchSize;
+    protected int $prefetchSize;
 
     /** @var int */
-    protected $maxPriority;
+    protected int $maxPriority;
 
     /** @var int */
-    protected $prefetchCount;
+    protected int $prefetchCount;
 
     /** @var AMQPChannel */
-    protected $channel;
+    protected AMQPChannel $channel;
 
     /** @var object|null */
     protected $currentJob;

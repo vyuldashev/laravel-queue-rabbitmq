@@ -21,7 +21,7 @@ class RabbitMQConnector implements ConnectorInterface
     /**
      * @var Dispatcher
      */
-    private $dispatcher;
+    private Dispatcher $dispatcher;
 
     public function __construct(Dispatcher $dispatcher)
     {
@@ -91,16 +91,13 @@ class RabbitMQConnector implements ConnectorInterface
      * @param  array  $options
      * @return HorizonRabbitMQQueue|RabbitMQQueue|Queue
      */
-    protected function createQueue(string $worker, AbstractConnection $connection, string $queue, array $options = [])
+    protected function createQueue(string $worker, AbstractConnection $connection, string $queue, array $options = []): RabbitMQQueue|HorizonRabbitMQQueue|Queue
     {
-        switch ($worker) {
-            case 'default':
-                return new RabbitMQQueue($connection, $queue, $options);
-            case 'horizon':
-                return new HorizonRabbitMQQueue($connection, $queue, $options);
-            default:
-                return new $worker($connection, $queue, $options);
-        }
+        return match ($worker) {
+            'default' => new RabbitMQQueue($connection, $queue, $options),
+            'horizon' => new HorizonRabbitMQQueue($connection, $queue, $options),
+            default => new $worker($connection, $queue, $options),
+        };
     }
 
     /**

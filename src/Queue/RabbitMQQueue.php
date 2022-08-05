@@ -30,54 +30,54 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @var AbstractConnection
      */
-    protected $connection;
+    protected AbstractConnection $connection;
 
     /**
      * The RabbitMQ channel instance.
      *
      * @var AMQPChannel
      */
-    protected $channel;
+    protected AMQPChannel $channel;
 
     /**
      * The name of the default queue.
      *
      * @var string
      */
-    protected $default;
+    protected string $default;
 
     /**
      * List of already declared exchanges.
      *
      * @var array
      */
-    protected $exchanges = [];
+    protected array $exchanges = [];
 
     /**
      * List of already declared queues.
      *
      * @var array
      */
-    protected $queues = [];
+    protected array $queues = [];
 
     /**
      * List of already bound queues to exchanges.
      *
      * @var array
      */
-    protected $boundQueues = [];
+    protected array $boundQueues = [];
 
     /**
      * Current job being processed.
      *
      * @var RabbitMQJob
      */
-    protected $currentJob;
+    protected RabbitMQJob $currentJob;
 
     /**
      * @var array
      */
-    protected $options;
+    protected array $options;
 
     /**
      * RabbitMQQueue constructor.
@@ -132,6 +132,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      * {@inheritdoc}
      *
      * @throws AMQPProtocolChannelException
+     * @throws JsonException
      */
     public function pushRaw($payload, $queue = null, array $options = [])
     {
@@ -165,11 +166,13 @@ class RabbitMQQueue extends Queue implements QueueContract
      * @param $payload
      * @param  null  $queue
      * @param  int  $attempts
+     *
      * @return mixed
      *
      * @throws AMQPProtocolChannelException
+     * @throws JsonException
      */
-    public function laterRaw($delay, $payload, $queue = null, $attempts = 0)
+    public function laterRaw($delay, $payload, $queue = null, int $attempts = 0)
     {
         $ttl = $this->secondsUntil($delay) * 1000;
 
@@ -208,9 +211,11 @@ class RabbitMQQueue extends Queue implements QueueContract
      * @param  string  $payload
      * @param  null  $queue
      * @param  array  $options
+     *
      * @return mixed
      *
      * @throws AMQPProtocolChannelException
+     * @throws JsonException
      */
     public function bulkRaw(string $payload, $queue = null, array $options = [])
     {
@@ -814,7 +819,8 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @param  string  $destination
      * @param  string|null  $exchange
-     * @param  string|null  $exchangeType
+     * @param  string  $exchangeType
+     *
      * @return void
      *
      * @throws AMQPProtocolChannelException
