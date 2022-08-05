@@ -166,7 +166,6 @@ class RabbitMQQueue extends Queue implements QueueContract
      * @param $payload
      * @param  null  $queue
      * @param  int  $attempts
-     *
      * @return mixed
      *
      * @throws AMQPProtocolChannelException
@@ -211,7 +210,6 @@ class RabbitMQQueue extends Queue implements QueueContract
      * @param  string  $payload
      * @param  null  $queue
      * @param  array  $options
-     *
      * @return mixed
      *
      * @throws AMQPProtocolChannelException
@@ -820,7 +818,6 @@ class RabbitMQQueue extends Queue implements QueueContract
      * @param  string  $destination
      * @param  string|null  $exchange
      * @param  string  $exchangeType
-     *
      * @return void
      *
      * @throws AMQPProtocolChannelException
