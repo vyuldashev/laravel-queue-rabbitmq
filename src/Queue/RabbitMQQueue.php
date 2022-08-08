@@ -145,7 +145,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         [$message, $correlationId] = $this->createMessage($payload, $attempts);
 
         $this->retry(
-            fn() => $this->channel->basic_publish($message, $exchange, $destination, true, false)
+            fn () => $this->channel->basic_publish($message, $exchange, $destination, true, false)
         );
 
         return $correlationId;
