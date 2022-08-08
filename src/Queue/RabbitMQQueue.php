@@ -480,7 +480,6 @@ class RabbitMQQueue extends Queue implements QueueContract
                 new AMQPTable($arguments)
             )
         );
-
     }
 
     /**
