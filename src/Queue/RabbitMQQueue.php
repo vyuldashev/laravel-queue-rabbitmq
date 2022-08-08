@@ -192,7 +192,7 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         // Publish directly on the delayQueue, no need to publish trough an exchange.
         $this->retry(
-            fn() => $this->channel->basic_publish($message, null, $destination, true, false)
+            fn () => $this->channel->basic_publish($message, null, $destination, true, false)
         );
 
         return $correlationId;
@@ -230,7 +230,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         [$message, $correlationId] = $this->createMessage($payload, $attempts);
 
         $this->retry(
-            fn() => $this->channel->batch_basic_publish($message, $exchange, $destination)
+            fn () => $this->channel->batch_basic_publish($message, $exchange, $destination)
         );
 
         return $correlationId;
@@ -387,7 +387,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         }
 
         $this->retry(
-            fn() => $this->channel->exchange_declare(
+            fn () => $this->channel->exchange_declare(
                 $name,
                 $type,
                 false,
@@ -419,7 +419,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         unset($this->exchanges[$idx]);
 
         $this->retry(
-            fn() => $this->channel->exchange_delete($name, $unused)
+            fn () => $this->channel->exchange_delete($name, $unused)
         );
     }
 
