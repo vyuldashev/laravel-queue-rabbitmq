@@ -63,7 +63,7 @@ Add connection to `config/queue.php`:
         * Set to "horizon" if you wish to use Laravel Horizon.
         */
        'worker' => env('RABBITMQ_WORKER', 'default'),
-        
+       'after_commit' => false,
     ],
 
     // ...    

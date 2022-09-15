@@ -90,7 +90,7 @@ class RabbitMQQueue extends Queue implements QueueContract
     public function __construct(
         AbstractConnection $connection,
         string $default,
-        $dispatchAfterCommit = false,
+        bool $dispatchAfterCommit = false,
         array $options = []
     ) {
         $this->connection = $connection;

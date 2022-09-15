@@ -44,7 +44,7 @@ class RabbitMQConnector implements ConnectorInterface
             Arr::get($config, 'worker', 'default'),
             $connection,
             $config['queue'],
-            $config['after_commit'] ?? null,
+            Arr::get($config, 'after_commit', false),
             Arr::get($config, 'options.queue', [])
         );
 
@@ -97,7 +97,7 @@ class RabbitMQConnector implements ConnectorInterface
         string $worker,
         AbstractConnection $connection,
         string $queue,
-        $dispatchAfterCommit,
+        bool $dispatchAfterCommit,
         array $options = []
     ) {
         switch ($worker) {
