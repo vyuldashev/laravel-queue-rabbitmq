@@ -104,7 +104,7 @@ class RabbitMQConnector implements ConnectorInterface
             case 'default':
                 return new RabbitMQQueue($connection, $queue, $dispatchAfterCommit, $options);
             case 'horizon':
-                return new HorizonRabbitMQQueue($connection, $queue, $options);
+                return new HorizonRabbitMQQueue($connection, $queue, $dispatchAfterCommit, $options);
             default:
                 return new $worker($connection, $queue, $options);
         }
