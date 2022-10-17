@@ -79,6 +79,9 @@ class Consumer extends Worker
 
         [$startTime, $jobsProcessed] = [hrtime(true) / 1e9, 0];
 
+        $phpAmqpLibConnection = $this->container['config']["queue.connections.$connectionName.connection"];
+        $phpAmqpLibConnection::$LIBRARY_PROPERTIES['connection_name'] = ['S', $options->name];
+
         /** @var RabbitMQQueue $connection */
         $connection = $this->manager->connection($connectionName);
 
