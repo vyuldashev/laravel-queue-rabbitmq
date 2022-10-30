@@ -1,5 +1,5 @@
 {
-  "name": "poensoft/task-dispatcher",
+  "name": "nick-scalewest/task-dispatcher",
   "description": "RabbitMQ driver for Laravel Queue. Supports Laravel Horizon.",
   "license": "MIT",
   "authors": [
