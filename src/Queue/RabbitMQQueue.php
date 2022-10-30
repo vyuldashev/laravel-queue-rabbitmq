@@ -150,11 +150,45 @@ class RabbitMQQueue extends Queue implements QueueContract
 
         $this->declareDestination($destination, $exchange, $exchangeType);
 
-        [$message, $correlationId] = $this->createMessage($payload, $attempts);
+        [$message, $correlationId] = $this->createMessage($payload, $attempts, $options);
 
-        $this->channel->basic_publish($message, $exchange, $destination, true, false);
+        $this->channel->basic_publish($message, $exchange, $destination, false, false);
 
+        if(isset($options['withReply']) && $options['withReply']) {
+
+            $data = Redis::get('user:'.$options['user']->id);
+            if($data){
+                $data = $this->unserialize($data);
+            } else {
+                $data = [];
+            }
+            $data = [...$data, [
+                'task_id' => $correlationId,
+                'status' => 'PENDING'
+            ]];
+
+            Redis::transaction(function ($redis) use ($correlationId, $options, $data) {
+                $redis->setex('task:'.$correlationId, 60*60*24*30, $this->serialize($options['user']->id));
+                $redis->set('user:'.$options['user']->id, $this->serialize($data));
+            });
+        }
         return $correlationId;
+    }
+
+    protected function serialize($value)
+    {
+        return is_numeric($value) && ! in_array($value, [INF, -INF]) && ! is_nan($value) ? $value : serialize($value);
+    }
+
+    /**
+     * Unserialize the value.
+     *
+     * @param  mixed  $value
+     * @return mixed
+     */
+    protected function unserialize($value)
+    {
+        return is_numeric($value) ? $value : unserialize($value);
     }
 
     /**
@@ -467,12 +501,12 @@ class RabbitMQQueue extends Queue implements QueueContract
         bool $durable = true,
         bool $autoDelete = false,
         array $arguments = []
-    ): void {
+    ) {
+
         if ($this->isQueueDeclared($name)) {
             return;
         }
-
-        $this->channel->queue_declare(
+        return $this->channel->queue_declare(
             $name,
             false,
             $durable,
@@ -480,6 +514,24 @@ class RabbitMQQueue extends Queue implements QueueContract
             $autoDelete,
             false,
             new AMQPTable($arguments)
+        );
+    }
+
+    public function exclusiveDeclareQueue(
+        string $name,
+        $channel
+    ) {
+
+        if ($this->isQueueDeclared($name)) {
+            return;
+        }
+
+        return $channel->queue_declare(
+            $name,
+            false,
+            false,
+            true,
+            false
         );
     }
 
@@ -569,7 +621,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @throws JsonException
      */
-    protected function createMessage($payload, int $attempts = 0): array
+    protected function createMessage($payload, int $attempts = 0, $options = []): array
     {
         $properties = [
             'content_type' => 'application/json',
@@ -591,6 +643,10 @@ class RabbitMQQueue extends Queue implements QueueContract
                 $properties['priority'] = $commandData->priority;
             }
         }
+	
+	if(isset($options['withReply']) && $options['withReply']) {
+	   $properties['reply_to'] = $options['replyTo'];
+	}
 
         $message = new AMQPMessage($payload, $properties);
 
@@ -740,9 +796,11 @@ class RabbitMQQueue extends Queue implements QueueContract
      * @param  string  $destination
      * @return string
      */
-    protected function getRoutingKey(string $destination): string
+    protected function getRoutingKey(string $destination, array $options = []): string
     {
-        return ltrim(sprintf(Arr::get($this->options, 'exchange_routing_key') ?: '%s', $destination), '.');
+        $options = array_merge($this->options, $options);
+
+        return ltrim(sprintf(Arr::get($options, 'exchange_routing_key') ?: '%s', $destination), '.');
     }
 
     /**
@@ -838,7 +896,8 @@ class RabbitMQQueue extends Queue implements QueueContract
         string $destination,
         ?string $exchange = null,
         string $exchangeType = AMQPExchangeType::DIRECT
-    ): void {
+    ) {
+
         // When a exchange is provided and no exchange is present in RabbitMQ, create an exchange.
         if ($exchange && ! $this->isExchangeExists($exchange)) {
             $this->declareExchange($exchange, $exchangeType);
@@ -855,7 +914,8 @@ class RabbitMQQueue extends Queue implements QueueContract
         }
 
         // Create a queue for amq.direct publishing.
-        $this->declareQueue($destination, true, false, $this->getQueueArguments($destination));
+        return $this->exclusiveDeclareQueue($destination, $this->channel);
+        //return $this->declareQueue($destination, true, false, $this->getQueueArguments($destination));
     }
 
     /**
@@ -870,7 +930,7 @@ class RabbitMQQueue extends Queue implements QueueContract
         $queue = $this->getQueue($queue);
         $attempts = Arr::get($options, 'attempts') ?: 0;
 
-        $destination = $this->getRoutingKey($queue);
+        $destination = $this->getRoutingKey($queue, $options);
         $exchange = $this->getExchange(Arr::get($options, 'exchange'));
         $exchangeType = $this->getExchangeType(Arr::get($options, 'exchange_type'));
 
