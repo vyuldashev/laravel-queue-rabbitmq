@@ -162,9 +162,10 @@ abstract class TestCase extends BaseTestCase
 
     /**
      * @param $object
-     * @param string $method
-     * @param array $parameters
+     * @param  string  $method
+     * @param  array  $parameters
      * @return mixed
+     *
      * @throws Exception
      */
     protected function callMethod($object, string $method, array $parameters = [])

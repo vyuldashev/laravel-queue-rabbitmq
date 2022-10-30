@@ -53,6 +53,8 @@ class ConnectorTest extends \VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCa
 
     public function testSslConnection(): void
     {
+        $this->markTestSkipped();
+
         $this->app['config']->set('queue.connections.rabbitmq', [
             'driver' => 'rabbitmq',
             'queue' => env('RABBITMQ_QUEUE', 'default'),

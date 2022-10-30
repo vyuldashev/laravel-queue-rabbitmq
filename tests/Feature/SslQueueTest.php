@@ -9,6 +9,11 @@ use PhpAmqpLib\Connection\AMQPSSLConnection;
  */
 class SslQueueTest extends TestCase
 {
+    public function setUp(): void
+    {
+        $this->markTestSkipped();
+    }
+
     protected function getEnvironmentSetUp($app): void
     {
         $app['config']->set('queue.default', 'rabbitmq');

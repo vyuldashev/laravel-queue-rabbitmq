@@ -17,7 +17,8 @@ class QueueBindCommand extends Command
     protected $description = 'Bind queue to exchange';
 
     /**
-     * @param RabbitMQConnector $connector
+     * @param  RabbitMQConnector  $connector
+     *
      * @throws Exception
      */
     public function handle(RabbitMQConnector $connector): void

@@ -3,7 +3,7 @@ version: '3.7'
 services:
 
   rabbitmq:
-    image: rabbitmq
+    image: rabbitmq:3.8
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASSWORD: guest
@@ -17,10 +17,10 @@ services:
       - "./tests/files/rootCA.pem:/rootCA.pem:ro"
       - "./tests/files/rootCA.key:/rootCA.key:ro"
     ports:
-      - 15671:15671
-      - 15672:15672
-      - 5671:5671
-      - 5672:5672
+      - "15671:15671"
+      - "15672:15672"
+      - "5671:5671"
+      - "5672:5672"
 
   rabbitmq-management:
     image: rabbitmq:management

@@ -118,7 +118,8 @@ class RabbitMQJob extends Job implements JobContract
     /**
      * Release the job back into the queue.
      *
-     * @param int $delay
+     * @param  int  $delay
+     *
      * @throws AMQPProtocolChannelException
      */
     public function release($delay = 0): void

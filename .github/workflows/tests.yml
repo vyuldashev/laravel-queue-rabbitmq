@@ -13,11 +13,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php: ['7.3', '7.4', '8.0']
+        php: ['8.0', '8.1']
         stability: [prefer-lowest, prefer-stable]
-        exclude:
-          - php: '8.0'
-            stability: 'prefer-lowest'
 
     name: PHP ${{ matrix.php }} - ${{ matrix.stability }}
 
@@ -45,9 +42,8 @@ jobs:
       - name: Install dependencies
         run: composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
 
-      - name: Run PHP CS Fixer
-        if: ${{ matrix.php != 8.0 }}
-        run: vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --allow-risky=yes --dry-run --diff --verbose
+      - name: Run Laravel Pint
+        run: ./vendor/bin/pint --test
 
       - name: Execute tests
         run: sleep 10 && vendor/bin/phpunit --verbose
