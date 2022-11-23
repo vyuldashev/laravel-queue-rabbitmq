@@ -74,7 +74,7 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @var RabbitMQJob
      */
-    protected RabbitMQJob $currentJob;
+    protected ?RabbitMQJob $currentJob;
 
     /**
      * @var array
