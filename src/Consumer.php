@@ -198,7 +198,7 @@ class Consumer extends Worker
      * @param  WorkerOptions|null  $options
      * @return int
      */
-    public function stop($status = 0, $options = null)
+    public function stop($status = 0, $options = null): int
     {
         // Tell the server you are going to stop consuming.
         // It will finish up the last message and not send you any more.
