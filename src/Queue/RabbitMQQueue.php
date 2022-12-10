@@ -188,10 +188,17 @@ class RabbitMQQueue extends Queue implements QueueContract
     {
         $ttl = $this->secondsUntil($delay) * 1000;
 
+        // default options
+        $options = ['delay' => $delay, 'attempts' => $attempts];
+
         // When no ttl just publish a new message to the exchange or queue
         if ($ttl <= 0) {
-            return $this->pushRaw($payload, $queue, ['delay' => $delay, 'attempts' => $attempts]);
+            return $this->pushRaw($payload, $queue, $options);
         }
+
+        // Create a main queue to handle delayed messages
+        [$mainDestination, $exchange, $exchangeType, $attempts] = $this->publishProperties($queue, $options);
+        $this->declareDestination($mainDestination, $exchange, $exchangeType);
 
         $destination = $this->getQueue($queue).'.delay.'.$ttl;
 
@@ -754,9 +761,9 @@ class RabbitMQQueue extends Queue implements QueueContract
     protected function getExchangeType(?string $type = null): string
     {
         return @constant(AMQPExchangeType::class.'::'.Str::upper($type ?: Arr::get(
-            $this->options,
-            'exchange_type'
-        ) ?: 'direct')) ?: AMQPExchangeType::DIRECT;
+                $this->options,
+                'exchange_type'
+            ) ?: 'direct')) ?: AMQPExchangeType::DIRECT;
     }
 
     /**
