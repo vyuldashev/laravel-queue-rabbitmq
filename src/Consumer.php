@@ -194,7 +194,7 @@ class Consumer extends Worker
     /**
      * Stop listening and bail out of the script.
      *
-     * @param  int                 $status
+     * @param  int  $status
      * @param  WorkerOptions|null  $options
      * @return int
      */
