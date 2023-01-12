@@ -120,9 +120,9 @@ class RabbitMQQueue extends Queue implements QueueContract
      *
      * @throws AMQPProtocolChannelException
      */
-    public function push($job, $data = '', $queue = null)
+    public function push($job, $data = '', $queue = null, $options = [])
     {
-        return $this->pushRaw($this->createPayload($job, $queue, $data), $queue, []);
+        return $this->pushRaw($this->createPayload($job, $queue, $data), $queue, $options);
     }
 
     /**
@@ -832,8 +832,8 @@ class RabbitMQQueue extends Queue implements QueueContract
         $queue = $this->getQueue($queue);
         $attempts = Arr::get($options, 'attempts') ?: 0;
 
-        $destination = $this->getRoutingKey($queue);
-        $exchange = $this->getExchange(Arr::get($options, 'exchange'));
+        $destination = Arr::get($options, 'exchange_routing_key') ?: $this->getRoutingKey($queue);
+        $exchange = Arr::get($options, 'exchange') ?: $this->getExchange();
         $exchangeType = $this->getExchangeType(Arr::get($options, 'exchange_type'));
 
         return [$destination, $exchange, $exchangeType, $attempts];
