@@ -74,6 +74,7 @@ class RabbitMQQueue extends Queue implements QueueContract
             $message->setCorrelationId($this->getCorrelationId());
             $message->setContentType('application/json');
             $message->setDeliveryMode(AmqpMessage::DELIVERY_MODE_PERSISTENT);
+            $message->setPriority($this->queueOptions['priority']);
 
             if (isset($options['attempts'])) {
                 $message->setProperty(RabbitMQJob::ATTEMPT_COUNT_HEADERS_KEY, $options['attempts']);
