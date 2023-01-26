@@ -73,7 +73,7 @@ Add connection to `config/queue.php`:
 ### Optional Config
 
 Optionally add queue options to the config of a connection.
-Every queue created for this connection, get's the properties.
+Every queue created for this connection, gets the properties.
 
 When you want to prioritize messages when they were delayed, then this is possible by adding extra options.
 
@@ -100,13 +100,13 @@ When you want to prioritize messages when they were delayed, then this is possib
 ],
 ```
 
-When you want to publish messages against an exchange with routing-key's, then this is possible by adding extra options.
+When you want to publish messages against an exchange with routing-keys, then this is possible by adding extra options.
 
 - When the exchange is omitted, RabbitMQ will use the `amq.direct` exchange for the routing-key
 - When routing-key is omitted the routing-key by default is the `queue` name.
 - When using `%s` in the routing-key the queue_name will be substituted.
 
-> Note: when using exchange with routing-key, u probably create your queues with bindings yourself.
+> Note: when using an exchange with routing-key, you probably create your queues with bindings yourself.
 
 ```php
 'connections' => [
@@ -139,7 +139,7 @@ by adding extra options.
 - When routing-key is omitted, the routing-key by default the `queue` name is substituted with `'.failed'`.
 - When using `%s` in the routing-key the queue_name will be substituted.
 
-> Note: When using failed_job exchange with routing-key, u probably need to create your exchange/queue with bindings
+> Note: When using failed_job exchange with routing-key, you probably need to create your exchange/queue with bindings
 > yourself.
 
 ```php
@@ -171,7 +171,7 @@ Those messages probably won't respect Laravel's job payload schema.
 The problem with these messages is that, Laravel workers won't be able to determine the actual job or class to execute.
 
 You can extend the build-in `RabbitMQJob::class` and within the queue connection config, you can define your own class.
-When you specify an `job` key in the config, with your own class name, every message retrieved from the broker will get
+When you specify a `job` key in the config, with your own class name, every message retrieved from the broker will get
 wrapped by your own class.
 
 An example for the config:
@@ -256,8 +256,8 @@ class RabbitMQJob extends BaseJob
 
 ## Laravel Usage
 
-Once you completed the configuration you can use Laravel Queue API. If you used other queue drivers you do not need to
-change anything else. If you do not know how to use Queue API, please refer to the official Laravel
+Once you completed the configuration you can use the Laravel Queue API. If you used other queue drivers you do not need to
+change anything else. If you do not know how to use the Queue API, please refer to the official Laravel
 documentation: http://laravel.com/docs/queues
 
 ## Laravel Horizon Usage
