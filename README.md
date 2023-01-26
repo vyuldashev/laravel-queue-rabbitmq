@@ -10,11 +10,9 @@ RabbitMQ Queue driver for Laravel
 
 Only the latest version will get new features. Bug fixes will be provided using the following scheme:
 
-| Package Version | Laravel Version | Bug Fixes Until     |                                                                                             |
-|-----------------|-----------------|---------------------|---------------------------------------------------------------------------------------------|
-| 9               | 6               | October 5th, 2021   | [Documentation](https://github.com/vyuldashev/laravel-queue-rabbitmq/blob/v9.0/README.md)   |
-| 10              | 6, 7            | October 5th, 2021   | [Documentation](https://github.com/vyuldashev/laravel-queue-rabbitmq/blob/v10.0/README.md)  |
-| 11              | 8               | April 6th, 2021     | [Documentation](https://github.com/vyuldashev/laravel-queue-rabbitmq/blob/master/README.md) |
+| Package Version | Laravel Version | Bug Fixes Until  |                                                                                             |
+|-----------------|-----------------|------------------|---------------------------------------------------------------------------------------------|
+| 13              | 9               | August 8th, 2023 | [Documentation](https://github.com/vyuldashev/laravel-queue-rabbitmq/blob/master/README.md) |
 
 ## Installation
 
@@ -65,7 +63,7 @@ Add connection to `config/queue.php`:
         * Set to "horizon" if you wish to use Laravel Horizon.
         */
        'worker' => env('RABBITMQ_WORKER', 'default'),
-        
+       'after_commit' => false,
     ],
 
     // ...    
@@ -74,10 +72,11 @@ Add connection to `config/queue.php`:
 
 ### Optional Config
 
-Optionally add queue options to the config of a connection. 
-Every queue created for this connection, get's the properties.
+Optionally add queue options to the config of a connection.
+Every queue created for this connection, gets the properties.
 
 When you want to prioritize messages when they were delayed, then this is possible by adding extra options.
+
 - When max-priority is omitted, the max priority is set with 2 when used.
 
 ```php
@@ -101,13 +100,14 @@ When you want to prioritize messages when they were delayed, then this is possib
 ],
 ```
 
-When you want to publish messages against an exchange with routing-key's, then this is possible by adding extra options.
+When you want to publish messages against an exchange with routing-keys, then this is possible by adding extra options.
+
 - When the exchange is omitted, RabbitMQ will use the `amq.direct` exchange for the routing-key
 - When routing-key is omitted the routing-key by default is the `queue` name.
 - When using `%s` in the routing-key the queue_name will be substituted.
 
-> Note: when using exchange with routing-key, u probably create your queues with bindings yourself.
-  
+> Note: when using an exchange with routing-key, you probably create your queues with bindings yourself.
+
 ```php
 'connections' => [
     // ...
@@ -130,14 +130,18 @@ When you want to publish messages against an exchange with routing-key's, then t
 ],
 ```
 
-In Laravel failed jobs are stored into the database. But maybe you want to instruct some other process to also do something with the message.
-When you want to instruct RabbitMQ to reroute failed messages to a exchange or a specific queue, then this is possible by adding extra options.
+In Laravel failed jobs are stored into the database. But maybe you want to instruct some other process to also do
+something with the message.
+When you want to instruct RabbitMQ to reroute failed messages to a exchange or a specific queue, then this is possible
+by adding extra options.
+
 - When the exchange is omitted, RabbitMQ will use the `amq.direct` exchange for the routing-key
 - When routing-key is omitted, the routing-key by default the `queue` name is substituted with `'.failed'`.
 - When using `%s` in the routing-key the queue_name will be substituted.
 
-> Note: When using failed_job exchange with routing-key, u probably need to create your exchange/queue with bindings yourself.
-  
+> Note: When using failed_job exchange with routing-key, you probably need to create your exchange/queue with bindings
+> yourself.
+
 ```php
 'connections' => [
     // ...
@@ -161,12 +165,14 @@ When you want to instruct RabbitMQ to reroute failed messages to a exchange or a
 ```
 
 ### Use your own RabbitMQJob class
+
 Sometimes you have to work with messages published by another application.  
 Those messages probably won't respect Laravel's job payload schema.
-The problem with these messages is that, Laravel workers won't be able to determine the actual job or class to execute. 
+The problem with these messages is that, Laravel workers won't be able to determine the actual job or class to execute.
 
 You can extend the build-in `RabbitMQJob::class` and within the queue connection config, you can define your own class.
-When you specify an `job` key in the config, with your own class name, every message retrieved from the broker will get wrapped by your own class.  
+When you specify a `job` key in the config, with your own class name, every message retrieved from the broker will get
+wrapped by your own class.
 
 An example for the config:
 
@@ -250,11 +256,14 @@ class RabbitMQJob extends BaseJob
 
 ## Laravel Usage
 
-Once you completed the configuration you can use Laravel Queue API. If you used other queue drivers you do not need to change anything else. If you do not know how to use Queue API, please refer to the official Laravel documentation: http://laravel.com/docs/queues
+Once you completed the configuration you can use the Laravel Queue API. If you used other queue drivers you do not need to
+change anything else. If you do not know how to use the Queue API, please refer to the official Laravel
+documentation: http://laravel.com/docs/queues
 
 ## Laravel Horizon Usage
 
-Starting with 8.0, this package supports [Laravel Horizon](http://horizon.laravel.com) out of the box. Firstly, install Horizon and then set `RABBITMQ_WORKER` to `horizon`.
+Starting with 8.0, this package supports [Laravel Horizon](http://horizon.laravel.com) out of the box. Firstly, install
+Horizon and then set `RABBITMQ_WORKER` to `horizon`.
 
 ## Lumen Usage
 
@@ -266,7 +275,7 @@ $app->register(VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServic
 
 ## Consuming Messages
 
-There are two ways of consuming messages. 
+There are two ways of consuming messages.
 
 1. `queue:work` command which is Laravel's built-in command. This command utilizes `basic_get`. Use this if you want to consume multiple queues.
 
@@ -302,4 +311,5 @@ composer fix:style
 
 ## Contribution
 
-You can contribute to this package by discovering bugs and opening issues. Please, add to which version of package you create pull request or issue. (e.g. [5.2] Fatal error on delayed job)
+You can contribute to this package by discovering bugs and opening issues. Please, add to which version of package you
+create pull request or issue. (e.g. [5.2] Fatal error on delayed job)

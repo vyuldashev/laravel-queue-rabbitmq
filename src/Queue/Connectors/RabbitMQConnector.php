@@ -31,9 +31,9 @@ class RabbitMQConnector implements ConnectorInterface
     /**
      * Establish a queue connection.
      *
-     * @param array $config
-     *
+     * @param  array  $config
      * @return RabbitMQQueue
+     *
      * @throws Exception
      */
     public function connect(array $config): Queue
@@ -44,6 +44,7 @@ class RabbitMQConnector implements ConnectorInterface
             Arr::get($config, 'worker', 'default'),
             $connection,
             $config['queue'],
+            Arr::get($config, 'after_commit', false),
             Arr::get($config, 'options.queue', [])
         );
 
@@ -63,8 +64,9 @@ class RabbitMQConnector implements ConnectorInterface
     }
 
     /**
-     * @param array $config
+     * @param  array  $config
      * @return AbstractConnection
+     *
      * @throws Exception
      */
     protected function createConnection(array $config): AbstractConnection
@@ -84,19 +86,25 @@ class RabbitMQConnector implements ConnectorInterface
     /**
      * Create a queue for the worker.
      *
-     * @param string $worker
-     * @param AbstractConnection $connection
-     * @param string $queue
-     * @param array $options
+     * @param  string  $worker
+     * @param  AbstractConnection  $connection
+     * @param  string  $queue
+     * @param  bool  $dispatchAfterCommit
+     * @param  array  $options
      * @return HorizonRabbitMQQueue|RabbitMQQueue|Queue
      */
-    protected function createQueue(string $worker, AbstractConnection $connection, string $queue, array $options = [])
-    {
+    protected function createQueue(
+        string $worker,
+        AbstractConnection $connection,
+        string $queue,
+        bool $dispatchAfterCommit,
+        array $options = []
+    ) {
         switch ($worker) {
             case 'default':
-                return new RabbitMQQueue($connection, $queue, $options);
+                return new RabbitMQQueue($connection, $queue, $dispatchAfterCommit, $options);
             case 'horizon':
-                return new HorizonRabbitMQQueue($connection, $queue, $options);
+                return new HorizonRabbitMQQueue($connection, $queue, $dispatchAfterCommit, $options);
             default:
                 return new $worker($connection, $queue, $options);
         }
@@ -105,7 +113,7 @@ class RabbitMQConnector implements ConnectorInterface
     /**
      * Recursively filter only null values.
      *
-     * @param array $array
+     * @param  array  $array
      * @return array
      */
     private function filter(array $array): array

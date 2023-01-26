@@ -63,10 +63,11 @@ class Consumer extends Worker
     /**
      * Listen to the given queue in a loop.
      *
-     * @param string $connectionName
-     * @param string $queue
-     * @param WorkerOptions $options
+     * @param  string  $connectionName
+     * @param  string  $queue
+     * @param  WorkerOptions  $options
      * @return int
+     *
      * @throws Throwable
      */
     public function daemon($connectionName, $queue, WorkerOptions $options)
@@ -87,7 +88,7 @@ class Consumer extends Worker
         $this->channel->basic_qos(
             $this->prefetchSize,
             $this->prefetchCount,
-            null
+            false
         );
 
         $jobClass = $connection->getJobClass();
@@ -146,8 +147,8 @@ class Consumer extends Worker
             } catch (AMQPRuntimeException $exception) {
                 $this->exceptions->report($exception);
 
-                $this->kill(1);
-            } catch (Exception | Throwable $exception) {
+                $this->kill(self::EXIT_ERROR, $options);
+            } catch (Exception|Throwable $exception) {
                 $this->exceptions->report($exception);
 
                 $this->stopWorkerIfLostConnection($exception);
@@ -170,7 +171,7 @@ class Consumer extends Worker
             );
 
             if (! is_null($status)) {
-                return $this->stop($status);
+                return $this->stop($status, $options);
             }
 
             $this->currentJob = null;
@@ -180,9 +181,9 @@ class Consumer extends Worker
     /**
      * Determine if the daemon should process on this iteration.
      *
-     * @param WorkerOptions $options
-     * @param string $connectionName
-     * @param string $queue
+     * @param  WorkerOptions  $options
+     * @param  string  $connectionName
+     * @param  string  $queue
      * @return bool
      */
     protected function daemonShouldRun(WorkerOptions $options, $connectionName, $queue): bool
@@ -194,14 +195,15 @@ class Consumer extends Worker
      * Stop listening and bail out of the script.
      *
      * @param  int  $status
+     * @param  WorkerOptions|null  $options
      * @return int
      */
-    public function stop($status = 0): int
+    public function stop($status = 0, $options = null)
     {
         // Tell the server you are going to stop consuming.
         // It will finish up the last message and not send you any more.
         $this->channel->basic_cancel($this->consumerTag, false, true);
 
-        return parent::stop($status);
+        return parent::stop($status, $options);
     }
 }
