@@ -42,6 +42,7 @@ class RabbitMQConnector implements ConnectorInterface
 
         $queue = $this->createQueue(
             Arr::get($config, 'worker', 'default'),
+            Arr::get($config, 'custom_worker_type', 'default'),
             $connection,
             $config['queue'],
             Arr::get($config, 'after_commit', false),
@@ -95,6 +96,7 @@ class RabbitMQConnector implements ConnectorInterface
      */
     protected function createQueue(
         string $worker,
+        string $customWorkerType,
         AbstractConnection $connection,
         string $queue,
         bool $dispatchAfterCommit,
@@ -106,7 +108,12 @@ class RabbitMQConnector implements ConnectorInterface
             case 'horizon':
                 return new HorizonRabbitMQQueue($connection, $queue, $dispatchAfterCommit, $options);
             default:
-                return new $worker($connection, $queue, $options);
+                switch ($customWorkerType) {
+                    case 'with_dispatch_after_commit':
+                        return new $worker($connection, $queue, $dispatchAfterCommit, $options);
+                    default:
+                        return new $worker($connection, $queue, $options);
+                }
         }
     }
 

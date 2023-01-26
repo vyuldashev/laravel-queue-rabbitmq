@@ -254,6 +254,62 @@ class RabbitMQJob extends BaseJob
 }
 ```
 
+### Use your own RabbitMQQueue class
+
+To use own RabbitMQQueue set `RABBITMQ_WORKER` (or `worker` param) to your queue class.
+
+```php
+RABBITMQ_WORKER='App\\Services\\CustomRabbitMQQueue'
+```
+or
+
+```php
+    'worker' => env('RABBITMQ_WORKER', App\Services\CustomRabbitMQQueue::class),
+```
+
+where queue class is defined like
+```php
+<?php
+
+namespace App\Queue\Jobs;
+
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
+
+class CustomRabbitMQQueue extends RabbitMQQueue
+{
+    public function __construct(
+        AbstractConnection $connection,
+        string $default,
+        array $options = []
+    ) {
+```
+
+for compatibility queue constructor doesn't receive `$dispatchAfterCommit`, to use parent contructor use extra parameter in config
+```php
+    'worker' => env('RABBITMQ_WORKER', App\Services\CustomRabbitMQQueue::class),
+    'custom_worker_type' =>  'with_dispatch_after_commit',
+```
+
+then you can reuse parent constructor
+```php
+<?php
+
+namespace App\Queue\Jobs;
+
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
+
+class CustomRabbitMQQueue extends RabbitMQQueue
+{
+    public function __construct(
+        AbstractConnection $connection,
+        string $default,
+        bool $dispatchAfterCommit = false,
+        array $options = []
+    ) {
+```
+
+or skip constructor entirely
+
 ## Laravel Usage
 
 Once you completed the configuration you can use the Laravel Queue API. If you used other queue drivers you do not need to
