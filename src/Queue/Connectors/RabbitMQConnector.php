@@ -14,6 +14,7 @@ use PhpAmqpLib\Connection\AbstractConnection;
 use PhpAmqpLib\Connection\AMQPLazyConnection;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\Listeners\RabbitMQFailedEvent;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\RabbitMQQueue as HorizonRabbitMQQueue;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\OctaneRabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQConnector implements ConnectorInterface
@@ -102,7 +103,7 @@ class RabbitMQConnector implements ConnectorInterface
     ) {
         switch ($worker) {
             case 'default':
-                return new RabbitMQQueue($connection, $queue, $dispatchAfterCommit, $options);
+                return new OctaneRabbitMQQueue($connection, $queue, $dispatchAfterCommit, $options);
             case 'horizon':
                 return new HorizonRabbitMQQueue($connection, $queue, $dispatchAfterCommit, $options);
             default:
