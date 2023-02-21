@@ -20,7 +20,7 @@ jobs:
           - php: '8.0'
             laravel: '^10.0'
 
-    name: 'PHP ${{ matrix.php }} - ${{ matrix.stability }} - Laravel: ${{matrix.laravel}}'
+    name: 'PHP ${{ matrix.php }} - Laravel: ${{matrix.laravel}} - ${{ matrix.stability }}'
 
     steps:
       - name: Checkout code
