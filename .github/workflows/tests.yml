@@ -44,7 +44,7 @@ jobs:
         run: docker-compose up -d rabbitmq
 
       - name: Install dependencies
-        run: composer update --with='illuminate/queue:${{matrix.laravel}}' --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
+        run: composer update --with='laravel/framework:${{matrix.laravel}}' --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
 
       - name: Run Laravel Pint
         run: ./vendor/bin/pint --test
