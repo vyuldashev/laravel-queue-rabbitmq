@@ -12,8 +12,6 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
 {
     /**
      * Register the service provider.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -60,8 +58,6 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
 
     /**
      * Register the application's event listeners.
-     *
-     * @return void
      */
     public function boot(): void
     {

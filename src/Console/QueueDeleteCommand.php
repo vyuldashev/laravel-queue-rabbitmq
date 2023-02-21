@@ -17,8 +17,6 @@ class QueueDeleteCommand extends Command
     protected $description = 'Delete queue';
 
     /**
-     * @param  RabbitMQConnector  $connector
-     *
      * @throws Exception
      */
     public function handle(RabbitMQConnector $connector): void

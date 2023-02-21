@@ -161,9 +161,6 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
-     * @param $object
-     * @param  string  $method
-     * @param  array  $parameters
      * @return mixed
      *
      * @throws Exception
