@@ -14,8 +14,8 @@ jobs:
       fail-fast: true
       matrix:
         php: ['8.0', '8.1', '8.2']
-        stability: ['', '--prefer-stable']
-        laravel: ['^9.0', '^10.0']
+        stability: ['prefer-lowest', prefer-stable]
+        laravel: ['>=9.0 <10', '^10.0']
         exclude:
           - php: '8.0'
             laravel: '^10.0'
@@ -44,7 +44,7 @@ jobs:
         run: docker-compose up -d rabbitmq
 
       - name: Install dependencies
-        run: composer update --with='illuminate/queue:${{matrix.laravel}}' ${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
+        run: composer update --with='illuminate/queue:${{matrix.laravel}}' --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
 
       - name: Run Laravel Pint
         run: ./vendor/bin/pint --test
