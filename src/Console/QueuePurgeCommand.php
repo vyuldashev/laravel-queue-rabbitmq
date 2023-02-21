@@ -19,8 +19,6 @@ class QueuePurgeCommand extends Command
     protected $description = 'Purge all messages in queue';
 
     /**
-     * @param  RabbitMQConnector  $connector
-     *
      * @throws Exception
      */
     public function handle(RabbitMQConnector $connector): void

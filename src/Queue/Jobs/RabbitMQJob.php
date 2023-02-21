@@ -137,8 +137,6 @@ class RabbitMQJob extends Job implements JobContract
 
     /**
      * Get the underlying RabbitMQ connection.
-     *
-     * @return RabbitMQQueue
      */
     public function getRabbitMQ(): RabbitMQQueue
     {
@@ -147,8 +145,6 @@ class RabbitMQJob extends Job implements JobContract
 
     /**
      * Get the underlying RabbitMQ message.
-     *
-     * @return AMQPMessage
      */
     public function getRabbitMQMessage(): AMQPMessage
     {
@@ -157,8 +153,6 @@ class RabbitMQJob extends Job implements JobContract
 
     /**
      * Get the headers from the rabbitMQ message.
-     *
-     * @return array|null
      */
     protected function getRabbitMQMessageHeaders(): ?array
     {

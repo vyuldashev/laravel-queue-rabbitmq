@@ -26,7 +26,6 @@ class RabbitMQQueue extends BaseRabbitMQQueue
      * Get the number of queue jobs that are ready to process.
      *
      * @param  string|null  $queue
-     * @return int
      *
      * @throws AMQPProtocolChannelException
      */
@@ -96,7 +95,6 @@ class RabbitMQQueue extends BaseRabbitMQQueue
      *
      * @param  string  $queue
      * @param  RabbitMQJob  $job
-     * @return void
      *
      * @throws BindingResolutionException
      */
@@ -110,7 +108,6 @@ class RabbitMQQueue extends BaseRabbitMQQueue
      *
      * @param  string  $queue
      * @param  mixed  $event
-     * @return void
      *
      * @throws BindingResolutionException
      */

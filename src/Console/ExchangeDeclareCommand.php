@@ -18,8 +18,6 @@ class ExchangeDeclareCommand extends Command
     protected $description = 'Declare exchange';
 
     /**
-     * @param  RabbitMQConnector  $connector
-     *
      * @throws Exception
      */
     public function handle(RabbitMQConnector $connector): void
