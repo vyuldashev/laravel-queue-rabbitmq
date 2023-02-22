@@ -2,7 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v13.1.0...master)
+## [unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v13.2.0...master)
+
+## [13.2.0](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v13.1.0...13.2.0)
+
+- Compatibility with Laravel 10 [#525](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/525)
 
 ## [13.1.0 (2023-01-25)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v13.0.1...v13.1.0)
 
