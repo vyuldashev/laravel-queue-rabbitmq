@@ -709,7 +709,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         return [$destination, $exchange, $exchangeType, $attempts];
     }
 
-    public function getConfig(): QueueConfig
+    private function getConfig(): QueueConfig
     {
         return $this->config;
     }

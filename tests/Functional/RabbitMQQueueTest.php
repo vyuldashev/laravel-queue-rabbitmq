@@ -23,41 +23,41 @@ class RabbitMQQueueTest extends BaseTestCase
 
     public function testConfigRerouteFailed(): void
     {
-        $config = $this->connection()->getConfig();
-        $this->assertFalse($this->callMethod($config, 'isRerouteFailed'));
+        $queue = $this->connection();
+        $this->assertFalse($this->callProperty($queue, 'config')->isRerouteFailed());
 
-        $config = $this->connection('rabbitmq-with-options')->getConfig();
-        $this->assertTrue($this->callMethod($config, 'isRerouteFailed'));
+        $queue = $this->connection('rabbitmq-with-options');
+        $this->assertTrue($this->callProperty($queue, 'config')->isRerouteFailed());
 
-        $config = $this->connection('rabbitmq-with-options-empty')->getConfig();
-        $this->assertFalse($this->callMethod($config, 'isRerouteFailed'));
+        $queue = $this->connection('rabbitmq-with-options-empty');
+        $this->assertFalse($this->callProperty($queue, 'config')->isRerouteFailed());
     }
 
     public function testConfigPrioritizeDelayed(): void
     {
-        $config = $this->connection()->getConfig();
-        $this->assertFalse($this->callMethod($config, 'isPrioritizeDelayed'));
+        $queue = $this->connection();
+        $this->assertFalse($this->callProperty($queue, 'config')->isPrioritizeDelayed());
 
-        $config = $this->connection('rabbitmq-with-options')->getConfig();
-        $this->assertTrue($this->callMethod($config, 'isPrioritizeDelayed'));
+        $queue = $this->connection('rabbitmq-with-options');
+        $this->assertTrue($this->callProperty($queue, 'config')->isPrioritizeDelayed());
 
-        $config = $this->connection('rabbitmq-with-options-empty')->getConfig();
-        $this->assertFalse($this->callMethod($config, 'isPrioritizeDelayed'));
+        $queue = $this->connection('rabbitmq-with-options-empty');
+        $this->assertFalse($this->callProperty($queue, 'config')->isPrioritizeDelayed());
     }
 
     public function testQueueMaxPriority(): void
     {
-        $config = $this->connection()->getConfig();
-        $this->assertIsInt($this->callMethod($config, 'getQueueMaxPriority'));
-        $this->assertSame(2, $this->callMethod($config, 'getQueueMaxPriority'));
+        $queue = $this->connection();
+        $this->assertIsInt($this->callProperty($queue, 'config')->getQueueMaxPriority());
+        $this->assertSame(2, $this->callProperty($queue, 'config')->getQueueMaxPriority());
 
-        $config = $this->connection('rabbitmq-with-options')->getConfig();
-        $this->assertIsInt($this->callMethod($config, 'getQueueMaxPriority'));
-        $this->assertSame(20, $this->callMethod($config, 'getQueueMaxPriority'));
+        $queue = $this->connection('rabbitmq-with-options');
+        $this->assertIsInt($this->callProperty($queue, 'config')->getQueueMaxPriority());
+        $this->assertSame(20, $this->callProperty($queue, 'config')->getQueueMaxPriority());
 
-        $config = $this->connection('rabbitmq-with-options-empty')->getConfig();
-        $this->assertIsInt($this->callMethod($config, 'getQueueMaxPriority'));
-        $this->assertSame(2, $this->callMethod($config, 'getQueueMaxPriority'));
+        $queue = $this->connection('rabbitmq-with-options-empty');
+        $this->assertIsInt($this->callProperty($queue, 'config')->getQueueMaxPriority());
+        $this->assertSame(2, $this->callProperty($queue, 'config')->getQueueMaxPriority());
     }
 
     public function testConfigExchangeType(): void
@@ -133,17 +133,17 @@ class RabbitMQQueueTest extends BaseTestCase
 
     public function testConfigQuorum(): void
     {
-        $config = $this->connection()->getConfig();
-        $this->assertFalse($this->callMethod($config, 'isQuorum'));
+        $queue = $this->connection();
+        $this->assertFalse($this->callProperty($queue, 'config')->isQuorum());
 
-        $config = $this->connection('rabbitmq-with-options')->getConfig();
-        $this->assertFalse($this->callMethod($config, 'isQuorum'));
+        $queue = $this->connection('rabbitmq-with-options');
+        $this->assertFalse($this->callProperty($queue, 'config')->isQuorum());
 
-        $config = $this->connection('rabbitmq-with-options-empty')->getConfig();
-        $this->assertFalse($this->callMethod($config, 'isQuorum'));
+        $queue = $this->connection('rabbitmq-with-options-empty');
+        $this->assertFalse($this->callProperty($queue, 'config')->isQuorum());
 
-        $config = $this->connection('rabbitmq-with-quorum-options')->getConfig();
-        $this->assertTrue($this->callMethod($config, 'isQuorum'));
+        $queue = $this->connection('rabbitmq-with-quorum-options');
+        $this->assertTrue($this->callProperty($queue, 'config')->isQuorum());
     }
 
     public function testDeclareDeleteExchange(): void

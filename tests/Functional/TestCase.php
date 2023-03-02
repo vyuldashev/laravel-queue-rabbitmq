@@ -165,7 +165,7 @@ abstract class TestCase extends BaseTestCase
      *
      * @throws Exception
      */
-    protected function callMethod($object, string $method, array $parameters = [])
+    protected function callMethod($object, string $method, array $parameters = []): mixed
     {
         try {
             $className = get_class($object);
@@ -178,5 +178,23 @@ abstract class TestCase extends BaseTestCase
         $method->setAccessible(true);
 
         return $method->invokeArgs($object, $parameters);
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function callProperty($object, string $property): mixed
+    {
+        try {
+            $className = get_class($object);
+            $reflection = new ReflectionClass($className);
+        } catch (ReflectionException $e) {
+            throw new Exception($e->getMessage());
+        }
+
+        $property = $reflection->getProperty($property);
+        $property->setAccessible(true);
+
+        return $property->getValue($object);
     }
 }
