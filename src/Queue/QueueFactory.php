@@ -7,31 +7,26 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\RabbitMQQueue as HorizonRabbi
 
 final class QueueFactory
 {
-    protected $queue;
-
-    /**
-     * Create a Queue
-     */
-    public function make(array $config = []): RabbitMQQueue
+    public static function make(array $config = []): RabbitMQQueue
     {
-        $queueConfig = $this->createQueueConfig($config);
+        $queueConfig = self::createQueueConfig($config);
         $worker = Arr::get($config, 'worker', 'default');
 
         if (strtolower($worker) == 'default') {
-            return $this->queue = new RabbitMQQueue($queueConfig);
+            return new RabbitMQQueue($queueConfig);
         }
 
         if (strtolower($worker) == 'horizon') {
-            return $this->queue = new HorizonRabbitMQQueue($queueConfig);
+            return new HorizonRabbitMQQueue($queueConfig);
         }
 
-        return $this->queue = new $worker($queueConfig);
+        return new $worker($queueConfig);
     }
 
     /**
      * Create a config object from config array
      */
-    private function createQueueConfig(array $config = []): QueueConfig
+    private static function createQueueConfig(array $config = []): QueueConfig
     {
         return tap(new QueueConfig(), function (QueueConfig $queueConfig) use ($config) {
             if (! empty($queue = Arr::get($config, 'queue'))) {

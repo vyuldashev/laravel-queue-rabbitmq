@@ -20,12 +20,9 @@ class RabbitMQConnector implements ConnectorInterface
 {
     private Dispatcher $dispatcher;
 
-    private QueueFactory $queue;
-
     public function __construct(Dispatcher $dispatcher)
     {
         $this->dispatcher = $dispatcher;
-        $this->queue = new QueueFactory();
     }
 
     /**
@@ -40,7 +37,7 @@ class RabbitMQConnector implements ConnectorInterface
         // Todo Create ConnectionFactory removing all deprecated dependicies
         $connection = $this->createConnection(Arr::except($config, 'options.queue'));
 
-        $queue = $this->queue->make($config)->setConnection($connection);
+        $queue = QueueFactory::make($config)->setConnection($connection);
 
         if ($queue instanceof HorizonRabbitMQQueue) {
             $this->dispatcher->listen(JobFailed::class, RabbitMQFailedEvent::class);
