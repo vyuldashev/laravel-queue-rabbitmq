@@ -9,23 +9,23 @@ use Illuminate\Queue\Connectors\ConnectorInterface;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\WorkerStopping;
 use Illuminate\Support\Arr;
-use InvalidArgumentException;
 use PhpAmqpLib\Connection\AbstractConnection;
 use PhpAmqpLib\Connection\AMQPLazyConnection;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\Listeners\RabbitMQFailedEvent;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\RabbitMQQueue as HorizonRabbitMQQueue;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\QueueFactory;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQConnector implements ConnectorInterface
 {
-    /**
-     * @var Dispatcher
-     */
-    private $dispatcher;
+    private Dispatcher $dispatcher;
+
+    private QueueFactory $queue;
 
     public function __construct(Dispatcher $dispatcher)
     {
         $this->dispatcher = $dispatcher;
+        $this->queue = new QueueFactory();
     }
 
     /**
@@ -37,19 +37,10 @@ class RabbitMQConnector implements ConnectorInterface
      */
     public function connect(array $config): Queue
     {
+        // Todo Create ConnectionFactory removing all deprecated dependicies
         $connection = $this->createConnection(Arr::except($config, 'options.queue'));
 
-        $queue = $this->createQueue(
-            Arr::get($config, 'worker', 'default'),
-            $connection,
-            $config['queue'],
-            Arr::get($config, 'after_commit', false),
-            Arr::get($config, 'options.queue', [])
-        );
-
-        if (! $queue instanceof RabbitMQQueue) {
-            throw new InvalidArgumentException('Invalid worker.');
-        }
+        $queue = $this->queue->make($config)->setConnection($connection);
 
         if ($queue instanceof HorizonRabbitMQQueue) {
             $this->dispatcher->listen(JobFailed::class, RabbitMQFailedEvent::class);
@@ -77,28 +68,6 @@ class RabbitMQConnector implements ConnectorInterface
             Arr::shuffle(Arr::get($config, 'hosts', [])),
             $this->filter(Arr::get($config, 'options', []))
         );
-    }
-
-    /**
-     * Create a queue for the worker.
-     *
-     * @return HorizonRabbitMQQueue|RabbitMQQueue|Queue
-     */
-    protected function createQueue(
-        string $worker,
-        AbstractConnection $connection,
-        string $queue,
-        bool $dispatchAfterCommit,
-        array $options = []
-    ) {
-        switch ($worker) {
-            case 'default':
-                return new RabbitMQQueue($connection, $queue, $dispatchAfterCommit, $options);
-            case 'horizon':
-                return new HorizonRabbitMQQueue($connection, $queue, $dispatchAfterCommit, $options);
-            default:
-                return new $worker($connection, $queue, $options);
-        }
     }
 
     /**
