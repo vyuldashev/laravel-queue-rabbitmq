@@ -161,8 +161,6 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
-     * @return mixed
-     *
      * @throws Exception
      */
     protected function callMethod($object, string $method, array $parameters = []): mixed
