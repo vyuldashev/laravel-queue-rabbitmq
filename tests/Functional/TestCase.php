@@ -3,7 +3,6 @@
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional;
 
 use Exception;
-use PhpAmqpLib\Connection\AMQPLazyConnection;
 use ReflectionClass;
 use ReflectionException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCase as BaseTestCase;
@@ -16,7 +15,7 @@ abstract class TestCase extends BaseTestCase
         $app['config']->set('queue.connections.rabbitmq', [
             'driver' => 'rabbitmq',
             'queue' => 'order',
-            'connection' => AMQPLazyConnection::class,
+            'connection' => 'default',
 
             'hosts' => [
                 [
@@ -44,7 +43,7 @@ abstract class TestCase extends BaseTestCase
         $app['config']->set('queue.connections.rabbitmq-with-options', [
             'driver' => 'rabbitmq',
             'queue' => 'order',
-            'connection' => AMQPLazyConnection::class,
+            'connection' => 'default',
 
             'hosts' => [
                 [
@@ -83,7 +82,7 @@ abstract class TestCase extends BaseTestCase
         $app['config']->set('queue.connections.rabbitmq-with-options-empty', [
             'driver' => 'rabbitmq',
             'queue' => 'order',
-            'connection' => AMQPLazyConnection::class,
+            'connection' => 'default',
 
             'hosts' => [
                 [
@@ -123,7 +122,7 @@ abstract class TestCase extends BaseTestCase
         $app['config']->set('queue.connections.rabbitmq-with-quorum-options', [
             'driver' => 'rabbitmq',
             'queue' => 'order',
-            'connection' => AMQPLazyConnection::class,
+            'connection' => 'default',
 
             'hosts' => [
                 [
