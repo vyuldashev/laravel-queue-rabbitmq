@@ -195,7 +195,7 @@ class ConnectionFactory
         self::assertExtendedOf($connection, self::CONNECTION_SUB_TYPE_STREAM);
     }
 
-    private static function assertSSLConnection($connection)
+    private static function assertSSLConnection($connection): void
     {
         self::assertExtendedOf($connection, self::CONNECTION_SUB_TYPE_SSL);
     }
