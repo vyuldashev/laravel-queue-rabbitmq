@@ -254,9 +254,83 @@ class RabbitMQJob extends BaseJob
 }
 ```
 
+### SSL Secure
+
+When u need a secure connection to rabbitMQ server(s). Then this is posible by settitng extra config options.
+
+```php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        'secure' = > true,
+        'options' => [
+            // ...
+
+            'ssl_options' => [
+                'cafile' => env('RABBITMQ_SSL_CAFILE', null),
+                'local_cert' => env('RABBITMQ_SSL_LOCALCERT', null),
+                'local_key' => env('RABBITMQ_SSL_LOCALKEY', null),
+                'verify_peer' => env('RABBITMQ_SSL_VERIFY_PEER', true),
+                'passphrase' => env('RABBITMQ_SSL_PASSPHRASE', null),
+            ],
+        ],
+    ],
+
+    // ...    
+],
+```
+
+### Lazy Connection
+
+By default, your connection will be created as a lazy connection.
+If for some reason you dont want the connection lazy you can turn it off by setting the following config.
+
+```php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        'lazy' = > false,
+    ],
+
+    // ...    
+],
+```
+
+### Heartbeat
+
+By default, your connection will be created with a heartbeat setting of `0`.
+You can alter the heartbeat settings by changing the config.
+
+```php
+
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        'secure' = > true,
+        'options' => [
+            // ...
+
+            'heartbeat' => 10,
+        ],
+    ],
+
+    // ...    
+],
+```
+
 ## Laravel Usage
 
-Once you completed the configuration you can use the Laravel Queue API. If you used other queue drivers you do not need to
+Once you completed the configuration you can use the Laravel Queue API. If you used other queue drivers you do not need
+to
 change anything else. If you do not know how to use the Queue API, please refer to the official Laravel
 documentation: http://laravel.com/docs/queues
 
