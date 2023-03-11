@@ -4,7 +4,7 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
-class QueueConfig
+final class QueueConfig
 {
     private string $queue = 'default';
 
@@ -109,7 +109,9 @@ class QueueConfig
 
     public function setQueueMaxPriority($queueMaxPriority): QueueConfig
     {
-        $this->queueMaxPriority = is_numeric($queueMaxPriority) ? (int) $queueMaxPriority : 2;
+        if (is_numeric($queueMaxPriority)) {
+            $this->queueMaxPriority = (int) $queueMaxPriority;
+        }
 
         return $this;
     }

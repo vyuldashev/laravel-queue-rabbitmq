@@ -17,17 +17,17 @@ use PhpAmqpLib\Exception\AMQPLogicException;
 
 class ConnectionFactory
 {
-    protected const CONNECTION_TYPE_DEFAULT = 'default';
+    private const CONNECTION_TYPE_DEFAULT = 'default';
 
-    protected const CONNECTION_TYPE_EXTENDED = AbstractConnection::class;
+    private const CONNECTION_TYPE_EXTENDED = AbstractConnection::class;
 
-    protected const CONNECTION_SUB_TYPE_STREAM = AMQPStreamConnection::class;
+    private const CONNECTION_SUB_TYPE_STREAM = AMQPStreamConnection::class;
 
-    protected const CONNECTION_SUB_TYPE_SOCKET = AMQPSocketConnection::class;
+    private const CONNECTION_SUB_TYPE_SOCKET = AMQPSocketConnection::class;
 
-    protected const CONNECTION_SUB_TYPE_SSL = AMQPSSLConnection::class;
+    private const CONNECTION_SUB_TYPE_SSL = AMQPSSLConnection::class;
 
-    protected const CONFIG_CONNECTION = 'connection';
+    private const CONFIG_CONNECTION = 'connection';
 
     /**
      * Create a Connection
@@ -152,7 +152,7 @@ class ConnectionFactory
         );
     }
 
-    protected static function getReadWriteTimeout(AMQPConnectionConfig $config): float
+    private static function getReadWriteTimeout(AMQPConnectionConfig $config): float
     {
         return min($config->getReadTimeout(), $config->getWriteTimeout());
     }

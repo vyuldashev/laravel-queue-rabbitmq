@@ -5,11 +5,11 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connection;
 use Illuminate\Support\Arr;
 use PhpAmqpLib\Connection\AMQPConnectionConfig;
 
-class ConfigFactory
+final class ConfigFactory
 {
-    protected const CONFIG_OPTIONS = 'options';
-
     public const CONFIG_HOSTS = 'hosts';
+
+    private const CONFIG_OPTIONS = 'options';
 
     /**
      * Create a config object from config array
@@ -32,15 +32,15 @@ class ConfigFactory
             );
 
             if ($connectionConfig->isSecure()) {
-                self::sllOptionsFromConfig($connectionConfig, $config);
+                self::getSLLOptionsFromConfig($connectionConfig, $config);
             }
 
-            self::hostFromConfig($connectionConfig, $config);
-            self::heartbeatFromConfig($connectionConfig, $config);
+            self::getHostFromConfig($connectionConfig, $config);
+            self::getHeartbeatFromConfig($connectionConfig, $config);
         });
     }
 
-    protected static function hostFromConfig(AMQPConnectionConfig $connectionConfig, array $config): void
+    private static function getHostFromConfig(AMQPConnectionConfig $connectionConfig, array $config): void
     {
         $hostConfig = Arr::first(Arr::shuffle(Arr::get($config, self::CONFIG_HOSTS, [])), null, []);
 
@@ -61,7 +61,7 @@ class ConfigFactory
         }
     }
 
-    protected static function sllOptionsFromConfig(AMQPConnectionConfig $connectionConfig, array $config): void
+    private static function getSLLOptionsFromConfig(AMQPConnectionConfig $connectionConfig, array $config): void
     {
         $sslConfig = Arr::get($config, self::CONFIG_OPTIONS.'.ssl_options', []);
 
@@ -82,7 +82,7 @@ class ConfigFactory
         }
     }
 
-    protected static function heartbeatFromConfig(AMQPConnectionConfig $connectionConfig, array $config): void
+    private static function getHeartbeatFromConfig(AMQPConnectionConfig $connectionConfig, array $config): void
     {
         $heartbeat = Arr::get($config, self::CONFIG_OPTIONS.'.heartbeat');
 
