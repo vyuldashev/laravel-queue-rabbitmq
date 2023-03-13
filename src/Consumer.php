@@ -127,7 +127,7 @@ class Consumer extends Worker
                 }
 
                 if ($options->rest > 0) {
-                    sleep($options->rest);
+                    $this->sleep($options->rest);
                 }
             },
             null,
