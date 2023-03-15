@@ -157,6 +157,24 @@ abstract class TestCase extends BaseTestCase
             'worker' => 'default',
 
         ]);
+        $app['config']->set('queue.connections.rabbitmq-with-octane-reconnect-options', [
+            'driver' => 'rabbitmq',
+            'queue' => 'default',
+            'connection' => 'default',
+
+            'hosts' => [
+                [
+                    'host' => getenv('HOST'),
+                    'port' => getenv('PORT'),
+                    'vhost' => '/',
+                    'user' => 'guest',
+                    'password' => 'guest',
+                ],
+            ],
+
+            'worker' => 'octane',
+
+        ]);
     }
 
     /**
@@ -165,7 +183,7 @@ abstract class TestCase extends BaseTestCase
     protected function callMethod($object, string $method, array $parameters = []): mixed
     {
         try {
-            $className = get_class($object);
+            $className  = get_class($object);
             $reflection = new ReflectionClass($className);
         } catch (ReflectionException $e) {
             throw new Exception($e->getMessage());
@@ -183,7 +201,7 @@ abstract class TestCase extends BaseTestCase
     protected function callProperty($object, string $property): mixed
     {
         try {
-            $className = get_class($object);
+            $className  = get_class($object);
             $reflection = new ReflectionClass($className);
         } catch (ReflectionException $e) {
             throw new Exception($e->getMessage());

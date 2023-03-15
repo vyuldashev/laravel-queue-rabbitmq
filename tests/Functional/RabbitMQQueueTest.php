@@ -2,10 +2,14 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional;
 
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
+use PhpAmqpLib\Exception\AMQPChannelClosedException;
 use PhpAmqpLib\Exchange\AMQPExchangeType;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Octane\RabbitMQQueue as OctaneRabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional\TestCase as BaseTestCase;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks\TestJob;
 
 class RabbitMQQueueTest extends BaseTestCase
 {
@@ -19,6 +23,10 @@ class RabbitMQQueueTest extends BaseTestCase
 
         $queue = $this->connection('rabbitmq-with-options-empty');
         $this->assertInstanceOf(RabbitMQQueue::class, $queue);
+
+        $queue = $this->connection('rabbitmq-with-octane-reconnect-options');
+        $this->assertInstanceOf(RabbitMQQueue::class, $queue);
+        $this->assertInstanceOf(OctaneRabbitMQQueue::class, $queue);
     }
 
     public function testConfigRerouteFailed(): void
@@ -180,14 +188,14 @@ class RabbitMQQueueTest extends BaseTestCase
     {
         $name = Str::random();
 
-        $queue = $this->connection();
-        $actual = $this->callMethod($queue, 'getQueueArguments', [$name]);
+        $queue    = $this->connection();
+        $actual   = $this->callMethod($queue, 'getQueueArguments', [$name]);
         $expected = [];
         $this->assertEquals(array_keys($expected), array_keys($actual));
         $this->assertEquals(array_values($expected), array_values($actual));
 
-        $queue = $this->connection('rabbitmq-with-options');
-        $actual = $this->callMethod($queue, 'getQueueArguments', [$name]);
+        $queue    = $this->connection('rabbitmq-with-options');
+        $actual   = $this->callMethod($queue, 'getQueueArguments', [$name]);
         $expected = [
             'x-max-priority' => 20,
             'x-dead-letter-exchange' => 'failed-exchange',
@@ -197,8 +205,8 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertEquals(array_keys($expected), array_keys($actual));
         $this->assertEquals(array_values($expected), array_values($actual));
 
-        $queue = $this->connection('rabbitmq-with-quorum-options');
-        $actual = $this->callMethod($queue, 'getQueueArguments', [$name]);
+        $queue    = $this->connection('rabbitmq-with-quorum-options');
+        $actual   = $this->callMethod($queue, 'getQueueArguments', [$name]);
         $expected = [
             'x-dead-letter-exchange' => 'failed-exchange',
             'x-dead-letter-routing-key' => sprintf('application-x.%s.failed', $name),
@@ -208,8 +216,8 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertEquals(array_keys($expected), array_keys($actual));
         $this->assertEquals(array_values($expected), array_values($actual));
 
-        $queue = $this->connection('rabbitmq-with-options-empty');
-        $actual = $this->callMethod($queue, 'getQueueArguments', [$name]);
+        $queue    = $this->connection('rabbitmq-with-options-empty');
+        $actual   = $this->callMethod($queue, 'getQueueArguments', [$name]);
         $expected = [];
 
         $this->assertEquals(array_keys($expected), array_keys($actual));
@@ -219,10 +227,10 @@ class RabbitMQQueueTest extends BaseTestCase
     public function testDelayQueueArguments(): void
     {
         $name = Str::random();
-        $ttl = 12000;
+        $ttl  = 12000;
 
-        $queue = $this->connection();
-        $actual = $this->callMethod($queue, 'getDelayQueueArguments', [$name, $ttl]);
+        $queue    = $this->connection();
+        $actual   = $this->callMethod($queue, 'getDelayQueueArguments', [$name, $ttl]);
         $expected = [
             'x-dead-letter-exchange' => '',
             'x-dead-letter-routing-key' => $name,
@@ -232,8 +240,8 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertEquals(array_keys($expected), array_keys($actual));
         $this->assertEquals(array_values($expected), array_values($actual));
 
-        $queue = $this->connection('rabbitmq-with-options');
-        $actual = $this->callMethod($queue, 'getDelayQueueArguments', [$name, $ttl]);
+        $queue    = $this->connection('rabbitmq-with-options');
+        $actual   = $this->callMethod($queue, 'getDelayQueueArguments', [$name, $ttl]);
         $expected = [
             'x-dead-letter-exchange' => 'application-x',
             'x-dead-letter-routing-key' => sprintf('process.%s', $name),
@@ -243,8 +251,8 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertEquals(array_keys($expected), array_keys($actual));
         $this->assertEquals(array_values($expected), array_values($actual));
 
-        $queue = $this->connection('rabbitmq-with-options-empty');
-        $actual = $this->callMethod($queue, 'getDelayQueueArguments', [$name, $ttl]);
+        $queue    = $this->connection('rabbitmq-with-options-empty');
+        $actual   = $this->callMethod($queue, 'getDelayQueueArguments', [$name, $ttl]);
         $expected = [
             'x-dead-letter-exchange' => '',
             'x-dead-letter-routing-key' => $name,
@@ -253,5 +261,34 @@ class RabbitMQQueueTest extends BaseTestCase
         ];
         $this->assertEquals(array_keys($expected), array_keys($actual));
         $this->assertEquals(array_values($expected), array_values($actual));
+    }
+
+    public function testWithoutReconnect(): void
+    {
+        $queue = $this->connection();
+        $queue->purge();
+        // Lazy connection
+        $queue->push(new TestJob());
+        sleep(1);
+        $this->assertSame(1, $queue->size());
+
+        $queue->getConnection()->close();
+        $this->assertFalse($queue->getConnection()->isConnected());
+        $this->assertThrows(fn() => $queue->push(new TestJob()), AMQPChannelClosedException::class);
+    }
+
+    public function testReconnect(): void
+    {
+        $queue = $this->connection('rabbitmq-with-octane-reconnect-options');
+        $queue->purge();
+        $queue->push(new TestJob());
+        sleep(1);
+        $this->assertSame(1, $queue->size());
+        $queue->getConnection()->close();
+        $this->assertFalse($queue->getConnection()->isConnected());
+        $queue->push(new TestJob());
+        sleep(1);
+        $this->assertTrue($queue->getConnection()->isConnected());
+        $this->assertSame(2, $queue->size());
     }
 }
