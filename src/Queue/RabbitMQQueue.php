@@ -283,6 +283,12 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         return $this->channel;
     }
 
+    protected function reconnect()
+    {
+        $this->getConnection()->reconnect();
+        $this->getChannel(true);
+    }
+
     /**
      * Job class to use.
      *
