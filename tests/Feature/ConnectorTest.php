@@ -48,8 +48,9 @@ class ConnectorTest extends \VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCa
 
         $this->assertInstanceOf(RabbitMQQueue::class, $connection);
         $this->assertInstanceOf(AMQPLazyConnection::class, $connection->getConnection());
-        $this->assertTrue($connection->getConnection()->isConnected());
+        $this->assertFalse($connection->getConnection()->isConnected());
         $this->assertTrue($connection->getChannel()->is_open());
+        $this->assertTrue($connection->getConnection()->isConnected());
     }
 
     public function testLazyStreamConnection(): void
@@ -90,8 +91,9 @@ class ConnectorTest extends \VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCa
 
         $this->assertInstanceOf(RabbitMQQueue::class, $connection);
         $this->assertInstanceOf(AMQPStreamConnection::class, $connection->getConnection());
-        $this->assertTrue($connection->getConnection()->isConnected());
+        $this->assertFalse($connection->getConnection()->isConnected());
         $this->assertTrue($connection->getChannel()->is_open());
+        $this->assertTrue($connection->getConnection()->isConnected());
     }
 
     public function testSslConnection(): void
