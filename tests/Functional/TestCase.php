@@ -183,7 +183,7 @@ abstract class TestCase extends BaseTestCase
     protected function callMethod($object, string $method, array $parameters = []): mixed
     {
         try {
-            $className  = get_class($object);
+            $className = get_class($object);
             $reflection = new ReflectionClass($className);
         } catch (ReflectionException $e) {
             throw new Exception($e->getMessage());
@@ -201,7 +201,7 @@ abstract class TestCase extends BaseTestCase
     protected function callProperty($object, string $property): mixed
     {
         try {
-            $className  = get_class($object);
+            $className = get_class($object);
             $reflection = new ReflectionClass($className);
         } catch (ReflectionException $e) {
             throw new Exception($e->getMessage());

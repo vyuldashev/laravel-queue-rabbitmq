@@ -2,7 +2,6 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional;
 
-use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 use PhpAmqpLib\Exception\AMQPChannelClosedException;
 use PhpAmqpLib\Exchange\AMQPExchangeType;
@@ -188,14 +187,14 @@ class RabbitMQQueueTest extends BaseTestCase
     {
         $name = Str::random();
 
-        $queue    = $this->connection();
-        $actual   = $this->callMethod($queue, 'getQueueArguments', [$name]);
+        $queue = $this->connection();
+        $actual = $this->callMethod($queue, 'getQueueArguments', [$name]);
         $expected = [];
         $this->assertEquals(array_keys($expected), array_keys($actual));
         $this->assertEquals(array_values($expected), array_values($actual));
 
-        $queue    = $this->connection('rabbitmq-with-options');
-        $actual   = $this->callMethod($queue, 'getQueueArguments', [$name]);
+        $queue = $this->connection('rabbitmq-with-options');
+        $actual = $this->callMethod($queue, 'getQueueArguments', [$name]);
         $expected = [
             'x-max-priority' => 20,
             'x-dead-letter-exchange' => 'failed-exchange',
@@ -205,8 +204,8 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertEquals(array_keys($expected), array_keys($actual));
         $this->assertEquals(array_values($expected), array_values($actual));
 
-        $queue    = $this->connection('rabbitmq-with-quorum-options');
-        $actual   = $this->callMethod($queue, 'getQueueArguments', [$name]);
+        $queue = $this->connection('rabbitmq-with-quorum-options');
+        $actual = $this->callMethod($queue, 'getQueueArguments', [$name]);
         $expected = [
             'x-dead-letter-exchange' => 'failed-exchange',
             'x-dead-letter-routing-key' => sprintf('application-x.%s.failed', $name),
@@ -216,8 +215,8 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertEquals(array_keys($expected), array_keys($actual));
         $this->assertEquals(array_values($expected), array_values($actual));
 
-        $queue    = $this->connection('rabbitmq-with-options-empty');
-        $actual   = $this->callMethod($queue, 'getQueueArguments', [$name]);
+        $queue = $this->connection('rabbitmq-with-options-empty');
+        $actual = $this->callMethod($queue, 'getQueueArguments', [$name]);
         $expected = [];
 
         $this->assertEquals(array_keys($expected), array_keys($actual));
@@ -227,10 +226,10 @@ class RabbitMQQueueTest extends BaseTestCase
     public function testDelayQueueArguments(): void
     {
         $name = Str::random();
-        $ttl  = 12000;
+        $ttl = 12000;
 
-        $queue    = $this->connection();
-        $actual   = $this->callMethod($queue, 'getDelayQueueArguments', [$name, $ttl]);
+        $queue = $this->connection();
+        $actual = $this->callMethod($queue, 'getDelayQueueArguments', [$name, $ttl]);
         $expected = [
             'x-dead-letter-exchange' => '',
             'x-dead-letter-routing-key' => $name,
@@ -240,8 +239,8 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertEquals(array_keys($expected), array_keys($actual));
         $this->assertEquals(array_values($expected), array_values($actual));
 
-        $queue    = $this->connection('rabbitmq-with-options');
-        $actual   = $this->callMethod($queue, 'getDelayQueueArguments', [$name, $ttl]);
+        $queue = $this->connection('rabbitmq-with-options');
+        $actual = $this->callMethod($queue, 'getDelayQueueArguments', [$name, $ttl]);
         $expected = [
             'x-dead-letter-exchange' => 'application-x',
             'x-dead-letter-routing-key' => sprintf('process.%s', $name),
@@ -251,8 +250,8 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertEquals(array_keys($expected), array_keys($actual));
         $this->assertEquals(array_values($expected), array_values($actual));
 
-        $queue    = $this->connection('rabbitmq-with-options-empty');
-        $actual   = $this->callMethod($queue, 'getDelayQueueArguments', [$name, $ttl]);
+        $queue = $this->connection('rabbitmq-with-options-empty');
+        $actual = $this->callMethod($queue, 'getDelayQueueArguments', [$name, $ttl]);
         $expected = [
             'x-dead-letter-exchange' => '',
             'x-dead-letter-routing-key' => $name,
@@ -274,7 +273,7 @@ class RabbitMQQueueTest extends BaseTestCase
 
         $queue->getConnection()->close();
         $this->assertFalse($queue->getConnection()->isConnected());
-        $this->assertThrows(fn() => $queue->push(new TestJob()), AMQPChannelClosedException::class);
+        $this->assertThrows(fn () => $queue->push(new TestJob()), AMQPChannelClosedException::class);
     }
 
     public function testReconnect(): void
