@@ -12,7 +12,7 @@ class RabbitMQQueue extends BaseRabbitMQQueue
     {
         try {
             parent::publishBasic($msg, $exchange, $destination, $mandatory, $immediate, $ticket);
-        } catch (AMQPConnectionClosedException|AMQPChannelClosedException $exception) {
+        } catch (AMQPConnectionClosedException|AMQPChannelClosedException) {
             $this->reconnect();
             parent::publishBasic($msg, $exchange, $destination, $mandatory, $immediate, $ticket);
         }
@@ -22,7 +22,7 @@ class RabbitMQQueue extends BaseRabbitMQQueue
     {
         try {
             parent::publishBatch();
-        } catch (AMQPConnectionClosedException|AMQPChannelClosedException $exception) {
+        } catch (AMQPConnectionClosedException|AMQPChannelClosedException) {
             $this->reconnect();
             parent::publishBatch();
         }
