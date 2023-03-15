@@ -4,6 +4,7 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
 use Illuminate\Support\Arr;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Horizon\RabbitMQQueue as HorizonRabbitMQQueue;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Octane\RabbitMQQueue as OctaneRabbitMQQueue;
 
 class QueueFactory
 {
@@ -18,6 +19,10 @@ class QueueFactory
 
         if (strtolower($worker) == 'horizon') {
             return new HorizonRabbitMQQueue($queueConfig);
+        }
+
+        if (strtolower($worker) == 'octane') {
+            return new OctaneRabbitMQQueue($queueConfig);
         }
 
         return new $worker($queueConfig);
