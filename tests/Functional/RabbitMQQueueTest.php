@@ -4,6 +4,7 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional;
 
 use Illuminate\Support\Str;
 use PhpAmqpLib\Exchange\AMQPExchangeType;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Octane\RabbitMQQueue as OctaneRabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional\TestCase as BaseTestCase;
 
@@ -19,6 +20,10 @@ class RabbitMQQueueTest extends BaseTestCase
 
         $queue = $this->connection('rabbitmq-with-options-empty');
         $this->assertInstanceOf(RabbitMQQueue::class, $queue);
+
+        $queue = $this->connection('rabbitmq-with-octane-reconnect-options');
+        $this->assertInstanceOf(RabbitMQQueue::class, $queue);
+        $this->assertInstanceOf(OctaneRabbitMQQueue::class, $queue);
     }
 
     public function testConfigRerouteFailed(): void
