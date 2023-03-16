@@ -5,11 +5,11 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connection;
 use Illuminate\Support\Arr;
 use PhpAmqpLib\Connection\AMQPConnectionConfig;
 
-final class ConfigFactory
+class ConfigFactory
 {
     public const CONFIG_HOSTS = 'hosts';
 
-    private const CONFIG_OPTIONS = 'options';
+    protected const CONFIG_OPTIONS = 'options';
 
     /**
      * Create a config object from config array
@@ -40,7 +40,7 @@ final class ConfigFactory
         });
     }
 
-    private static function getHostFromConfig(AMQPConnectionConfig $connectionConfig, array $config): void
+    protected static function getHostFromConfig(AMQPConnectionConfig $connectionConfig, array $config): void
     {
         $hostConfig = Arr::first(Arr::shuffle(Arr::get($config, self::CONFIG_HOSTS, [])), null, []);
 
@@ -61,7 +61,7 @@ final class ConfigFactory
         }
     }
 
-    private static function getSLLOptionsFromConfig(AMQPConnectionConfig $connectionConfig, array $config): void
+    protected static function getSLLOptionsFromConfig(AMQPConnectionConfig $connectionConfig, array $config): void
     {
         $sslConfig = Arr::get($config, self::CONFIG_OPTIONS.'.ssl_options', []);
 
@@ -82,7 +82,7 @@ final class ConfigFactory
         }
     }
 
-    private static function getHeartbeatFromConfig(AMQPConnectionConfig $connectionConfig, array $config): void
+    protected static function getHeartbeatFromConfig(AMQPConnectionConfig $connectionConfig, array $config): void
     {
         $heartbeat = Arr::get($config, self::CONFIG_OPTIONS.'.heartbeat');
 

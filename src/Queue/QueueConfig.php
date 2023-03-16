@@ -4,33 +4,33 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
-final class QueueConfig
+class QueueConfig
 {
-    private string $queue = 'default';
+    protected string $queue = 'default';
 
-    private bool $dispatchAfterCommit = false;
+    protected bool $dispatchAfterCommit = false;
 
-    private string $abstractJob = RabbitMQJob::class;
+    protected string $abstractJob = RabbitMQJob::class;
 
-    private bool $prioritizeDelayed = false;
+    protected bool $prioritizeDelayed = false;
 
-    private int $queueMaxPriority = 2;
+    protected int $queueMaxPriority = 2;
 
-    private ?string $exchange = null;
+    protected ?string $exchange = null;
 
-    private string $exchangeType = 'direct';
+    protected string $exchangeType = 'direct';
 
-    private string $exchangeRoutingKey = '%s';
+    protected string $exchangeRoutingKey = '%s';
 
-    private bool $rerouteFailed = false;
+    protected bool $rerouteFailed = false;
 
-    private ?string $failedExchange = null;
+    protected ?string $failedExchange = null;
 
-    private string $failedRoutingKey = '%s.failed';
+    protected string $failedRoutingKey = '%s.failed';
 
-    private bool $quorum = false;
+    protected bool $quorum = false;
 
-    private array $options = [];
+    protected array $options = [];
 
     public function getQueue(): string
     {

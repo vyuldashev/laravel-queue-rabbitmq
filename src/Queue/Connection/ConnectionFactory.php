@@ -17,17 +17,17 @@ use PhpAmqpLib\Exception\AMQPLogicException;
 
 class ConnectionFactory
 {
-    private const CONNECTION_TYPE_DEFAULT = 'default';
+    protected const CONNECTION_TYPE_DEFAULT = 'default';
 
-    private const CONNECTION_TYPE_EXTENDED = AbstractConnection::class;
+    protected const CONNECTION_TYPE_EXTENDED = AbstractConnection::class;
 
-    private const CONNECTION_SUB_TYPE_STREAM = AMQPStreamConnection::class;
+    protected const CONNECTION_SUB_TYPE_STREAM = AMQPStreamConnection::class;
 
-    private const CONNECTION_SUB_TYPE_SOCKET = AMQPSocketConnection::class;
+    protected const CONNECTION_SUB_TYPE_SOCKET = AMQPSocketConnection::class;
 
-    private const CONNECTION_SUB_TYPE_SSL = AMQPSSLConnection::class;
+    protected const CONNECTION_SUB_TYPE_SSL = AMQPSSLConnection::class;
 
-    private const CONFIG_CONNECTION = 'connection';
+    protected const CONFIG_CONNECTION = 'connection';
 
     /**
      * Create a Connection
@@ -58,7 +58,7 @@ class ConnectionFactory
     /**
      * Get the validated connection from config
      */
-    private static function getConnectionFromConfig(array $config): string
+    protected static function getConnectionFromConfig(array $config): string
     {
         $connection = (string) Arr::get($config, self::CONFIG_CONNECTION, self::CONNECTION_TYPE_DEFAULT);
 
@@ -70,7 +70,7 @@ class ConnectionFactory
     /**
      * Creation of your own connection
      */
-    private static function create($connection, AMQPConnectionConfig $config): AbstractConnection
+    protected static function create($connection, AMQPConnectionConfig $config): AbstractConnection
     {
         if ($config->getIoType() === AMQPConnectionConfig::IO_TYPE_SOCKET) {
             return self::createSocketConnection($connection, $config);
@@ -79,7 +79,7 @@ class ConnectionFactory
         return self::createStreamConnection($connection, $config);
     }
 
-    private static function createSocketConnection($connection, AMQPConnectionConfig $config): AMQPSocketConnection
+    protected static function createSocketConnection($connection, AMQPConnectionConfig $config): AMQPSocketConnection
     {
         self::assertSocketConnection($connection, $config);
 
@@ -102,7 +102,7 @@ class ConnectionFactory
         );
     }
 
-    private static function createStreamConnection($connection, AMQPConnectionConfig $config): AMQPStreamConnection
+    protected static function createStreamConnection($connection, AMQPConnectionConfig $config): AMQPStreamConnection
     {
         self::assertStreamConnection($connection);
 
@@ -152,12 +152,12 @@ class ConnectionFactory
         );
     }
 
-    private static function getReadWriteTimeout(AMQPConnectionConfig $config): float
+    protected static function getReadWriteTimeout(AMQPConnectionConfig $config): float
     {
         return min($config->getReadTimeout(), $config->getWriteTimeout());
     }
 
-    private static function getSslOptions(AMQPConnectionConfig $config): array
+    protected static function getSslOptions(AMQPConnectionConfig $config): array
     {
         return array_filter([
             'cafile' => $config->getSslCaCert(),
@@ -174,14 +174,14 @@ class ConnectionFactory
         });
     }
 
-    private static function assertConnectionFromConfig(string $connection): void
+    protected static function assertConnectionFromConfig(string $connection): void
     {
         if ($connection !== self::CONNECTION_TYPE_DEFAULT && ! is_subclass_of($connection, self::CONNECTION_TYPE_EXTENDED)) {
             throw new AMQPLogicException(sprintf('The config property \'%s\' must contain \'%s\' or must extend: %s', self::CONFIG_CONNECTION, self::CONNECTION_TYPE_DEFAULT, class_basename(self::CONNECTION_TYPE_EXTENDED)));
         }
     }
 
-    private static function assertSocketConnection($connection, AMQPConnectionConfig $config): void
+    protected static function assertSocketConnection($connection, AMQPConnectionConfig $config): void
     {
         self::assertExtendedOf($connection, self::CONNECTION_SUB_TYPE_SOCKET);
 
@@ -190,17 +190,17 @@ class ConnectionFactory
         }
     }
 
-    private static function assertStreamConnection($connection): void
+    protected static function assertStreamConnection($connection): void
     {
         self::assertExtendedOf($connection, self::CONNECTION_SUB_TYPE_STREAM);
     }
 
-    private static function assertSSLConnection($connection): void
+    protected static function assertSSLConnection($connection): void
     {
         self::assertExtendedOf($connection, self::CONNECTION_SUB_TYPE_SSL);
     }
 
-    private static function assertExtendedOf($connection, string $abstract): void
+    protected static function assertExtendedOf($connection, string $abstract): void
     {
         if (! is_subclass_of($connection, $abstract)) {
             throw new AMQPLogicException(sprintf('The connection must extend: %s', class_basename($abstract)));
@@ -214,7 +214,7 @@ class ConnectionFactory
      *
      * @deprecated This is the fallback method, update your config asap. (example: connection => 'default')
      */
-    private static function _createLazyConnection($connection, array $config): AbstractConnection
+    protected static function _createLazyConnection($connection, array $config): AbstractConnection
     {
         return $connection::create_connection(
             Arr::shuffle(Arr::get($config, ConfigFactory::CONFIG_HOSTS, [])),
