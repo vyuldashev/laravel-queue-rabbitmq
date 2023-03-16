@@ -157,11 +157,8 @@ abstract class TestCase extends BaseTestCase
             'worker' => 'default',
 
         ]);
-        $app['config']->set('queue.connections.rabbitmq-with-octane-reconnect-options', [
+        $app['config']->set('queue.connections.rabbitmq-for-octane', [
             'driver' => 'rabbitmq',
-            'queue' => 'default',
-            'connection' => 'default',
-
             'hosts' => [
                 [
                     'host' => getenv('HOST'),
@@ -171,9 +168,7 @@ abstract class TestCase extends BaseTestCase
                     'password' => 'guest',
                 ],
             ],
-
             'worker' => 'octane',
-
         ]);
     }
 

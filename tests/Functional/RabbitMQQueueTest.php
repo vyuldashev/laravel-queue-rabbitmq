@@ -21,7 +21,7 @@ class RabbitMQQueueTest extends BaseTestCase
         $queue = $this->connection('rabbitmq-with-options-empty');
         $this->assertInstanceOf(RabbitMQQueue::class, $queue);
 
-        $queue = $this->connection('rabbitmq-with-octane-reconnect-options');
+        $queue = $this->connection('rabbitmq-for-octane');
         $this->assertInstanceOf(RabbitMQQueue::class, $queue);
         $this->assertInstanceOf(OctaneRabbitMQQueue::class, $queue);
     }
