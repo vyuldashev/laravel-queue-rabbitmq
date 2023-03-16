@@ -6,7 +6,7 @@ use Illuminate\Support\Arr;
 
 class QueueConfigFactory
 {
-    private const CONFIG_OPTIONS = 'options';
+    protected const CONFIG_OPTIONS = 'options';
 
     /**
      * Create a config object from config array
@@ -25,7 +25,7 @@ class QueueConfigFactory
         });
     }
 
-    private static function getOptionsFromConfig(QueueConfig $queueConfig, array $config): void
+    protected static function getOptionsFromConfig(QueueConfig $queueConfig, array $config): void
     {
         $queueOptions = Arr::get($config, self::CONFIG_OPTIONS.'.queue', []) ?: [];
 

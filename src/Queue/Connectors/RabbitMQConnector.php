@@ -16,7 +16,7 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMQConnector implements ConnectorInterface
 {
-    private Dispatcher $dispatcher;
+    protected Dispatcher $dispatcher;
 
     public function __construct(Dispatcher $dispatcher)
     {
