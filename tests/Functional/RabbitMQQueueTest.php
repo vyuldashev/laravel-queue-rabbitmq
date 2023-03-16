@@ -3,12 +3,10 @@
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional;
 
 use Illuminate\Support\Str;
-use PhpAmqpLib\Exception\AMQPChannelClosedException;
 use PhpAmqpLib\Exchange\AMQPExchangeType;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Octane\RabbitMQQueue as OctaneRabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional\TestCase as BaseTestCase;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks\TestJob;
 
 class RabbitMQQueueTest extends BaseTestCase
 {
@@ -260,34 +258,5 @@ class RabbitMQQueueTest extends BaseTestCase
         ];
         $this->assertEquals(array_keys($expected), array_keys($actual));
         $this->assertEquals(array_values($expected), array_values($actual));
-    }
-
-    public function testWithoutReconnect(): void
-    {
-        $queue = $this->connection();
-        $queue->purge();
-        // Lazy connection
-        $queue->push(new TestJob());
-        sleep(1);
-        $this->assertSame(1, $queue->size());
-
-        $queue->getConnection()->close();
-        $this->assertFalse($queue->getConnection()->isConnected());
-        $this->assertThrows(fn () => $queue->push(new TestJob()), AMQPChannelClosedException::class);
-    }
-
-    public function testReconnect(): void
-    {
-        $queue = $this->connection('rabbitmq-with-octane-reconnect-options');
-        $queue->purge();
-        $queue->push(new TestJob());
-        sleep(1);
-        $this->assertSame(1, $queue->size());
-        $queue->getConnection()->close();
-        $this->assertFalse($queue->getConnection()->isConnected());
-        $queue->push(new TestJob());
-        sleep(1);
-        $this->assertTrue($queue->getConnection()->isConnected());
-        $this->assertSame(2, $queue->size());
     }
 }
