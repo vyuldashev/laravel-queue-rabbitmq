@@ -149,7 +149,9 @@ by adding extra options.
 ```
 
 ### Horizon support
-Starting with 8.0, this package supports [Laravel Horizon](http://horizon.laravel.com) out of the box. Firstly, install
+
+Starting with 8.0, this package supports [Laravel Horizon](https://laravel.com/docs/horizon) out of the box. Firstly,
+install
 Horizon and then set `RABBITMQ_WORKER` to `horizon`.
 
 Horizon is depending on events dispatched by the worker.
@@ -165,6 +167,30 @@ This Library supports Horizon, but in the config you have to inform Laravel to u
         // ...
 
         /* Set to "horizon" if you wish to use Laravel Horizon. */
+       'worker' => env('RABBITMQ_WORKER', 'default'),
+    ],
+
+    // ...    
+],
+```
+
+### Octane support
+
+Starting with 13.3.0, this package supports [Laravel Octane](https://laravel.com/docs/octane) out of the box. Firstly,
+install
+Octane and then set `RABBITMQ_WORKER` to `octane`.
+
+This Library supports Octane, but in the config you have to inform Laravel to use the QueueApi compatible with octane.
+
+> Note: don't forget to warm 'rabbitmq' connection in the octane config.
+```php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        /* Set to "octane" if you wish to use Laravel Octane. */
        'worker' => env('RABBITMQ_WORKER', 'default'),
     ],
 
