@@ -50,9 +50,9 @@
             "@test:style",
             "@test:unit"
         ],
-        "test:style": "@php vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --allow-risky=yes --dry-run --diff --verbose",
+        "test:style": "@php vendor/bin/pint --test -v",
         "test:unit": "@php vendor/bin/phpunit",
-        "fix:style": "@php vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --allow-risky=yes --diff --verbose"
+        "fix:style": "@php vendor/bin/pint -v"
     },
     "minimum-stability": "dev",
     "prefer-stable": true
