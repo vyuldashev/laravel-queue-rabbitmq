@@ -34,7 +34,8 @@ class QueueTest extends TestCase
         $queue->getConnection()->close();
         $this->assertFalse($queue->getConnection()->isConnected());
 
-        $this->assertThrows(fn () => $queue->push(new TestJob()), AMQPChannelClosedException::class);
+        $this->expectException(AMQPChannelClosedException::class);
+        $queue->push(new TestJob());
     }
 
     public function testReconnect(): void
