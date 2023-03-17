@@ -329,7 +329,7 @@ You can alter the heartbeat settings by changing the config.
 
 ### SSL Secure
 
-When u need a secure connection to rabbitMQ server(s). Then this is possible by setting extra config options.
+If you need a secure connection to rabbitMQ server(s), you will need to add these extra config options.
 
 ```php
 'connections' => [
