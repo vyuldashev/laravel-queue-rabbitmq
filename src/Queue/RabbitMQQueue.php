@@ -594,7 +594,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         }
 
         if ($this->getConfig()->isRerouteFailed()) {
-            $arguments['x-dead-letter-exchange'] = $this->getFailedExchange() ?? '';
+            $arguments['x-dead-letter-exchange'] = $this->getFailedExchange();
             $arguments['x-dead-letter-routing-key'] = $this->getFailedRoutingKey($destination);
         }
 
@@ -611,7 +611,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     protected function getDelayQueueArguments(string $destination, int $ttl): array
     {
         return [
-            'x-dead-letter-exchange' => $this->getExchange() ?? '',
+            'x-dead-letter-exchange' => $this->getExchange(),
             'x-dead-letter-routing-key' => $this->getRoutingKey($destination),
             'x-message-ttl' => $ttl,
             'x-expires' => $ttl * 2,
@@ -619,11 +619,11 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     }
 
     /**
-     * Get the exchange name, or &null; as default value.
+     * Get the exchange name, or empty string; as default value.
      */
-    protected function getExchange(string $exchange = null): ?string
+    protected function getExchange(?string $exchange = null): string
     {
-        return $exchange ?: $this->getConfig()->getExchange();
+        return $exchange ?? $this->getConfig()->getExchange();
     }
 
     /**
@@ -648,9 +648,9 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     /**
      * Get the exchange for failed messages.
      */
-    protected function getFailedExchange(string $exchange = null): ?string
+    protected function getFailedExchange(?string $exchange = null): string
     {
-        return $exchange ?: $this->getConfig()->getFailedExchange();
+        return $exchange ?? $this->getConfig()->getFailedExchange();
     }
 
     /**
@@ -680,7 +680,6 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
 
     /**
      * Declare the destination when necessary.
-     *
      *
      * @throws AMQPProtocolChannelException
      */
