@@ -264,7 +264,7 @@ class RabbitMQJob extends BaseJob
 
 ### Use your own Connection
 
-You can extend the build-in `PhpAmqpLib\Connection\AMQPStreamConnection::class`
+You can extend the built-in `PhpAmqpLib\Connection\AMQPStreamConnection::class`
 or `PhpAmqpLib\Connection\AMQPSLLConnection::class` and within the connection config, you can define your own class.
 When you specify a `connection` key in the config, with your own class name, every connection will use your own class.
 
