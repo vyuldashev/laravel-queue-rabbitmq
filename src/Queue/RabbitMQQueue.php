@@ -640,7 +640,9 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
      */
     protected function getExchangeType(?string $type = null): string
     {
-        return @constant(AMQPExchangeType::class.'::'.Str::upper($type ?: $this->getConfig()->getExchangeType())) ?: AMQPExchangeType::DIRECT;
+        $constant = AMQPExchangeType::class.'::'.Str::upper($type ?: $this->getConfig()->getExchangeType());
+
+        return defined($constant) ? constant($constant) : AMQPExchangeType::DIRECT;
     }
 
     /**
