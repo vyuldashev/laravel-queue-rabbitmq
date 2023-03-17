@@ -395,8 +395,7 @@ If for some reason you don't want the connection lazy you can turn it off by set
 
 ## Laravel Usage
 
-Once you completed the configuration you can use the Laravel Queue API. If you used other queue drivers you do not need
-to
+Once you completed the configuration you can use the Laravel Queue API. If you used other queue drivers you do not need to
 change anything else. If you do not know how to use the Queue API, please refer to the official Laravel
 documentation: http://laravel.com/docs/queues
 
