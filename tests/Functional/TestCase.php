@@ -119,6 +119,46 @@ abstract class TestCase extends BaseTestCase
             'worker' => 'default',
 
         ]);
+        $app['config']->set('queue.connections.rabbitmq-with-options-null', [
+            'driver' => 'rabbitmq',
+            'queue' => 'order',
+            'connection' => 'default',
+
+            'hosts' => [
+                [
+                    'host' => null,
+                    'port' => null,
+                    'vhost' => null,
+                    'user' => null,
+                    'password' => null,
+                ],
+            ],
+
+            'options' => [
+                'ssl_options' => [
+                    'cafile' => null,
+                    'local_cert' => null,
+                    'local_key' => null,
+                    'verify_peer' => null,
+                    'passphrase' => null,
+                ],
+
+                'queue' => [
+                    'prioritize_delayed' => null,
+                    'queue_max_priority' => null,
+                    'exchange' => null,
+                    'exchange_type' => null,
+                    'exchange_routing_key' => null,
+                    'reroute_failed' => null,
+                    'failed_exchange' => null,
+                    'failed_routing_key' => null,
+                    'quorum' => null,
+                ],
+            ],
+
+            'worker' => 'default',
+
+        ]);
         $app['config']->set('queue.connections.rabbitmq-with-quorum-options', [
             'driver' => 'rabbitmq',
             'queue' => 'order',
