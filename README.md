@@ -264,7 +264,7 @@ class RabbitMQJob extends BaseJob
 
 ### Use your own Connection
 
-You can extend the build-in `PhpAmqpLib\Connection\AMQPStreamConnection::class`
+You can extend the built-in `PhpAmqpLib\Connection\AMQPStreamConnection::class`
 or `PhpAmqpLib\Connection\AMQPSLLConnection::class` and within the connection config, you can define your own class.
 When you specify a `connection` key in the config, with your own class name, every connection will use your own class.
 
@@ -329,7 +329,7 @@ You can alter the heartbeat settings by changing the config.
 
 ### SSL Secure
 
-When u need a secure connection to rabbitMQ server(s). Then this is possible by setting extra config options.
+If you need a secure connection to rabbitMQ server(s), you will need to add these extra config options.
 
 ```php
 'connections' => [
@@ -395,8 +395,7 @@ If for some reason you don't want the connection lazy you can turn it off by set
 
 ## Laravel Usage
 
-Once you completed the configuration you can use the Laravel Queue API. If you used other queue drivers you do not need
-to
+Once you completed the configuration you can use the Laravel Queue API. If you used other queue drivers you do not need to
 change anything else. If you do not know how to use the Queue API, please refer to the official Laravel
 documentation: http://laravel.com/docs/queues
 
