@@ -125,6 +125,10 @@ class Consumer extends Worker
                 if ($this->supportsAsyncSignals()) {
                     $this->resetTimeoutHandler();
                 }
+
+                if ($options->rest > 0) {
+                    $this->sleep($options->rest);
+                }
             },
             null,
             $arguments
