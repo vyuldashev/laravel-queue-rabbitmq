@@ -399,11 +399,19 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
      */
     public function isQueueExists(string $name = null): bool
     {
+        $queueName = $this->getQueue($name);
+
+        if ($this->isQueueDeclared($queueName)) {
+            return true;
+        }
+
         try {
             // create a temporary channel, so the main channel will not be closed on exception
             $channel = $this->createChannel();
-            $channel->queue_declare($this->getQueue($name), true);
+            $channel->queue_declare($queueName, true);
             $channel->close();
+
+            $this->queues[] = $queueName;
 
             return true;
         } catch (AMQPProtocolChannelException $exception) {
@@ -450,6 +458,9 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         if (! $this->isQueueExists($name)) {
             return;
         }
+
+        $idx = array_search($name, $this->queues);
+        unset($this->queues[$idx]);
 
         $this->getChannel()->queue_delete($name, $if_unused, $if_empty);
     }
