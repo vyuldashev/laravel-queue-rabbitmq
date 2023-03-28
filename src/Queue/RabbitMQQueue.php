@@ -84,7 +84,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         }
 
         // create a temporary channel, so the main channel will not be closed on exception
-        $channel = $this->getConnection()->channel();
+        $channel = $this->createChannel();
         [, $size] = $channel->queue_declare($queue, true);
         $channel->close();
 
@@ -277,7 +277,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     public function getChannel($forceNew = false): AMQPChannel
     {
         if (! $this->channel || $forceNew) {
-            $this->channel = $this->getConnection()->channel();
+            $this->channel = $this->createChannel();
         }
 
         return $this->channel;
@@ -333,7 +333,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
 
         try {
             // create a temporary channel, so the main channel will not be closed on exception
-            $channel = $this->getConnection()->channel();
+            $channel = $this->createChannel();
             $channel->exchange_declare($exchange, '', true);
             $channel->close();
 
@@ -405,11 +405,19 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
      */
     public function isQueueExists(string $name = null): bool
     {
+        $queueName = $this->getQueue($name);
+
+        if ($this->isQueueDeclared($queueName)) {
+            return true;
+        }
+
         try {
             // create a temporary channel, so the main channel will not be closed on exception
-            $channel = $this->getConnection()->channel();
-            $channel->queue_declare($this->getQueue($name), true);
+            $channel = $this->createChannel();
+            $channel->queue_declare($queueName, true);
             $channel->close();
+
+            $this->queues[] = $queueName;
 
             return true;
         } catch (AMQPProtocolChannelException $exception) {
@@ -457,6 +465,9 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
             return;
         }
 
+        $idx = array_search($name, $this->queues);
+        unset($this->queues[$idx]);
+
         $this->getChannel()->queue_delete($name, $if_unused, $if_empty);
     }
 
@@ -482,7 +493,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     public function purge(string $queue = null): void
     {
         // create a temporary channel, so the main channel will not be closed on exception
-        $channel = $this->getConnection()->channel();
+        $channel = $this->createChannel();
         $channel->queue_purge($this->getQueue($queue));
         $channel->close();
     }
@@ -738,5 +749,10 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     protected function publishBatch(): void
     {
         $this->getChannel()->publish_batch();
+    }
+
+    protected function createChannel(): AMQPChannel
+    {
+        return $this->getConnection()->channel();
     }
 }
