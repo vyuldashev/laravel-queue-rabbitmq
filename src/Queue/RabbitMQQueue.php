@@ -183,11 +183,19 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
      */
     public function bulk($jobs, $data = '', $queue = null): void
     {
-        foreach ((array) $jobs as $job) {
+        $this->publishBatch($jobs, $queue, $data);
+    }
+
+    /**
+     * @throws AMQPProtocolChannelException
+     */
+    protected function publishBatch($jobs, $data = '', $queue = null): void
+    {
+        foreach ($jobs as $job) {
             $this->bulkRaw($this->createPayload($job, $queue, $data), $queue, ['job' => $job]);
         }
 
-        $this->publishBatch();
+        $this->batchPublish();
     }
 
     /**
@@ -272,21 +280,6 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         $this->connection = $connection;
 
         return $this;
-    }
-
-    public function getChannel($forceNew = false): AMQPChannel
-    {
-        if (! $this->channel || $forceNew) {
-            $this->channel = $this->createChannel();
-        }
-
-        return $this->channel;
-    }
-
-    protected function reconnect()
-    {
-        $this->getConnection()->reconnect();
-        $this->getChannel(true);
     }
 
     /**
@@ -746,13 +739,33 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         $this->getChannel()->basic_publish($msg, $exchange, $destination, $mandatory, $immediate, $ticket);
     }
 
-    protected function publishBatch(): void
+    protected function batchPublish(): void
     {
         $this->getChannel()->publish_batch();
+    }
+
+    public function getChannel($forceNew = false): AMQPChannel
+    {
+        if (! $this->channel || $forceNew) {
+            $this->channel = $this->createChannel();
+        }
+
+        return $this->channel;
     }
 
     protected function createChannel(): AMQPChannel
     {
         return $this->getConnection()->channel();
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function reconnect(): void
+    {
+        // Reconnects using the original connection settings.
+        $this->getConnection()->reconnect();
+        // Create a new main channel because all old channels are removed.
+        $this->getChannel(true);
     }
 }
