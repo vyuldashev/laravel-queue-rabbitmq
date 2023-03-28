@@ -84,7 +84,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         }
 
         // create a temporary channel, so the main channel will not be closed on exception
-        $channel = $this->getConnection()->channel();
+        $channel = $this->createChannel();
         [, $size] = $channel->queue_declare($queue, true);
         $channel->close();
 
@@ -277,7 +277,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     public function getChannel($forceNew = false): AMQPChannel
     {
         if (! $this->channel || $forceNew) {
-            $this->channel = $this->getConnection()->channel();
+            $this->channel = $this->createChannel();
         }
 
         return $this->channel;
@@ -327,7 +327,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
 
         try {
             // create a temporary channel, so the main channel will not be closed on exception
-            $channel = $this->getConnection()->channel();
+            $channel = $this->createChannel();
             $channel->exchange_declare($exchange, '', true);
             $channel->close();
 
@@ -401,7 +401,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     {
         try {
             // create a temporary channel, so the main channel will not be closed on exception
-            $channel = $this->getConnection()->channel();
+            $channel = $this->createChannel();
             $channel->queue_declare($this->getQueue($name), true);
             $channel->close();
 
@@ -476,7 +476,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     public function purge(string $queue = null): void
     {
         // create a temporary channel, so the main channel will not be closed on exception
-        $channel = $this->getConnection()->channel();
+        $channel = $this->createChannel();
         $channel->queue_purge($this->getQueue($queue));
         $channel->close();
     }
@@ -732,5 +732,10 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     protected function publishBatch(): void
     {
         $this->getChannel()->publish_batch();
+    }
+
+    protected function createChannel(): AMQPChannel
+    {
+        return $this->getConnection()->channel();
     }
 }
