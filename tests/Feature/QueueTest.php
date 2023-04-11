@@ -2,12 +2,12 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Feature;
 
-use PhpAmqpLib\Connection\AMQPLazyConnection;
+use PhpAmqpLib\Connection\AMQPStreamConnection;
 
 class QueueTest extends TestCase
 {
     public function testConnection(): void
     {
-        $this->assertInstanceOf(AMQPLazyConnection::class, $this->connection()->getChannel()->getConnection());
+        $this->assertInstanceOf(AMQPStreamConnection::class, $this->connection()->getChannel()->getConnection());
     }
 }
