@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v13.2.0...master)
 
+## [13.3.0](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v13.2.0...13.3.0)
+
+- Refactor the creation of RabbitMQ Connection and QueueAPI. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
+- Added configuration object as single dependency for RabbitMQQueue in constructor. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
+- Fix method getExchangeType, not throwing an exception. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
+- Separating the apilogic from the actual publishing to RabbitMQ. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
+- Added a reconnect method. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
+- Fix the connection and channel not being fully lazy, when QueueAPI was created. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
+- Keep track of declared queue's within RabbitMQ. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
+- Implemented the 'rest' option to the consumer [#530](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/530)
+
 ## [13.2.0](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v13.1.0...13.2.0)
 
 - Compatibility with Laravel 10 [#525](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/525)
