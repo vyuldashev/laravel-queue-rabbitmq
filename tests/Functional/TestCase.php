@@ -3,7 +3,6 @@
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional;
 
 use Exception;
-use PhpAmqpLib\Connection\AMQPLazyConnection;
 use ReflectionClass;
 use ReflectionException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCase as BaseTestCase;
@@ -16,7 +15,7 @@ abstract class TestCase extends BaseTestCase
         $app['config']->set('queue.connections.rabbitmq', [
             'driver' => 'rabbitmq',
             'queue' => 'order',
-            'connection' => AMQPLazyConnection::class,
+            'connection' => 'default',
 
             'hosts' => [
                 [
@@ -44,7 +43,7 @@ abstract class TestCase extends BaseTestCase
         $app['config']->set('queue.connections.rabbitmq-with-options', [
             'driver' => 'rabbitmq',
             'queue' => 'order',
-            'connection' => AMQPLazyConnection::class,
+            'connection' => 'default',
 
             'hosts' => [
                 [
@@ -83,7 +82,7 @@ abstract class TestCase extends BaseTestCase
         $app['config']->set('queue.connections.rabbitmq-with-options-empty', [
             'driver' => 'rabbitmq',
             'queue' => 'order',
-            'connection' => AMQPLazyConnection::class,
+            'connection' => 'default',
 
             'hosts' => [
                 [
@@ -120,10 +119,50 @@ abstract class TestCase extends BaseTestCase
             'worker' => 'default',
 
         ]);
+        $app['config']->set('queue.connections.rabbitmq-with-options-null', [
+            'driver' => 'rabbitmq',
+            'queue' => 'order',
+            'connection' => 'default',
+
+            'hosts' => [
+                [
+                    'host' => null,
+                    'port' => null,
+                    'vhost' => null,
+                    'user' => null,
+                    'password' => null,
+                ],
+            ],
+
+            'options' => [
+                'ssl_options' => [
+                    'cafile' => null,
+                    'local_cert' => null,
+                    'local_key' => null,
+                    'verify_peer' => null,
+                    'passphrase' => null,
+                ],
+
+                'queue' => [
+                    'prioritize_delayed' => null,
+                    'queue_max_priority' => null,
+                    'exchange' => null,
+                    'exchange_type' => null,
+                    'exchange_routing_key' => null,
+                    'reroute_failed' => null,
+                    'failed_exchange' => null,
+                    'failed_routing_key' => null,
+                    'quorum' => null,
+                ],
+            ],
+
+            'worker' => 'default',
+
+        ]);
         $app['config']->set('queue.connections.rabbitmq-with-quorum-options', [
             'driver' => 'rabbitmq',
             'queue' => 'order',
-            'connection' => AMQPLazyConnection::class,
+            'connection' => 'default',
 
             'hosts' => [
                 [
@@ -161,11 +200,9 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
-     * @return mixed
-     *
      * @throws Exception
      */
-    protected function callMethod($object, string $method, array $parameters = [])
+    protected function callMethod($object, string $method, array $parameters = []): mixed
     {
         try {
             $className = get_class($object);
@@ -178,5 +215,23 @@ abstract class TestCase extends BaseTestCase
         $method->setAccessible(true);
 
         return $method->invokeArgs($object, $parameters);
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function callProperty($object, string $property): mixed
+    {
+        try {
+            $className = get_class($object);
+            $reflection = new ReflectionClass($className);
+        } catch (ReflectionException $e) {
+            throw new Exception($e->getMessage());
+        }
+
+        $property = $reflection->getProperty($property);
+        $property->setAccessible(true);
+
+        return $property->getValue($object);
     }
 }
