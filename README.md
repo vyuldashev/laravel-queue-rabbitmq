@@ -262,6 +262,31 @@ class RabbitMQJob extends BaseJob
 }
 ```
 
+If you want to handle raw message, not in JSON format or without 'job' key in JSON, you should add stub for `getName` method:
+```php
+<?php
+
+namespace App\Queue\Jobs;
+
+use Illuminate\Support\Facades\Log;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob as BaseJob;
+
+class RabbitMQJob extends BaseJob
+{
+    public function fire()
+    {
+        $anyMessage = $this->getRawBody();
+        Log::info($anyMessage);
+
+        $this->delete();
+    }
+
+    public function getName()
+    {
+        return '';
+    }
+}
+
 ### Use your own Connection
 
 You can extend the built-in `PhpAmqpLib\Connection\AMQPStreamConnection::class`
