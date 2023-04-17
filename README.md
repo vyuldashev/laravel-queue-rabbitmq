@@ -286,6 +286,7 @@ class RabbitMQJob extends BaseJob
         return '';
     }
 }
+```
 
 ### Use your own Connection
 
