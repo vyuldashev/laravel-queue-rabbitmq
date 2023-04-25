@@ -19,7 +19,8 @@ All notable changes to this project will be documented in this file.
   created. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
 - Keep track of declared queue's within RabbitMQ. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
 - Implemented the 'rest' option to the consumer [#530](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/530)
-- Added abbility to reconnect to RabbitMQ, by inserting a Trait into own `RabbitMQQueue:class` [#530](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/530)
+- Added ability to reconnect to RabbitMQ, by creating your
+  own `RabbitMQQueue:class` [#531](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/531)
 
 ## [13.2.0](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v13.1.0...13.2.0)
 
