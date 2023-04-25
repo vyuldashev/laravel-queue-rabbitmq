@@ -151,8 +151,7 @@ by adding extra options.
 ### Horizon support
 
 Starting with 8.0, this package supports [Laravel Horizon](https://laravel.com/docs/horizon) out of the box. Firstly,
-install
-Horizon and then set `RABBITMQ_WORKER` to `horizon`.
+install Horizon and then set `RABBITMQ_WORKER` to `horizon`.
 
 Horizon is depending on events dispatched by the worker.
 These events inform Horizon what was done with the message/job.
@@ -320,7 +319,7 @@ If you want to use your own `RabbitMQQueue::class` this is possible by
 extending `VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue`.
 and inform laravel to use your class by setting `RABBITMQ_WORKER` to `\App\Queue\RabbitMQQueue::class`.
 
-> Note: Worker classes **must** extend ``VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue``
+> Note: Worker classes **must** extend `VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue`
 
 ```php
 'connections' => [
