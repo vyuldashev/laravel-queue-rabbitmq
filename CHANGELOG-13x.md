@@ -2,18 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v13.2.0...master)
+## [unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v13.3.0...master)
 
 ## [13.3.0](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v13.2.0...13.3.0)
 
-- Refactor the creation of RabbitMQ Connection and QueueAPI. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
-- Added configuration object as single dependency for RabbitMQQueue in constructor. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
-- Fix method getExchangeType, not throwing an exception. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
-- Separating the apilogic from the actual publishing to RabbitMQ. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
+- Refactor the creation of RabbitMQ Connection and
+  QueueAPI. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
+- Added configuration object as single dependency for RabbitMQQueue in
+  constructor. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
+- Fix method getExchangeType, not throwing an
+  exception. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
+- Separating the api logic from the actual publishing to
+  RabbitMQ. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
 - Added a reconnect method. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
-- Fix the connection and channel not being fully lazy, when QueueAPI was created. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
+- Fix the connection and channel not being fully lazy, when QueueAPI was
+  created. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
 - Keep track of declared queue's within RabbitMQ. [#528](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/528)
 - Implemented the 'rest' option to the consumer [#530](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/530)
+- Added abbility to reconnect to RabbitMQ, by inserting a Trait into own `RabbitMQQueue:class` [#530](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/530)
 
 ## [13.2.0](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v13.1.0...13.2.0)
 
@@ -27,7 +33,8 @@ All notable changes to this project will be documented in this file.
 
 ## [13.0.1 (2022-09-16)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v13.0.0...v13.0.1)
 
-- Add $dispatchAfterCommit when running via Horizon [#484](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/484)
+- Add $dispatchAfterCommit when running via
+  Horizon [#484](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/484)
 
 ## [13.0.0 (2022-09-15)](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v12.0.1...v13.0.0)
 
