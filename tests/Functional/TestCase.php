@@ -197,19 +197,6 @@ abstract class TestCase extends BaseTestCase
             'worker' => 'default',
 
         ]);
-        $app['config']->set('queue.connections.rabbitmq-for-octane', [
-            'driver' => 'rabbitmq',
-            'hosts' => [
-                [
-                    'host' => getenv('HOST'),
-                    'port' => getenv('PORT'),
-                    'vhost' => '/',
-                    'user' => 'guest',
-                    'password' => 'guest',
-                ],
-            ],
-            'worker' => 'octane',
-        ]);
     }
 
     /**

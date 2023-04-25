@@ -48,26 +48,6 @@ abstract class TestCase extends BaseTestCase
             'worker' => 'default',
 
         ]);
-        $app['config']->set('queue.connections.octane', [
-            'driver' => 'rabbitmq',
-            'queue' => 'default',
-            'connection' => AMQPLazyConnection::class,
-
-            'hosts' => [
-                [
-                    'host' => getenv('HOST'),
-                    'port' => getenv('PORT'),
-                    'vhost' => '/',
-                    'user' => 'guest',
-                    'password' => 'guest',
-                ],
-            ],
-
-            'options' => [],
-
-            'worker' => 'octane',
-
-        ]);
     }
 
     protected function connection(string $name = null): RabbitMQQueue
