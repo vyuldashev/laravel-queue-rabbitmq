@@ -15,7 +15,8 @@ class QueueTest extends TestCase
         parent::setUp();
 
         $this->withoutExceptionHandling([
-            AMQPChannelClosedException::class, AMQPConnectionClosedException::class, AMQPProtocolChannelException::class,
+            AMQPChannelClosedException::class, AMQPConnectionClosedException::class,
+            AMQPProtocolChannelException::class,
         ]);
     }
 
@@ -38,25 +39,5 @@ class QueueTest extends TestCase
 
         $this->expectException(AMQPChannelClosedException::class);
         $queue->push(new TestJob());
-    }
-
-    public function testReconnect(): void
-    {
-        $this->markTestSkipped();
-
-        $queue = $this->connection('octane');
-
-        $queue->push(new TestJob());
-        sleep(1);
-        $this->assertSame(1, $queue->size());
-
-        // close connection
-        $queue->getConnection()->close();
-        $this->assertFalse($queue->getConnection()->isConnected());
-
-        $queue->push(new TestJob());
-        sleep(1);
-        $this->assertTrue($queue->getConnection()->isConnected());
-        $this->assertSame(2, $queue->size());
     }
 }
