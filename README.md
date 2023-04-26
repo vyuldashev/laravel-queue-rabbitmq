@@ -513,6 +513,7 @@ If for some reason you don't want the connection lazy you can turn it off by set
 
 Starting with 13.3.0, this package supports [Laravel Octane](https://laravel.com/docs/octane) out of the box.
 Firstly, install Octane and don't forget to warm 'rabbitmq' connection in the octane config.
+> See: https://github.com/vyuldashev/laravel-queue-rabbitmq/issues/460#issuecomment-1469851667
 
 ## Laravel Usage
 
