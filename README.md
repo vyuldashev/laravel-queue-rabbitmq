@@ -263,7 +263,7 @@ class RabbitMQJob extends BaseJob
 }
 ```
 
-If you want to handle raw message, not in JSON format or without 'job' key in JSON, 
+If you want to handle raw message, not in JSON format or without 'job' key in JSON,
 you should add stub for `getName` method:
 
 ```php
@@ -342,7 +342,6 @@ and inform laravel to use your class by setting `RABBITMQ_WORKER` to `\App\Queue
 namespace App\Queue;
 
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue as BaseRabbitMQQueue;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\ReconnectTrait;
 
 class RabbitMQQueue extends BaseRabbitMQQueue
 {
@@ -362,8 +361,9 @@ You can override the publishing and the createChannel methods.
 
 namespace App\Queue;
 
+use PhpAmqpLib\Exception\AMQPChannelClosedException;
+use PhpAmqpLib\Exception\AMQPConnectionClosedException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue as BaseRabbitMQQueue;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\ReconnectTrait;
 
 class RabbitMQQueue extends BaseRabbitMQQueue
 {
