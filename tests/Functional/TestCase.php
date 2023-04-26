@@ -258,9 +258,11 @@ abstract class TestCase extends BaseTestCase
         $this->assertTrue($queue->getConnection()->isConnected());
         $this->assertSame($channel, $this->callProperty($queue, 'channel'));
 
-        // reconnect
+        // close
         $queue->getConnection()->close();
         $this->assertFalse($queue->getConnection()->isConnected());
+
+        // reconnect
         $this->callMethod($queue, 'reconnect');
         $this->assertTrue($queue->getConnection()->isConnected());
         $this->assertTrue($queue->getChannel()->is_open());
