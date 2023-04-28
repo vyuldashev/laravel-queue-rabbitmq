@@ -149,8 +149,9 @@ by adding extra options.
 ```
 
 ### Horizon support
-Starting with 8.0, this package supports [Laravel Horizon](http://horizon.laravel.com) out of the box. Firstly, install
-Horizon and then set `RABBITMQ_WORKER` to `horizon`.
+
+Starting with 8.0, this package supports [Laravel Horizon](https://laravel.com/docs/horizon) out of the box. Firstly,
+install Horizon and then set `RABBITMQ_WORKER` to `horizon`.
 
 Horizon is depending on events dispatched by the worker.
 These events inform Horizon what was done with the message/job.
@@ -262,7 +263,9 @@ class RabbitMQJob extends BaseJob
 }
 ```
 
-If you want to handle raw message, not in JSON format or without 'job' key in JSON, you should add stub for `getName` method:
+If you want to handle raw message, not in JSON format or without 'job' key in JSON,
+you should add stub for `getName` method:
+
 ```php
 <?php
 
@@ -308,6 +311,93 @@ An example for the config:
 
     // ...    
 ],
+```
+
+### Use your own Worker class
+
+If you want to use your own `RabbitMQQueue::class` this is possible by
+extending `VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue`.
+and inform laravel to use your class by setting `RABBITMQ_WORKER` to `\App\Queue\RabbitMQQueue::class`.
+
+> Note: Worker classes **must** extend `VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue`
+
+```php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        /* Set to a class if you wish to use your own. */
+       'worker' => \App\Queue\RabbitMQQueue::class,
+    ],
+
+    // ...    
+],
+```
+
+```php
+<?php
+
+namespace App\Queue;
+
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue as BaseRabbitMQQueue;
+
+class RabbitMQQueue extends BaseRabbitMQQueue
+{
+    // ...
+}
+```
+
+**For Example: A reconnect implementation.**
+
+If you want to reconnect to RabbitMQ, if the connection is dead.
+You can override the publishing and the createChannel methods.
+
+> Note: this is not best practice, it is an example.
+
+```php
+<?php
+
+namespace App\Queue;
+
+use PhpAmqpLib\Exception\AMQPChannelClosedException;
+use PhpAmqpLib\Exception\AMQPConnectionClosedException;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue as BaseRabbitMQQueue;
+
+class RabbitMQQueue extends BaseRabbitMQQueue
+{
+
+    protected function publishBasic($msg, $exchange = '', $destination = '', $mandatory = false, $immediate = false, $ticket = null): void
+    {
+        try {
+            parent::publishBasic($msg, $exchange, $destination, $mandatory, $immediate, $ticket);
+        } catch (AMQPConnectionClosedException|AMQPChannelClosedException) {
+            $this->reconnect();
+            parent::publishBasic($msg, $exchange, $destination, $mandatory, $immediate, $ticket);
+        }
+    }
+
+    protected function publishBatch($jobs, $data = '', $queue = null): void
+    {
+        try {
+            parent::publishBatch($jobs, $data, $queue);
+        } catch (AMQPConnectionClosedException|AMQPChannelClosedException) {
+            $this->reconnect();
+            parent::publishBatch($jobs, $data, $queue);
+        }
+    }
+
+    protected function createChannel(): AMQPChannel
+    {
+        try {
+            return parent::createChannel();
+        } catch (AMQPConnectionClosedException) {
+            $this->reconnect();
+            return parent::createChannel();
+        }
+    }
+}
 ```
 
 ### Default Queue
@@ -419,10 +509,16 @@ If for some reason you don't want the connection lazy you can turn it off by set
 ],
 ```
 
+### Octane support
+
+Starting with 13.3.0, this package supports [Laravel Octane](https://laravel.com/docs/octane) out of the box.
+Firstly, install Octane and don't forget to warm 'rabbitmq' connection in the octane config.
+> See: https://github.com/vyuldashev/laravel-queue-rabbitmq/issues/460#issuecomment-1469851667
+
 ## Laravel Usage
 
-Once you completed the configuration you can use the Laravel Queue API. If you used other queue drivers you do not need to
-change anything else. If you do not know how to use the Queue API, please refer to the official Laravel
+Once you completed the configuration you can use the Laravel Queue API. If you used other queue drivers you do not
+need to change anything else. If you do not know how to use the Queue API, please refer to the official Laravel
 documentation: http://laravel.com/docs/queues
 
 ## Lumen Usage

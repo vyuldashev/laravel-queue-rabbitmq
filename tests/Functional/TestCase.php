@@ -3,6 +3,7 @@
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional;
 
 use Exception;
+use PhpAmqpLib\Channel\AMQPChannel;
 use ReflectionClass;
 use ReflectionException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCase as BaseTestCase;
@@ -233,5 +234,37 @@ abstract class TestCase extends BaseTestCase
         $property->setAccessible(true);
 
         return $property->getValue($object);
+    }
+
+    public function testConnectChannel(): void
+    {
+        $queue = $this->connection();
+        $this->assertFalse($queue->getConnection()->isConnected());
+
+        /** @var AMQPChannel $channel */
+        $channel = $this->callMethod($queue, 'getChannel');
+        $this->assertTrue($queue->getConnection()->isConnected());
+        $this->assertSame($channel, $this->callProperty($queue, 'channel'));
+        $this->assertTrue($channel->is_open());
+    }
+
+    public function testReconnect(): void
+    {
+        $queue = $this->connection();
+        $this->assertFalse($queue->getConnection()->isConnected());
+
+        // connect
+        $channel = $this->callMethod($queue, 'getChannel');
+        $this->assertTrue($queue->getConnection()->isConnected());
+        $this->assertSame($channel, $this->callProperty($queue, 'channel'));
+
+        // close
+        $queue->getConnection()->close();
+        $this->assertFalse($queue->getConnection()->isConnected());
+
+        // reconnect
+        $this->callMethod($queue, 'reconnect');
+        $this->assertTrue($queue->getConnection()->isConnected());
+        $this->assertTrue($queue->getChannel()->is_open());
     }
 }
