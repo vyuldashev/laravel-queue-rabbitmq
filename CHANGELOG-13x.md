@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v13.3.0...master)
 
+## [13.3.1](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v13.3.0...13.3.3)
+- Fix a bug when no job / message is available on the queue initially [#543](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/543)
+
 ## [13.3.0](https://github.com/vyuldashev/laravel-queue-rabbitmq/compare/v13.2.0...13.3.0)
 
 - Refactor the creation of RabbitMQ Connection and
