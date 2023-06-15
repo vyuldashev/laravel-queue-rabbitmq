@@ -183,7 +183,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
      */
     public function bulk($jobs, $data = '', $queue = null): void
     {
-        $this->publishBatch($jobs, $queue, $data);
+        $this->publishBatch($jobs, $data, $queue);
     }
 
     /**
