@@ -18,7 +18,7 @@ class RabbitMQQueue extends BaseRabbitMQQueue
     /**
      * The job that last pushed to queue via the "push" method.
      */
-    protected string|object $lastPushed;
+    protected string|object|null $lastPushed = null;
 
     /**
      * Get the number of queue jobs that are ready to process.
@@ -62,7 +62,22 @@ class RabbitMQQueue extends BaseRabbitMQQueue
      */
     public function later($delay, $job, $data = '', $queue = null): mixed
     {
-        $payload = (new JobPayload($this->createPayload($job, $data)))->prepare($job)->value;
+        $payload = (new JobPayload($this->createPayload($job, $this->getQueue($queue), $data)))->prepare($job)->value;
+
+        // Support enqueueUsing, events are fired in enqueueUsing
+        if (method_exists($this, 'enqueueUsing')) {
+            return $this->enqueueUsing(
+                $job,
+                $payload,
+                $queue,
+                $delay,
+                function ($payload, $queue, $delay) {
+                    return tap(parent::laterRaw($delay, $payload, $queue), function () use ($payload, $queue) {
+                        $this->event($this->getQueue($queue), new JobPushed($payload));
+                    });
+                }
+            );
+        }
 
         return tap(parent::laterRaw($delay, $payload, $queue), function () use ($payload, $queue): void {
             $this->event($this->getQueue($queue), new JobPushed($payload));
