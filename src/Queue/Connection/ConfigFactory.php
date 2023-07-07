@@ -37,6 +37,7 @@ class ConfigFactory
 
             self::getHostFromConfig($connectionConfig, $config);
             self::getHeartbeatFromConfig($connectionConfig, $config);
+            self::getNetworkProtocolFromConfig($connectionConfig, $config);
         });
     }
 
@@ -88,6 +89,13 @@ class ConfigFactory
 
         if (is_numeric($heartbeat) && intval($heartbeat) > 0) {
             $connectionConfig->setHeartbeat((int) $heartbeat);
+        }
+    }
+
+    protected static function getNetworkProtocolFromConfig(AMQPConnectionConfig $connectionConfig, array $config): void
+    {
+        if ($networkProtocol = Arr::get($config, self::CONFIG_OPTIONS.'.network_protocol')) {
+            $connectionConfig->setNetworkProtocol($networkProtocol);
         }
     }
 }
