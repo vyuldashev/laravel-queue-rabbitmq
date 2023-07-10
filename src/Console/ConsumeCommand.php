@@ -11,7 +11,7 @@ class ConsumeCommand extends WorkCommand
     protected $signature = 'rabbitmq:consume
                             {connection? : The name of the queue connection to work}
                             {--name=default : The name of the consumer}
-                            {--queue= : The names of the queues to work}
+                            {--queue= : The name of the queue to work. Please notice that there is no support for multiple queues}
                             {--once : Only process the next job on the queue}
                             {--stop-when-empty : Stop when the queue is empty}
                             {--delay=0 : The number of seconds to delay failed jobs (Deprecated)}
