@@ -48,7 +48,7 @@ class RabbitMQQueue extends BaseRabbitMQQueue
      */
     public function pushRaw($payload, $queue = null, array $options = []): int|string|null
     {
-        $payload = (new JobPayload($payload))->prepare($this->lastPushed)->value;
+        $payload = (new JobPayload($payload))->prepare($this->lastPushed ?? null)->value;
 
         return tap(parent::pushRaw($payload, $queue, $options), function () use ($queue, $payload): void {
             $this->event($this->getQueue($queue), new JobPushed($payload));
