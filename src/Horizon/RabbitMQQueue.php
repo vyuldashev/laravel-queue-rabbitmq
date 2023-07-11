@@ -18,7 +18,7 @@ class RabbitMQQueue extends BaseRabbitMQQueue
     /**
      * The job that last pushed to queue via the "push" method.
      */
-    protected string|object|null $lastPushed = null;
+    protected string|object $lastPushed = '';
 
     /**
      * Get the number of queue jobs that are ready to process.
