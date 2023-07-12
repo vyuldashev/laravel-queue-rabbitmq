@@ -94,7 +94,7 @@ class ConfigFactory
 
     protected static function getNetworkProtocolFromConfig(AMQPConnectionConfig $connectionConfig, array $config): void
     {
-        if ($networkProtocol = Arr::get($config, self::CONFIG_OPTIONS.'.network_protocol')) {
+        if ($networkProtocol = Arr::get($config, 'network_protocol')) {
             $connectionConfig->setNetworkProtocol($networkProtocol);
         }
     }

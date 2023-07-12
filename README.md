@@ -513,6 +513,7 @@ If for some reason you don't want the connection lazy you can turn it off by set
 
 By default, the network protocol used for connection is tcp.
 If for some reason you want to use another network protocol, you can add the extra value in your config options.
+Available protocols : `tcp`, `ssl`, `tls`
 
 ```php
 'connections' => [
@@ -521,11 +522,7 @@ If for some reason you want to use another network protocol, you can add the ext
     'rabbitmq' => [
         // ...
 
-        'options' => [
-            // ...
-
-            'network_protocol' => 'network wanted',
-        ],
+        'network_protocol' => 'tcp',
     ],
 
     // ...    
