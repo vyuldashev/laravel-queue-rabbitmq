@@ -509,6 +509,26 @@ If for some reason you don't want the connection lazy you can turn it off by set
 ],
 ```
 
+### Network Protocol
+
+By default, the network protocol used for connection is tcp.
+If for some reason you want to use another network protocol, you can add the extra value in your config options.
+Available protocols : `tcp`, `ssl`, `tls`
+
+```php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        'network_protocol' => 'tcp',
+    ],
+
+    // ...    
+],
+```
+
 ### Octane support
 
 Starting with 13.3.0, this package supports [Laravel Octane](https://laravel.com/docs/octane) out of the box.
