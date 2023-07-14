@@ -3,10 +3,12 @@
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Feature;
 
 use Illuminate\Queue\QueueManager;
+use PhpAmqpLib\Connection\AMQPConnectionConfig;
 use PhpAmqpLib\Connection\AMQPLazyConnection;
 use PhpAmqpLib\Connection\AMQPSSLConnection;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks\TestSSLConnection;
 
 class ConnectorTest extends \VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCase
 {
@@ -137,5 +139,48 @@ class ConnectorTest extends \VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCa
         $this->assertInstanceOf(AMQPSSLConnection::class, $connection->getConnection());
         $this->assertTrue($connection->getConnection()->isConnected());
         $this->assertTrue($connection->getChannel()->is_open());
+    }
+
+    public function testNoVerificationSslConnection(): void
+    {
+        $this->app['config']->set('queue.connections.rabbitmq', [
+            'driver' => 'rabbitmq',
+            'queue' => env('RABBITMQ_QUEUE', 'default'),
+            'connection' => TestSSLConnection::class,
+            'secure' => true,
+
+            'hosts' => [
+                [
+                    'host' => getenv('HOST'),
+                    'port' => getenv('PORT_SSL'),
+                    'user' => 'guest',
+                    'password' => 'guest',
+                    'vhost' => '/',
+                ],
+            ],
+
+            'options' => [
+                'ssl_options' => [
+                    'cafile' => getenv('RABBITMQ_SSL_CAFILE'),
+                    'local_cert' => null,
+                    'local_key' => null,
+                    'verify_peer' => false,
+                    'passphrase' => null,
+                ],
+            ],
+
+            'worker' => env('RABBITMQ_WORKER', 'default'),
+        ]);
+
+        /** @var QueueManager $queue */
+        $queue = $this->app['queue'];
+
+        /** @var RabbitMQQueue $connection */
+        $connection = $queue->connection('rabbitmq');
+        $this->assertInstanceOf(RabbitMQQueue::class, $connection);
+        $this->assertInstanceOf(AMQPSSLConnection::class, $connection->getConnection());
+        /** @var AMQPConnectionConfig */
+        $config = $connection->getConnection()->getConfig();
+        $this->assertFalse($config->getSslVerify());
     }
 }

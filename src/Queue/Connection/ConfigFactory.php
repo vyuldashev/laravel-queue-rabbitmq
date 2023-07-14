@@ -75,7 +75,8 @@ class ConfigFactory
         if ($key = Arr::get($sslConfig, 'local_key')) {
             $connectionConfig->setSslKey($key);
         }
-        if ($verifyPeer = Arr::get($sslConfig, 'verify_peer')) {
+        if (Arr::has($sslConfig, 'verify_peer')) {
+            $verifyPeer = Arr::get($sslConfig, 'verify_peer');
             $connectionConfig->setSslVerify($verifyPeer);
         }
         if ($passphrase = Arr::get($sslConfig, 'passphrase')) {
