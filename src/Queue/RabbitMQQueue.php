@@ -620,12 +620,19 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
      */
     protected function getDelayQueueArguments(string $destination, int $ttl): array
     {
-        return [
+
+        $arguments = [
             'x-dead-letter-exchange' => $this->getExchange(),
             'x-dead-letter-routing-key' => $this->getRoutingKey($destination),
             'x-message-ttl' => $ttl,
             'x-expires' => $ttl * 2,
         ];
+
+        if ($this->getConfig()->isQuorum()) {
+            $arguments['x-queue-type'] = 'quorum';
+        }
+
+        return $arguments;
     }
 
     /**
