@@ -141,6 +141,7 @@ class ConnectorTest extends \VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCa
         $this->assertTrue($connection->getChannel()->is_open());
     }
 
+    // Test to validate ssl connection params
     public function testNoVerificationSslConnection(): void
     {
         $this->app['config']->set('queue.connections.rabbitmq', [
