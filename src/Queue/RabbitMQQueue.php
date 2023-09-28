@@ -303,8 +303,6 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
 
     /**
      * Gets a queue/destination, by default the queue option set on the connection.
-     *
-     * @param  null  $queue
      */
     public function getQueue($queue = null): string
     {

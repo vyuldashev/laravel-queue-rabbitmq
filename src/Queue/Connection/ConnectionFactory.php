@@ -170,7 +170,7 @@ class ConnectionFactory
             'ciphers' => $config->getSslCiphers(),
             'security_level' => $config->getSslSecurityLevel(),
         ], static function ($value) {
-            return null !== $value;
+            return $value !== null;
         });
     }
 
