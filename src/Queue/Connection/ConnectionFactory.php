@@ -159,9 +159,14 @@ class ConnectionFactory
 
     protected static function getSslOptions(AMQPConnectionConfig $config): array
     {
+        $path = null;
+        if (method_exists($config, 'getSslCaPath')) {
+            $path = $config->getSslCaPath();
+        }
+
         return array_filter([
             'cafile' => $config->getSslCaCert(),
-            'capath' => $config->getSslCaPath(),
+            'capath' => $path,
             'local_cert' => $config->getSslCert(),
             'local_pk' => $config->getSslKey(),
             'verify_peer' => $config->getSslVerify(),
