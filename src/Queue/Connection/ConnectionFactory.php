@@ -163,6 +163,10 @@ class ConnectionFactory
         if (method_exists($config, 'getSslCaPath')) {
             $path = $config->getSslCaPath();
         }
+        $securityLevel = null;
+        if (method_exists($config, 'getSslSecurityLevel')) {
+            $securityLevel = $config->getSslSecurityLevel();
+        }
 
         return array_filter([
             'cafile' => $config->getSslCaCert(),
@@ -173,7 +177,7 @@ class ConnectionFactory
             'verify_peer_name' => $config->getSslVerifyName(),
             'passphrase' => $config->getSslPassPhrase(),
             'ciphers' => $config->getSslCiphers(),
-            'security_level' => $config->getSslSecurityLevel(),
+            'security_level' => $securityLevel,
         ], static function ($value) {
             return $value !== null;
         });
