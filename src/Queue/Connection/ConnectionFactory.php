@@ -91,7 +91,7 @@ class ConnectionFactory
             $config->getVhost(),
             $config->isInsist(),
             $config->getLoginMethod(),
-            $config->getLoginResponse() ?? null,
+            $config->getLoginResponse(),
             $config->getLocale(),
             $config->getReadTimeout(),
             $config->isKeepalive(),
@@ -159,25 +159,16 @@ class ConnectionFactory
 
     protected static function getSslOptions(AMQPConnectionConfig $config): array
     {
-        $path = null;
-        if (method_exists($config, 'getSslCaPath')) {
-            $path = $config->getSslCaPath();
-        }
-        $securityLevel = null;
-        if (method_exists($config, 'getSslSecurityLevel')) {
-            $securityLevel = $config->getSslSecurityLevel();
-        }
-
         return array_filter([
             'cafile' => $config->getSslCaCert(),
-            'capath' => $path,
+            'capath' => $config->getSslCaPath(),
             'local_cert' => $config->getSslCert(),
             'local_pk' => $config->getSslKey(),
             'verify_peer' => $config->getSslVerify(),
             'verify_peer_name' => $config->getSslVerifyName(),
             'passphrase' => $config->getSslPassPhrase(),
             'ciphers' => $config->getSslCiphers(),
-            'security_level' => $securityLevel,
+            'security_level' => $config->getSslSecurityLevel(),
         ], static function ($value) {
             return $value !== null;
         });
