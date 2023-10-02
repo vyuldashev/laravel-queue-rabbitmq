@@ -91,7 +91,7 @@ class ConnectionFactory
             $config->getVhost(),
             $config->isInsist(),
             $config->getLoginMethod(),
-            $config->getLoginResponse(),
+            $config->getLoginResponse() ?? null,
             $config->getLocale(),
             $config->getReadTimeout(),
             $config->isKeepalive(),
