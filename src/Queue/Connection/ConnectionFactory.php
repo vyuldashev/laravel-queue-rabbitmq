@@ -202,7 +202,7 @@ class ConnectionFactory
 
     protected static function assertExtendedOf($connection, string $abstract): void
     {
-        if (! is_subclass_of($connection, $abstract)) {
+        if ($connection !== $abstract && ! is_subclass_of($connection, $abstract)) {
             throw new AMQPLogicException(sprintf('The connection must extend: %s', class_basename($abstract)));
         }
     }
