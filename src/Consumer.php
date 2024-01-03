@@ -65,7 +65,6 @@ class Consumer extends Worker
      *
      * @param  string  $connectionName
      * @param  string  $queue
-     * @param  WorkerOptions  $options
      * @return int
      *
      * @throws Throwable
@@ -88,7 +87,7 @@ class Consumer extends Worker
         $this->channel->basic_qos(
             $this->prefetchSize,
             $this->prefetchCount,
-            null
+            false
         );
 
         $jobClass = $connection->getJobClass();
@@ -126,6 +125,10 @@ class Consumer extends Worker
                 if ($this->supportsAsyncSignals()) {
                     $this->resetTimeoutHandler();
                 }
+
+                if ($options->rest > 0) {
+                    $this->sleep($options->rest);
+                }
             },
             null,
             $arguments
@@ -147,7 +150,7 @@ class Consumer extends Worker
             } catch (AMQPRuntimeException $exception) {
                 $this->exceptions->report($exception);
 
-                $this->kill(1);
+                $this->kill(self::EXIT_ERROR, $options);
             } catch (Exception|Throwable $exception) {
                 $this->exceptions->report($exception);
 
@@ -171,7 +174,7 @@ class Consumer extends Worker
             );
 
             if (! is_null($status)) {
-                return $this->stop($status);
+                return $this->stop($status, $options);
             }
 
             $this->currentJob = null;
@@ -181,10 +184,8 @@ class Consumer extends Worker
     /**
      * Determine if the daemon should process on this iteration.
      *
-     * @param  WorkerOptions  $options
      * @param  string  $connectionName
      * @param  string  $queue
-     * @return bool
      */
     protected function daemonShouldRun(WorkerOptions $options, $connectionName, $queue): bool
     {
@@ -195,14 +196,15 @@ class Consumer extends Worker
      * Stop listening and bail out of the script.
      *
      * @param  int  $status
+     * @param  WorkerOptions|null  $options
      * @return int
      */
-    public function stop($status = 0): int
+    public function stop($status = 0, $options = null)
     {
         // Tell the server you are going to stop consuming.
         // It will finish up the last message and not send you any more.
         $this->channel->basic_cancel($this->consumerTag, false, true);
 
-        return parent::stop($status);
+        return parent::stop($status, $options);
     }
 }

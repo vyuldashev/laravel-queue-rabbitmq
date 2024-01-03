@@ -5,6 +5,7 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Feature;
 use Illuminate\Queue\QueueManager;
 use PhpAmqpLib\Connection\AMQPLazyConnection;
 use PhpAmqpLib\Connection\AMQPSSLConnection;
+use PhpAmqpLib\Connection\AMQPStreamConnection;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class ConnectorTest extends \VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCase
@@ -47,8 +48,52 @@ class ConnectorTest extends \VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCa
 
         $this->assertInstanceOf(RabbitMQQueue::class, $connection);
         $this->assertInstanceOf(AMQPLazyConnection::class, $connection->getConnection());
-        $this->assertTrue($connection->getConnection()->isConnected());
+        $this->assertFalse($connection->getConnection()->isConnected());
         $this->assertTrue($connection->getChannel()->is_open());
+        $this->assertTrue($connection->getConnection()->isConnected());
+    }
+
+    public function testLazyStreamConnection(): void
+    {
+        $this->app['config']->set('queue.connections.rabbitmq', [
+            'driver' => 'rabbitmq',
+            'queue' => env('RABBITMQ_QUEUE', 'default'),
+            'connection' => 'default',
+
+            'hosts' => [
+                [
+                    'host' => getenv('HOST'),
+                    'port' => getenv('PORT'),
+                    'user' => 'guest',
+                    'password' => 'guest',
+                    'vhost' => '/',
+                ],
+            ],
+
+            'options' => [
+                'ssl_options' => [
+                    'cafile' => env('RABBITMQ_SSL_CAFILE', null),
+                    'local_cert' => env('RABBITMQ_SSL_LOCALCERT', null),
+                    'local_key' => env('RABBITMQ_SSL_LOCALKEY', null),
+                    'verify_peer' => env('RABBITMQ_SSL_VERIFY_PEER', true),
+                    'passphrase' => env('RABBITMQ_SSL_PASSPHRASE', null),
+                ],
+            ],
+
+            'worker' => env('RABBITMQ_WORKER', 'default'),
+        ]);
+
+        /** @var QueueManager $queue */
+        $queue = $this->app['queue'];
+
+        /** @var RabbitMQQueue $connection */
+        $connection = $queue->connection('rabbitmq');
+
+        $this->assertInstanceOf(RabbitMQQueue::class, $connection);
+        $this->assertInstanceOf(AMQPStreamConnection::class, $connection->getConnection());
+        $this->assertFalse($connection->getConnection()->isConnected());
+        $this->assertTrue($connection->getChannel()->is_open());
+        $this->assertTrue($connection->getConnection()->isConnected());
     }
 
     public function testSslConnection(): void

@@ -3,7 +3,6 @@ RabbitMQ Queue driver for Laravel
 [![Latest Stable Version](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/v/stable?format=flat-square)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq)
 [![Build Status](https://github.com/vyuldashev/laravel-queue-rabbitmq/workflows/Tests/badge.svg)](https://github.com/vyuldashev/laravel-queue-rabbitmq/actions)
 [![Total Downloads](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/downloads?format=flat-square)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq)
-[![StyleCI](https://styleci.io/repos/14976752/shield)](https://styleci.io/repos/14976752)
 [![License](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/license?format=flat-square)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq)
 
 ## Support Policy
@@ -24,7 +23,11 @@ composer require vladimir-yuldashev/laravel-queue-rabbitmq
 
 The package will automatically register itself.
 
+### Configuration
+
 Add connection to `config/queue.php`:
+
+> This is the minimal config for the rabbitMQ connection/driver to work.
 
 ```php
 'connections' => [
@@ -33,9 +36,6 @@ Add connection to `config/queue.php`:
     'rabbitmq' => [
     
        'driver' => 'rabbitmq',
-       'queue' => env('RABBITMQ_QUEUE', 'default'),
-       'connection' => PhpAmqpLib\Connection\AMQPLazyConnection::class,
-   
        'hosts' => [
            [
                'host' => env('RABBITMQ_HOST', '127.0.0.1'),
@@ -44,36 +44,20 @@ Add connection to `config/queue.php`:
                'password' => env('RABBITMQ_PASSWORD', 'guest'),
                'vhost' => env('RABBITMQ_VHOST', '/'),
            ],
+           // ...
        ],
-   
-       'options' => [
-           'ssl_options' => [
-               'cafile' => env('RABBITMQ_SSL_CAFILE', null),
-               'local_cert' => env('RABBITMQ_SSL_LOCALCERT', null),
-               'local_key' => env('RABBITMQ_SSL_LOCALKEY', null),
-               'verify_peer' => env('RABBITMQ_SSL_VERIFY_PEER', true),
-               'passphrase' => env('RABBITMQ_SSL_PASSPHRASE', null),
-           ],
-           'queue' => [
-               'job' => VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob::class,
-           ],
-       ],
-   
-       /*
-        * Set to "horizon" if you wish to use Laravel Horizon.
-        */
-       'worker' => env('RABBITMQ_WORKER', 'default'),
-       'after_commit' => false,
+
+       // ...
     ],
 
     // ...    
 ],
 ```
 
-### Optional Config
+### Optional Queue Config
 
 Optionally add queue options to the config of a connection.
-Every queue created for this connection, get's the properties.
+Every queue created for this connection, gets the properties.
 
 When you want to prioritize messages when they were delayed, then this is possible by adding extra options.
 
@@ -100,13 +84,13 @@ When you want to prioritize messages when they were delayed, then this is possib
 ],
 ```
 
-When you want to publish messages against an exchange with routing-key's, then this is possible by adding extra options.
+When you want to publish messages against an exchange with routing-keys, then this is possible by adding extra options.
 
 - When the exchange is omitted, RabbitMQ will use the `amq.direct` exchange for the routing-key
 - When routing-key is omitted the routing-key by default is the `queue` name.
 - When using `%s` in the routing-key the queue_name will be substituted.
 
-> Note: when using exchange with routing-key, u probably create your queues with bindings yourself.
+> Note: when using an exchange with routing-key, you probably create your queues with bindings yourself.
 
 ```php
 'connections' => [
@@ -139,7 +123,7 @@ by adding extra options.
 - When routing-key is omitted, the routing-key by default the `queue` name is substituted with `'.failed'`.
 - When using `%s` in the routing-key the queue_name will be substituted.
 
-> Note: When using failed_job exchange with routing-key, u probably need to create your exchange/queue with bindings
+> Note: When using failed_job exchange with routing-key, you probably need to create your exchange/queue with bindings
 > yourself.
 
 ```php
@@ -164,6 +148,31 @@ by adding extra options.
 ],
 ```
 
+### Horizon support
+
+Starting with 8.0, this package supports [Laravel Horizon](https://laravel.com/docs/horizon) out of the box. Firstly,
+install Horizon and then set `RABBITMQ_WORKER` to `horizon`.
+
+Horizon is depending on events dispatched by the worker.
+These events inform Horizon what was done with the message/job.
+
+This Library supports Horizon, but in the config you have to inform Laravel to use the QueueApi compatible with horizon.
+
+```php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        /* Set to "horizon" if you wish to use Laravel Horizon. */
+       'worker' => env('RABBITMQ_WORKER', 'default'),
+    ],
+
+    // ...    
+],
+```
+
 ### Use your own RabbitMQJob class
 
 Sometimes you have to work with messages published by another application.  
@@ -171,7 +180,7 @@ Those messages probably won't respect Laravel's job payload schema.
 The problem with these messages is that, Laravel workers won't be able to determine the actual job or class to execute.
 
 You can extend the build-in `RabbitMQJob::class` and within the queue connection config, you can define your own class.
-When you specify an `job` key in the config, with your own class name, every message retrieved from the broker will get
+When you specify a `job` key in the config, with your own class name, every message retrieved from the broker will get
 wrapped by your own class.
 
 An example for the config:
@@ -254,16 +263,283 @@ class RabbitMQJob extends BaseJob
 }
 ```
 
+If you want to handle raw message, not in JSON format or without 'job' key in JSON,
+you should add stub for `getName` method:
+
+```php
+<?php
+
+namespace App\Queue\Jobs;
+
+use Illuminate\Support\Facades\Log;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob as BaseJob;
+
+class RabbitMQJob extends BaseJob
+{
+    public function fire()
+    {
+        $anyMessage = $this->getRawBody();
+        Log::info($anyMessage);
+
+        $this->delete();
+    }
+
+    public function getName()
+    {
+        return '';
+    }
+}
+```
+
+### Use your own Connection
+
+You can extend the built-in `PhpAmqpLib\Connection\AMQPStreamConnection::class`
+or `PhpAmqpLib\Connection\AMQPSLLConnection::class` and within the connection config, you can define your own class.
+When you specify a `connection` key in the config, with your own class name, every connection will use your own class.
+
+An example for the config:
+
+```php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        'connection' = > \App\Queue\Connection\MyRabbitMQConnection::class,
+    ],
+
+    // ...    
+],
+```
+
+### Use your own Worker class
+
+If you want to use your own `RabbitMQQueue::class` this is possible by
+extending `VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue`.
+and inform laravel to use your class by setting `RABBITMQ_WORKER` to `\App\Queue\RabbitMQQueue::class`.
+
+> Note: Worker classes **must** extend `VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue`
+
+```php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        /* Set to a class if you wish to use your own. */
+       'worker' => \App\Queue\RabbitMQQueue::class,
+    ],
+
+    // ...    
+],
+```
+
+```php
+<?php
+
+namespace App\Queue;
+
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue as BaseRabbitMQQueue;
+
+class RabbitMQQueue extends BaseRabbitMQQueue
+{
+    // ...
+}
+```
+
+**For Example: A reconnect implementation.**
+
+If you want to reconnect to RabbitMQ, if the connection is dead.
+You can override the publishing and the createChannel methods.
+
+> Note: this is not best practice, it is an example.
+
+```php
+<?php
+
+namespace App\Queue;
+
+use PhpAmqpLib\Exception\AMQPChannelClosedException;
+use PhpAmqpLib\Exception\AMQPConnectionClosedException;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue as BaseRabbitMQQueue;
+
+class RabbitMQQueue extends BaseRabbitMQQueue
+{
+
+    protected function publishBasic($msg, $exchange = '', $destination = '', $mandatory = false, $immediate = false, $ticket = null): void
+    {
+        try {
+            parent::publishBasic($msg, $exchange, $destination, $mandatory, $immediate, $ticket);
+        } catch (AMQPConnectionClosedException|AMQPChannelClosedException) {
+            $this->reconnect();
+            parent::publishBasic($msg, $exchange, $destination, $mandatory, $immediate, $ticket);
+        }
+    }
+
+    protected function publishBatch($jobs, $data = '', $queue = null): void
+    {
+        try {
+            parent::publishBatch($jobs, $data, $queue);
+        } catch (AMQPConnectionClosedException|AMQPChannelClosedException) {
+            $this->reconnect();
+            parent::publishBatch($jobs, $data, $queue);
+        }
+    }
+
+    protected function createChannel(): AMQPChannel
+    {
+        try {
+            return parent::createChannel();
+        } catch (AMQPConnectionClosedException) {
+            $this->reconnect();
+            return parent::createChannel();
+        }
+    }
+}
+```
+
+### Default Queue
+
+The connection does use a default queue with value 'default', when no queue is provided by laravel.
+It is possible to change te default queue by adding an extra parameter in the connection config.
+
+```php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+            
+        'queue' => env('RABBITMQ_QUEUE', 'default'),
+    ],
+
+    // ...    
+],
+```
+
+### Heartbeat
+
+By default, your connection will be created with a heartbeat setting of `0`.
+You can alter the heartbeat settings by changing the config.
+
+```php
+
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        'options' => [
+            // ...
+
+            'heartbeat' => 10,
+        ],
+    ],
+
+    // ...    
+],
+```
+
+### SSL Secure
+
+If you need a secure connection to rabbitMQ server(s), you will need to add these extra config options.
+
+```php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        'secure' = > true,
+        'options' => [
+            // ...
+
+            'ssl_options' => [
+                'cafile' => env('RABBITMQ_SSL_CAFILE', null),
+                'local_cert' => env('RABBITMQ_SSL_LOCALCERT', null),
+                'local_key' => env('RABBITMQ_SSL_LOCALKEY', null),
+                'verify_peer' => env('RABBITMQ_SSL_VERIFY_PEER', true),
+                'passphrase' => env('RABBITMQ_SSL_PASSPHRASE', null),
+            ],
+        ],
+    ],
+
+    // ...    
+],
+```
+
+### Events after Database commits
+
+To instruct Laravel workers to dispatch events after all database commits are completed.
+
+```php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        'after_commit' => true,
+    ],
+
+    // ...    
+],
+```
+
+### Lazy Connection
+
+By default, your connection will be created as a lazy connection.
+If for some reason you don't want the connection lazy you can turn it off by setting the following config.
+
+```php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        'lazy' = > false,
+    ],
+
+    // ...    
+],
+```
+
+### Network Protocol
+
+By default, the network protocol used for connection is tcp.
+If for some reason you want to use another network protocol, you can add the extra value in your config options.
+Available protocols : `tcp`, `ssl`, `tls`
+
+```php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        'network_protocol' => 'tcp',
+    ],
+
+    // ...    
+],
+```
+
+### Octane support
+
+Starting with 13.3.0, this package supports [Laravel Octane](https://laravel.com/docs/octane) out of the box.
+Firstly, install Octane and don't forget to warm 'rabbitmq' connection in the octane config.
+> See: https://github.com/vyuldashev/laravel-queue-rabbitmq/issues/460#issuecomment-1469851667
+
 ## Laravel Usage
 
-Once you completed the configuration you can use Laravel Queue API. If you used other queue drivers you do not need to
-change anything else. If you do not know how to use Queue API, please refer to the official Laravel
+Once you completed the configuration you can use the Laravel Queue API. If you used other queue drivers you do not
+need to change anything else. If you do not know how to use the Queue API, please refer to the official Laravel
 documentation: http://laravel.com/docs/queues
-
-## Laravel Horizon Usage
-
-Starting with 8.0, this package supports [Laravel Horizon](http://horizon.laravel.com) out of the box. Firstly, install
-Horizon and then set `RABBITMQ_WORKER` to `horizon`.
 
 ## Lumen Usage
 
@@ -277,17 +553,16 @@ $app->register(VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServic
 
 There are two ways of consuming messages.
 
-1. `queue:work` command which is Laravel's built-in command. This command utilizes `basic_get`.
+1. `queue:work` command which is Laravel's built-in command. This command utilizes `basic_get`. Use this if you want to consume multiple queues.
 
-2. `rabbitmq:consume` command which is provided by this package. This command utilizes `basic_consume` and is more
-   performant than `basic_get` by ~2x.
+2. `rabbitmq:consume` command which is provided by this package. This command utilizes `basic_consume` and is more performant than `basic_get` by ~2x, but does not support multiple queues.
 
 ## Testing
 
 Setup RabbitMQ using `docker-compose`:
 
 ```bash
-docker-compose up -d rabbitmq
+docker compose up -d
 ```
 
 To run the test suite you can use the following commands:
@@ -304,7 +579,7 @@ composer test:unit
 ```
 
 If you receive any errors from the style tests, you can automatically fix most,
-if not all of the issues with the following command:
+if not all the issues with the following command:
 
 ```bash
 composer fix:style

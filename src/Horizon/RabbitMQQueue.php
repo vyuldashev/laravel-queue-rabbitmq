@@ -17,20 +17,16 @@ class RabbitMQQueue extends BaseRabbitMQQueue
 {
     /**
      * The job that last pushed to queue via the "push" method.
-     *
-     * @var object|string
      */
-    protected $lastPushed;
+    protected string|object $lastPushed;
 
     /**
      * Get the number of queue jobs that are ready to process.
      *
-     * @param  string|null  $queue
-     * @return int
      *
      * @throws AMQPProtocolChannelException
      */
-    public function readyNow($queue = null): int
+    public function readyNow(string $queue = null): int
     {
         return $this->size($queue);
     }
@@ -47,10 +43,12 @@ class RabbitMQQueue extends BaseRabbitMQQueue
 
     /**
      * {@inheritdoc}
+     *
+     * @throws BindingResolutionException
      */
-    public function pushRaw($payload, $queue = null, array $options = [])
+    public function pushRaw($payload, $queue = null, array $options = []): int|string|null
     {
-        $payload = (new JobPayload($payload))->prepare($this->lastPushed)->value;
+        $payload = (new JobPayload($payload))->prepare($this->lastPushed ?? null)->value;
 
         return tap(parent::pushRaw($payload, $queue, $options), function () use ($queue, $payload): void {
             $this->event($this->getQueue($queue), new JobPushed($payload));
@@ -59,12 +57,14 @@ class RabbitMQQueue extends BaseRabbitMQQueue
 
     /**
      * {@inheritdoc}
+     *
+     * @throws BindingResolutionException
      */
-    public function later($delay, $job, $data = '', $queue = null)
+    public function later($delay, $job, $data = '', $queue = null): mixed
     {
         $payload = (new JobPayload($this->createPayload($job, $data)))->prepare($job)->value;
 
-        return tap(parent::pushRaw($payload, $queue, ['delay' => $this->secondsUntil($delay)]), function () use ($payload, $queue): void {
+        return tap(parent::laterRaw($delay, $payload, $queue), function () use ($payload, $queue): void {
             $this->event($this->getQueue($queue), new JobPushed($payload));
         });
     }
@@ -82,21 +82,10 @@ class RabbitMQQueue extends BaseRabbitMQQueue
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function release($delay, $job, $data, $queue, $attempts = 0)
-    {
-        $this->lastPushed = $job;
-
-        return parent::release($delay, $job, $data, $queue, $attempts);
-    }
-
-    /**
      * Fire the job deleted event.
      *
      * @param  string  $queue
      * @param  RabbitMQJob  $job
-     * @return void
      *
      * @throws BindingResolutionException
      */
@@ -110,7 +99,6 @@ class RabbitMQQueue extends BaseRabbitMQQueue
      *
      * @param  string  $queue
      * @param  mixed  $event
-     * @return void
      *
      * @throws BindingResolutionException
      */
