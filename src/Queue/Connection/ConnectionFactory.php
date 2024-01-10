@@ -170,7 +170,7 @@ class ConnectionFactory
             'ciphers' => $config->getSslCiphers(),
             'security_level' => $config->getSslSecurityLevel(),
         ], static function ($value) {
-            return null !== $value;
+            return $value !== null;
         });
     }
 
@@ -200,10 +200,10 @@ class ConnectionFactory
         self::assertExtendedOf($connection, self::CONNECTION_SUB_TYPE_SSL);
     }
 
-    protected static function assertExtendedOf($connection, string $abstract): void
+    protected static function assertExtendedOf($connection, string $parent): void
     {
-        if (! is_subclass_of($connection, $abstract)) {
-            throw new AMQPLogicException(sprintf('The connection must extend: %s', class_basename($abstract)));
+        if (! is_subclass_of($connection, $parent) && $connection !== $parent) {
+            throw new AMQPLogicException(sprintf('The connection must extend: %s', class_basename($parent)));
         }
     }
 
