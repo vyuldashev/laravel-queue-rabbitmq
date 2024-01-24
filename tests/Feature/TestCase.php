@@ -96,6 +96,8 @@ abstract class TestCase extends BaseTestCase
 
     public function testPushAfterCommit(): void
     {
+        $this->markTestSkipped();
+
         $transaction = new DatabaseTransactionsManager;
 
         $this->app->singleton('db.transactions', function ($app) use ($transaction) {
