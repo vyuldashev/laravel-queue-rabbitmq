@@ -96,8 +96,6 @@ abstract class TestCase extends BaseTestCase
 
     public function testPushAfterCommit(): void
     {
-        $this->markTestSkipped();
-
         $transaction = new DatabaseTransactionsManager;
 
         $this->app->singleton('db.transactions', function ($app) use ($transaction) {
@@ -112,7 +110,7 @@ abstract class TestCase extends BaseTestCase
         $this->assertSame(0, Queue::size());
         $this->assertNull(Queue::pop());
 
-        $transaction->commit('FakeDBConnection');
+        $transaction->commit('FakeDBConnection', 1, 0);
 
         sleep(1);
 
