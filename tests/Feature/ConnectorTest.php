@@ -144,8 +144,6 @@ class ConnectorTest extends \VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCa
     // Test to validate ssl connection params
     public function testNoVerificationSslConnection(): void
     {
-        $this->markTestSkipped();
-
         $this->app['config']->set('queue.connections.rabbitmq', [
             'driver' => 'rabbitmq',
             'queue' => env('RABBITMQ_QUEUE', 'default'),
