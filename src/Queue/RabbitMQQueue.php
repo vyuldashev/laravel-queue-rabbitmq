@@ -54,7 +54,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     /**
      * Current job being processed.
      */
-    protected RabbitMQJob $currentJob;
+    protected ?RabbitMQJob $currentJob = null;
 
     /**
      * Holds the Configuration
