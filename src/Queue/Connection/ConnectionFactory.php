@@ -126,7 +126,6 @@ class ConnectionFactory
                     'keepalive' => $config->isKeepalive(),
                     'heartbeat' => $config->getHeartbeat(),
                 ],
-                $config->getNetworkProtocol(),
                 $config
             );
         }
