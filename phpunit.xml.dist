@@ -1,20 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" backupGlobals="false" beStrictAboutTestsThatDoNotTestAnything="false" bootstrap="vendor/autoload.php" colors="true" processIsolation="false" stopOnError="false" stopOnFailure="false" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.0/phpunit.xsd" cacheDirectory=".phpunit.cache" backupStaticProperties="false">
-  <coverage>
-    <report>
-      <html outputDirectory="build/coverage"/>
-    </report>
-  </coverage>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  backupGlobals="false"
+  beStrictAboutTestsThatDoNotTestAnything="false"
+  bootstrap="vendor/autoload.php"
+  colors="true"
+  processIsolation="false"
+  stopOnError="false"
+  stopOnFailure="false"
+  xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.0/phpunit.xsd"
+  cacheDirectory=".phpunit.cache"
+  backupStaticProperties="false">
   <testsuites>
     <testsuite name="Package Test Suite">
       <directory suffix=".php">./tests/</directory>
     </testsuite>
   </testsuites>
   <php>
-    <env name="HOST" value="127.0.0.1"/>
-    <env name="PORT" value="5672"/>
-    <env name="PORT_SSL" value="5671"/>
-    <env name="RABBITMQ_SSL_CAFILE" value="./tests/files/rootCA.pem"/>
+    <env name="HOST"
+      value="127.0.0.1"/>
+    <env name="PORT"
+      value="5672"/>
+    <env name="PORT_SSL"
+      value="5671"/>
+    <env name="RABBITMQ_SSL_CAFILE"
+      value="./tests/files/rootCA.pem"/>
   </php>
   <logging/>
   <source>
