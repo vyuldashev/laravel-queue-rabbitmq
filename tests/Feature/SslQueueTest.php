@@ -4,7 +4,7 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Feature;
 
 use PhpAmqpLib\Connection\AMQPSSLConnection;
 
-class SslQueueTest extends BaseTestCase
+class SslQueueTest extends TestCase
 {
     public function setUp(): void
     {

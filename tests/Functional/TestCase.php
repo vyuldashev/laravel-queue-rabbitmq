@@ -6,9 +6,9 @@ use Exception;
 use PhpAmqpLib\Channel\AMQPChannel;
 use ReflectionClass;
 use ReflectionException;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\BaseTestCase as TestCase;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCase as BaseTestCase;
 
-abstract class BaseTestCase extends TestCase
+abstract class TestCase extends BaseTestCase
 {
     protected function getEnvironmentSetUp($app): void
     {

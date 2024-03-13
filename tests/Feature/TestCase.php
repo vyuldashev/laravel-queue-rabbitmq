@@ -8,10 +8,10 @@ use Illuminate\Support\Str;
 use PhpAmqpLib\Exception\AMQPProtocolChannelException;
 use RuntimeException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
-use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\BaseTestCase as TestCase;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks\TestJob;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCase as BaseTestCase;
 
-abstract class BaseTestCase extends TestCase
+abstract class TestCase extends BaseTestCase
 {
     /**
      * @throws AMQPProtocolChannelException

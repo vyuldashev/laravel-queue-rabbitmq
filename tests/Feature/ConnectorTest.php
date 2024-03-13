@@ -10,7 +10,7 @@ use PhpAmqpLib\Connection\AMQPStreamConnection;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks\TestSSLConnection;
 
-class ConnectorTest extends \VladimirYuldashev\LaravelQueueRabbitMQ\Tests\BaseTestCase
+class ConnectorTest extends \VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCase
 {
     public function testLazyConnection(): void
     {
