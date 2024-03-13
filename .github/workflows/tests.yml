@@ -54,4 +54,4 @@ jobs:
         run: ./vendor/bin/pint --test
 
       - name: Execute tests
-        run: sleep 10 && (vendor/bin/phpunit --debug || vendor/bin/phpunit --verbose)
+        run: sleep 10 && vendor/bin/phpunit
