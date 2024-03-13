@@ -50,5 +50,4 @@ jobs:
         run: ./vendor/bin/pint --test
 
       - name: Execute tests
-        if:
         run: sleep 10 && vendor/bin/phpunit
