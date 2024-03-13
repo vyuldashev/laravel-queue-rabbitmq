@@ -8,7 +8,7 @@ use PhpAmqpLib\Exception\AMQPConnectionClosedException;
 use PhpAmqpLib\Exception\AMQPProtocolChannelException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks\TestJob;
 
-class QueueTest extends TestCase
+class QueueTest extends BaseTestCase
 {
     public function setUp(): void
     {
