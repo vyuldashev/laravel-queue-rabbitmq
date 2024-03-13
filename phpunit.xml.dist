@@ -12,9 +12,4 @@
     <env name="RABBITMQ_SSL_CAFILE" value="./tests/files/rootCA.pem"/>
   </php>
   <logging/>
-  <source>
-    <include>
-      <directory suffix="Test.php">src/</directory>
-    </include>
-  </source>
 </phpunit>
