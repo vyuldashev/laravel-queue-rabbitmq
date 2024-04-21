@@ -525,6 +525,11 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         }
 
         if (isset($currentPayload['data']['command'])) {
+            // If the command data is encrypted, decrypt it first before attempting to unserialize
+            if (in_array(ShouldBeEncrypted::class, class_implements($currentPayload['data']['commandName']))) {
+                $currentPayload['data']['command'] = decrypt($currentPayload['data']['command']);
+            }
+            
             $commandData = unserialize($currentPayload['data']['command']);
             if (property_exists($commandData, 'priority')) {
                 $properties['priority'] = $commandData->priority;
