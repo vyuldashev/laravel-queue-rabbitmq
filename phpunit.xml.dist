@@ -10,6 +10,7 @@
     <env name="PORT" value="5672"/>
     <env name="PORT_SSL" value="5671"/>
     <env name="RABBITMQ_SSL_CAFILE" value="./tests/files/rootCA.pem"/>
+    <env name="APP_KEY" value="12345678901234567890123456789012"/>
   </php>
   <logging/>
 </phpunit>

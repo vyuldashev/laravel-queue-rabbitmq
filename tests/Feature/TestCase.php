@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use PhpAmqpLib\Exception\AMQPProtocolChannelException;
 use RuntimeException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks\TestEncryptedJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks\TestJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCase as BaseTestCase;
 
@@ -185,6 +186,103 @@ abstract class TestCase extends BaseTestCase
 
         for ($i = 0; $i < $count; $i++) {
             $jobs[$i] = new TestJob($i);
+        }
+
+        Queue::bulk($jobs);
+
+        sleep(1);
+
+        $this->assertSame($count, Queue::size());
+    }
+
+    public function testPushEncrypted(): void
+    {
+        Queue::push(new TestEncryptedJob());
+
+        sleep(1);
+
+        $this->assertSame(1, Queue::size());
+        $this->assertNotNull($job = Queue::pop());
+        $this->assertSame(1, $job->attempts());
+        $this->assertInstanceOf(RabbitMQJob::class, $job);
+        $this->assertSame(TestEncryptedJob::class, $job->resolveName());
+        $this->assertNotNull($job->getJobId());
+
+        $payload = $job->payload();
+
+        $this->assertSame(TestEncryptedJob::class, $payload['displayName']);
+        $this->assertSame('Illuminate\Queue\CallQueuedHandler@call', $payload['job']);
+        $this->assertNull($payload['maxTries']);
+        $this->assertNull($payload['backoff']);
+        $this->assertNull($payload['timeout']);
+        $this->assertNull($payload['retryUntil']);
+        $this->assertSame($job->getJobId(), $payload['id']);
+
+        $job->delete();
+        $this->assertSame(0, Queue::size());
+    }
+
+    public function testPushEncryptedAfterCommit(): void
+    {
+        $transaction = new DatabaseTransactionsManager;
+
+        $this->app->singleton('db.transactions', function ($app) use ($transaction) {
+            $transaction->begin('FakeDBConnection', 1);
+
+            return $transaction;
+        });
+
+        TestEncryptedJob::dispatch()->afterCommit();
+
+        sleep(1);
+        $this->assertSame(0, Queue::size());
+        $this->assertNull(Queue::pop());
+
+        $transaction->commit('FakeDBConnection', 1, 0);
+
+        sleep(1);
+
+        $this->assertSame(1, Queue::size());
+        $this->assertNotNull($job = Queue::pop());
+
+        $job->delete();
+        $this->assertSame(0, Queue::size());
+    }
+
+    public function testEncryptedLater(): void
+    {
+        Queue::later(3, new TestEncryptedJob());
+
+        sleep(1);
+
+        $this->assertSame(0, Queue::size());
+        $this->assertNull(Queue::pop());
+
+        sleep(3);
+
+        $this->assertSame(1, Queue::size());
+        $this->assertNotNull($job = Queue::pop());
+
+        $this->assertInstanceOf(RabbitMQJob::class, $job);
+
+        $body = json_decode($job->getRawBody(), true);
+
+        $this->assertSame(TestEncryptedJob::class, $body['displayName']);
+        $this->assertSame('Illuminate\Queue\CallQueuedHandler@call', $body['job']);
+        $this->assertSame(TestEncryptedJob::class, $body['data']['commandName']);
+        $this->assertNotNull($job->getJobId());
+
+        $job->delete();
+        $this->assertSame(0, Queue::size());
+    }
+
+    public function testEncryptedBulk(): void
+    {
+        $count = 100;
+        $jobs = [];
+
+        for ($i = 0; $i < $count; $i++) {
+            $jobs[$i] = new TestEncryptedJob($i);
         }
 
         Queue::bulk($jobs);

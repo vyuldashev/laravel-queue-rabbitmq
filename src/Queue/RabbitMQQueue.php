@@ -7,8 +7,10 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue;
 use ErrorException;
 use Exception;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
+use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Queue\Queue;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AbstractConnection;
@@ -525,6 +527,11 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         }
 
         if (isset($currentPayload['data']['command'])) {
+            // If the command data is encrypted, decrypt it first before attempting to unserialize
+            if (is_subclass_of($currentPayload['data']['commandName'], ShouldBeEncrypted::class)) {
+                $currentPayload['data']['command'] = Crypt::decrypt($currentPayload['data']['command']);
+            }
+
             $commandData = unserialize($currentPayload['data']['command']);
             if (property_exists($commandData, 'priority')) {
                 $properties['priority'] = $commandData->priority;
