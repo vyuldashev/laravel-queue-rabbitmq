@@ -15,6 +15,7 @@ use Illuminate\Support\Str;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AbstractConnection;
 use PhpAmqpLib\Exception\AMQPChannelClosedException;
+use PhpAmqpLib\Exception\AMQPConnectionBlockedException;
 use PhpAmqpLib\Exception\AMQPConnectionClosedException;
 use PhpAmqpLib\Exception\AMQPProtocolChannelException;
 use PhpAmqpLib\Exception\AMQPRuntimeException;
@@ -739,6 +740,11 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         return $this->config;
     }
 
+    /**
+     * @throws AMQPChannelClosedException
+     * @throws AMQPConnectionClosedException
+     * @throws AMQPConnectionBlockedException
+     */
     protected function publishBasic($msg, $exchange = '', $destination = '', $mandatory = false, $immediate = false, $ticket = null): void
     {
         $this->getChannel()->basic_publish($msg, $exchange, $destination, $mandatory, $immediate, $ticket);
