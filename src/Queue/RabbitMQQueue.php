@@ -170,8 +170,8 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         $destination = $this->getQueue($queue).'.delay.'.$ttl;
 
         $options = $this->config->getOptions();
-        $durable = Arr::get($options, 'queue.durable') ?: true;
-        $autoDelete = Arr::get($options, 'queue.auto_delete') ?: false;
+        $durable = Arr::get($options, 'durable') ?: true;
+        $autoDelete = Arr::get($options, 'auto_delete') ?: false;
 
         $this->declareQueue($destination, $durable, $autoDelete, $this->getDelayQueueArguments($this->getQueue($queue), $ttl));
 
@@ -707,11 +707,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     {
         // When an exchange is provided and no exchange is present in RabbitMQ, create an exchange.
         if ($exchange && ! $this->isExchangeExists($exchange)) {
-            $options = $this->config->getOptions();
-            $durable = Arr::get($options, 'exchange.durable') ?: true;
-            $autoDelete = Arr::get($options, 'exchange.auto_delete') ?: false;
-
-            $this->declareExchange($exchange, $exchangeType, $durable, $autoDelete);
+            $this->declareExchange($exchange, $exchangeType);
         }
 
         // When an exchange is provided, just return.
@@ -726,8 +722,8 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
 
         // Create a queue for amq.direct publishing.
         $options = $this->config->getOptions();
-        $durable = Arr::get($options, 'queue.durable') ?: true;
-        $autoDelete = Arr::get($options, 'queue.auto_delete') ?: false;
+        $durable = Arr::get($options, 'durable') ?: true;
+        $autoDelete = Arr::get($options, 'auto_delete') ?: false;
 
         $this->declareQueue($destination, $durable, $autoDelete, $this->getQueueArguments($destination));
     }
