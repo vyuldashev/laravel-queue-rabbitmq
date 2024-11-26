@@ -22,10 +22,6 @@ return [
     ],
 
     'options' => [
-        'exchange' => [
-            'durable' => true,
-            'auto_delete' => false,
-        ],
         'queue' => [
             'durable' => true,
             'auto_delete' => false,
