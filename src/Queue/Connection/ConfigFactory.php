@@ -38,6 +38,7 @@ class ConfigFactory
             self::getHostFromConfig($connectionConfig, $config);
             self::getHeartbeatFromConfig($connectionConfig, $config);
             self::getNetworkProtocolFromConfig($connectionConfig, $config);
+            self::getTimeoutFromConfig($connectionConfig, $config);
         });
     }
 
@@ -97,6 +98,25 @@ class ConfigFactory
     {
         if ($networkProtocol = Arr::get($config, 'network_protocol')) {
             $connectionConfig->setNetworkProtocol($networkProtocol);
+        }
+    }
+
+    protected static function getTimeoutFromConfig(AMQPConnectionConfig $connectionConfig, array $config): void
+    {
+        if ($connectionTimeout = Arr::get($config, 'connection_timeout')) {
+            $connectionConfig->setConnectionTimeout($connectionTimeout);
+        }
+
+        if ($readTimeout = Arr::get($config, 'read_timeout')) {
+            $connectionConfig->setReadTimeout($readTimeout);
+        }
+
+        if ($writeTimeout = Arr::get($config, 'write_timeout')) {
+            $connectionConfig->setWriteTimeout($writeTimeout);
+        }
+
+        if ($channelRPCTimeout = Arr::get($config, 'channel_rpc_timeout')) {
+            $connectionConfig->setChannelRPCTimeout($channelRPCTimeout);
         }
     }
 }
