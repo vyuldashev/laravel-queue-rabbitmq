@@ -37,6 +37,7 @@ class ConfigFactory
 
             self::getHostFromConfig($connectionConfig, $config);
             self::getHeartbeatFromConfig($connectionConfig, $config);
+            self::getKeepAliveFromConfig($connectionConfig, $config);
             self::getNetworkProtocolFromConfig($connectionConfig, $config);
             self::getTimeoutFromConfig($connectionConfig, $config);
         });
@@ -91,6 +92,15 @@ class ConfigFactory
 
         if (is_numeric($heartbeat) && intval($heartbeat) > 0) {
             $connectionConfig->setHeartbeat((int) $heartbeat);
+        }
+    }
+
+    protected static function getKeepAliveFromConfig(AMQPConnectionConfig $connectionConfig, array $config): void
+    {
+        $keepAlive = Arr::get($config, self::CONFIG_OPTIONS.'.keep_alive');
+
+        if (is_bool($keepAlive)) {
+            $connectionConfig->setKeepalive($keepAlive);
         }
     }
 
