@@ -6,6 +6,12 @@
         {
             "name": "Vladimir Yuldashev",
             "email": "misterio92@gmail.com"
+        },
+        {
+            "name": "David Běhal",
+            "email": "david.behal@dejw.sk",
+            "homepage": "https://www.dejw.sk",
+            "role": "Developer"
         }
     ],
     "require": {
