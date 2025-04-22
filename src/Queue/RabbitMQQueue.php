@@ -637,7 +637,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     /**
      * Get the exchange name, or empty string; as default value.
      */
-    protected function getExchange(string $exchange = null): string
+    protected function getExchange(?string $exchange = null): string
     {
         return $exchange ?? $this->getConfig()->getExchange();
     }
@@ -664,7 +664,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     /**
      * Get the exchange for failed messages.
      */
-    protected function getFailedExchange(string $exchange = null): string
+    protected function getFailedExchange(?string $exchange = null): string
     {
         return $exchange ?? $this->getConfig()->getFailedExchange();
     }
