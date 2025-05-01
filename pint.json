@@ -2,7 +2,7 @@
   "preset": "laravel",
   "rules": {
     "php_unit_method_casing": {
-        "case": "camel_case"
+      "case": "camel_case"
     }
   }
 }
