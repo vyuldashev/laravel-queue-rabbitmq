@@ -100,6 +100,12 @@ class QueueConfigFactory
             unset($queueOptions['use_expiration_for_delayed_queues']);
         }
 
+        // Feature: Declare full route
+        if (array_key_exists('declare_full_route', $queueOptions)) {
+            $queueConfig->setDeclareFullRoute($queueOptions['declare_full_route']);
+            unset($queueOptions['declare_full_route']);
+        }
+
         // All extra options not defined
         $queueConfig->setOptions($queueOptions);
     }

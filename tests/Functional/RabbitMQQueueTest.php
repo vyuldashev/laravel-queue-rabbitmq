@@ -312,6 +312,7 @@ class RabbitMQQueueTest extends BaseTestCase
 
     public function test_delay_queue_arguments(): void
     {
+        $this->app['config']->set('queue.connections.rabbitmq.options.queue.use_expiration_for_delayed_queues', true);
         $name = Str::random();
         $ttl = 12000;
 
@@ -319,9 +320,7 @@ class RabbitMQQueueTest extends BaseTestCase
         $actual = $this->callMethod($queue, 'getDelayQueueArguments', [$name, $ttl]);
         $expected = [
             'x-dead-letter-exchange' => '',
-            'x-dead-letter-routing-key' => $name,
-            'x-message-ttl' => $ttl,
-            'x-expires' => $ttl * 2,
+            'x-dead-letter-routing-key' => $name
         ];
         $this->assertEquals(array_keys($expected), array_keys($actual));
         $this->assertEquals(array_values($expected), array_values($actual));

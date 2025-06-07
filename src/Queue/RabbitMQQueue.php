@@ -499,15 +499,15 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
      */
     public function bindQueue(string $queue, string $exchange, string $routingKey = ''): void
     {
-        if (in_array(
-            implode('', compact('queue', 'exchange', 'routingKey')),
-            $this->boundQueues,
-            true
-        )) {
+        $bindKey = $queue . $exchange . $routingKey;
+        if (isset($this->boundQueues[$bindKey])) {
             return;
         }
 
         $this->getChannel()->queue_bind($queue, $exchange, $routingKey);
+        if ($this->getConfig()->isCacheDeclared()) {
+            $this->boundQueues[$bindKey] = 1;
+        }
     }
 
     /**
@@ -778,23 +778,30 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
      */
     protected function declareDestination(string $destination, ?string $exchange = null, string $exchangeType = AMQPExchangeType::DIRECT): void
     {
-        // When an exchange is provided and no exchange is present in RabbitMQ, create an exchange.
-        if ($exchange && ! $this->isExchangeExists($exchange)) {
-            $this->declareExchange($exchange, $exchangeType);
-        }
+        $declareAll = $this->getConfig()->isDeclareFullRoute();
 
-        // When an exchange is provided, just return.
+        // When an exchange is provided and no exchange is present in RabbitMQ, create an exchange.
         if ($exchange) {
-            return;
+            if (! $this->isExchangeExists($exchange)) {
+                $this->declareExchange($exchange, $exchangeType);
+            }
+
+            // When an exchange is provided, just return.
+            if (! $declareAll) {
+                return;
+            }
         }
 
         // When the queue already exists, just return.
-        if ($this->isQueueExists($destination)) {
-            return;
+        if (!$this->isQueueExists($destination)) {
+            // Create a queue for amq.direct publishing.
+            $this->declareQueueByConfig($destination);
         }
 
-        // Create a queue for amq.direct publishing.
-        $this->declareQueueByConfig($destination);
+        if (! $declareAll) {
+            return;
+        }
+        $this->bindQueue($destination, $exchange, $this->getRoutingKey($destination));
     }
 
     /**

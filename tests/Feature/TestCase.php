@@ -483,4 +483,27 @@ abstract class TestCase extends BaseTestCase
             }
         }
     }
+
+    public function test_full_route_declare(): void
+    {
+        // Make another connection
+        $this->app['config']->set('queue.connections.rabbitmq2', $this->app['config']->get('queue.connections.rabbitmq'));
+        $this->app['config']->set('queue.connections.rabbitmq2.options.queue.declare_full_route', true);
+
+        $queue = Str::random();
+        $exchange = Str::random();
+
+        /** @var RabbitMQQueue $connection */
+        $connection = Queue::connection('rabbitmq2');
+        $this->assertFalse($connection->isQueueExists($queue));
+        $this->assertFalse($connection->isExchangeExists($exchange));
+
+        $connection->pushRaw('data', $queue, [
+            'exchange' => $exchange,
+        ]);
+
+        $this->assertTrue($connection->isQueueExists($queue));
+        $this->assertTrue($connection->isExchangeExists($exchange));
+        $this->assertSame(1, $connection->size($queue));
+    }
 }

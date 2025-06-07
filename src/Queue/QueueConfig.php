@@ -30,6 +30,8 @@ class QueueConfig
 
     protected string $exchangeRoutingKey = '%s';
 
+    protected bool $declareFullRoute = false;
+
     protected bool $rerouteFailed = false;
 
     protected string $failedExchange = '';
@@ -360,6 +362,18 @@ class QueueConfig
     public function setLogChannelName(?string $logChannelName): QueueConfig
     {
         $this->logChannelName = $logChannelName;
+
+        return $this;
+    }
+
+    public function isDeclareFullRoute(): bool
+    {
+        return $this->declareFullRoute;
+    }
+
+    public function setDeclareFullRoute(bool $declareFullRoute): QueueConfig
+    {
+        $this->declareFullRoute = $declareFullRoute;
 
         return $this;
     }
