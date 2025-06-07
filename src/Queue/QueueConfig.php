@@ -38,6 +38,14 @@ class QueueConfig
 
     protected bool $quorum = false;
 
+    protected ?string $logChannelName = null;
+
+    protected array $retryOptions = [
+        'enable' => false,
+        'max' => 5,
+        'pause_ms' => 1e6,
+    ];
+
     protected array $options = [];
 
     /**
@@ -328,6 +336,30 @@ class QueueConfig
     public function setUseExpirationForDelayedQueues(bool $useExpirationForDelayedQueues): QueueConfig
     {
         $this->useExpirationForDelayedQueues = $useExpirationForDelayedQueues;
+
+        return $this;
+    }
+
+    public function getRetryOptions(): array
+    {
+        return $this->retryOptions;
+    }
+
+    public function setRetryOptions(array $retryOptions): QueueConfig
+    {
+        $this->retryOptions = $retryOptions;
+
+        return $this;
+    }
+
+    public function getLogChannelName(): ?string
+    {
+        return $this->logChannelName;
+    }
+
+    public function setLogChannelName(?string $logChannelName): QueueConfig
+    {
+        $this->logChannelName = $logChannelName;
 
         return $this;
     }

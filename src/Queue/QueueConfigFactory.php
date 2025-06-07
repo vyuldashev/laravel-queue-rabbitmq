@@ -68,6 +68,15 @@ class QueueConfigFactory
             $queueConfig->setQuorum($quorum);
         }
 
+        // Feature: Retries with Logs
+        if ($retriesOption = Arr::pull($queueOptions, 'retries')) {
+            $queueConfig->setRetryOptions($retriesOption);
+        }
+        if (array_key_exists('log_channel', $queueOptions)) {
+            $queueConfig->setLogChannelName($queueOptions['log_channel']);
+            unset($queueOptions['log_channel']);
+        }
+
         // Feature: Caching
         if (array_key_exists('cache_declared', $queueOptions)) {
             $queueConfig->setCacheDeclared($queueOptions['cache_declared']);

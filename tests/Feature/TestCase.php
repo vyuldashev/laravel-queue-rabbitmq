@@ -5,6 +5,7 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Feature;
 use Illuminate\Database\DatabaseTransactionsManager;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
+use PhpAmqpLib\Exception\AMQPExceptionInterface;
 use PhpAmqpLib\Exception\AMQPProtocolChannelException;
 use PHPUnit\Framework\Attributes\TestWith;
 use RuntimeException;
@@ -452,19 +453,34 @@ abstract class TestCase extends BaseTestCase
         $this->assertNull(Queue::pop());
     }
 
-    public function test_failed(): void
+    #[TestWith([false])]
+    #[TestWith([true])]
+    public function test_push_retry(bool $enableRetries): void
     {
-        Queue::push(new TestJob);
+        // Make another connection
+        $this->app['config']->set('queue.connections.rabbitmq2', $this->app['config']->get('queue.connections.rabbitmq'));
+        $this->app['config']->set('queue.connections.rabbitmq2.options.queue.retries', [
+            'enabled' => $enableRetries,
+            'max' => 1,
+            'pause_ms' => 1
+        ]);
 
-        $job = Queue::pop();
+        /** @var RabbitMQQueue $connection */
+        $connection = Queue::connection('rabbitmq2');
+        $connection->declareQueue('default');
 
-        $job->fail(new RuntimeException($job->resolveName().' has an exception.'));
-
-        sleep(1);
-
-        $this->assertSame(true, $job->hasFailed());
-        $this->assertSame(true, $job->isDeleted());
-        $this->assertSame(0, Queue::size());
-        $this->assertNull(Queue::pop());
+        // Now let's close connection, it will trigger retry
+        $connection->getChannel()->close();
+        if ($enableRetries) {
+            $connection->push(new TestJob);
+            $this->assertSame(1, $connection->size());
+        } else {
+            // Push will trigger exception
+            try {
+                $connection->push(new TestJob);
+            } catch (AMQPExceptionInterface $exception) {
+                $this->assertSame('Channel connection is closed.', $exception->getMessage());
+            }
+        }
     }
 }
