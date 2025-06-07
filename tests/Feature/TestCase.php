@@ -71,6 +71,33 @@ abstract class TestCase extends BaseTestCase
         $this->assertSame(0, Queue::size());
     }
 
+    public function test_push_bulk_raw(): void
+    {
+        $payload1 = Str::random();
+        $payload2 = Str::random();
+
+        Queue::pushBulkRaw([$payload1, $payload2]);
+
+        sleep(1);
+
+        $this->assertSame(2, Queue::size());
+        $this->assertNotNull($job1 = Queue::pop());
+        $this->assertNotNull($job2 = Queue::pop());
+        $this->assertSame(1, $job1->attempts());
+        $this->assertSame(1, $job2->attempts());
+        $this->assertInstanceOf(RabbitMQJob::class, $job1);
+        $this->assertInstanceOf(RabbitMQJob::class, $job2);
+        $this->assertSame($payload1, $job1->getRawBody());
+        $this->assertSame($payload2, $job2->getRawBody());
+
+        $this->assertNull($job1->getJobId());
+        $this->assertNull($job2->getJobId());
+
+        $job1->delete();
+        $job2->delete();
+        $this->assertSame(0, Queue::size());
+    }
+
     public function test_push(): void
     {
         Queue::push(new TestJob);

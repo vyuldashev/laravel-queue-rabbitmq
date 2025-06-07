@@ -242,6 +242,35 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     }
 
     /**
+     * @param array<string> $payloads
+     * @param null $queue
+     * @param array $options
+     *
+     * @return array
+     * @throws AMQPProtocolChannelException
+     */
+    public function pushBulkRaw(array $payloads, $queue = null, array $options = [])
+    {
+        return $this->retryOnError(function () use ($payloads, $queue, $options) {
+            [$destination, $exchange, $exchangeType, $attempts] = $this->publishProperties($queue, $options);
+
+            $this->declareDestination($destination, $exchange, $exchangeType);
+
+            $ids = [];
+            $channel = $this->getChannel();
+            foreach ($payloads as $payload) {
+                [$message, $correlationId] = $this->createMessage($payload, $attempts);
+                $channel->batch_basic_publish($message, $exchange, $destination);
+                $ids[] = $correlationId;
+            }
+
+            $this->batchPublish();
+
+            return $ids;
+        });
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @throws Throwable
