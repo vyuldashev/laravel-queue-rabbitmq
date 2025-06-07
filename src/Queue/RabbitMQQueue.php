@@ -976,4 +976,18 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
 
         return $destination;
     }
+
+    /**
+     * @param \DateTimeInterface|\DateInterval|int|float $delay
+     * @return float|int
+     */
+    protected function secondsUntil($delay)
+    {
+        // Support ms
+        if (is_float($delay)) {
+            return $delay;
+        }
+
+        return parent::secondsUntil($delay);
+    }
 }
