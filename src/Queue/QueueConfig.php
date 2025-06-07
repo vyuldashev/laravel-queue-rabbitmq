@@ -14,6 +14,8 @@ class QueueConfig
 
     protected bool $prioritizeDelayed = false;
 
+    protected bool $cacheDeclared = true;
+
     protected int $queueMaxPriority = 2;
 
     protected string $exchange = '';
@@ -274,5 +276,17 @@ class QueueConfig
     protected function toBoolean($value): bool
     {
         return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    public function isCacheDeclared(): bool
+    {
+        return $this->cacheDeclared;
+    }
+
+    public function setCacheDeclared(bool $cacheDeclared): QueueConfig
+    {
+        $this->cacheDeclared = $cacheDeclared;
+
+        return $this;
     }
 }

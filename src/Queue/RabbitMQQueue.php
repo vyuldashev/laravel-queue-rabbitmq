@@ -331,7 +331,9 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
             $channel->exchange_declare($exchange, '', true);
             $channel->close();
 
-            $this->exchanges[] = $exchange;
+            if ($this->getConfig()->isCacheDeclared()) {
+                $this->cacheDeclaredExchange($exchange);
+            }
 
             return true;
         } catch (AMQPProtocolChannelException $exception) {
@@ -381,9 +383,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
             return;
         }
 
-        $idx = array_search($name, $this->exchanges);
-        unset($this->exchanges[$idx]);
-
+        unset($this->exchanges[$name]);
         $this->getChannel()->exchange_delete(
             $name,
             $unused
@@ -411,7 +411,10 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
             $channel->queue_declare($queueName, true);
             $channel->close();
 
-            $this->queues[] = $queueName;
+            $cfg = $this->getConfig();
+            if ($cfg->isCacheDeclared()) {
+                $this->cacheDeclaredQueue($queueName);
+            }
 
             return true;
         } catch (AMQPProtocolChannelException $exception) {
@@ -445,6 +448,10 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
             false,
             new AMQPTable($arguments)
         );
+
+        if (! $autoDelete && ! isset($arguments['x-expires']) && $this->getConfig()->isCacheDeclared()) {
+            $this->cacheDeclaredQueue($name);
+        }
     }
 
     /**
@@ -459,9 +466,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
             return;
         }
 
-        $idx = array_search($name, $this->queues);
-        unset($this->queues[$idx]);
-
+        unset($this->queues[$name]);
         $this->getChannel()->queue_delete($name, $if_unused, $if_empty);
     }
 
@@ -683,7 +688,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
      */
     protected function isExchangeDeclared(string $name): bool
     {
-        return in_array($name, $this->exchanges, true);
+        return isset($this->exchanges[$name]);
     }
 
     /**
@@ -691,7 +696,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
      */
     protected function isQueueDeclared(string $name): bool
     {
-        return in_array($name, $this->queues, true);
+        return isset($this->queues[$name]);
     }
 
     /**
@@ -778,5 +783,23 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         $this->getConnection()->reconnect();
         // Create a new main channel because all old channels are removed.
         $this->getChannel(true);
+    }
+
+    /**
+     * @param string $name
+     * @return void
+     */
+    protected function cacheDeclaredQueue(string $name): void
+    {
+        $this->queues[$name] = 1;
+    }
+
+    /**
+     * @param string $name
+     * @return void
+     */
+    protected function cacheDeclaredExchange(string $name): void
+    {
+        $this->exchanges[$name] = 1;
     }
 }

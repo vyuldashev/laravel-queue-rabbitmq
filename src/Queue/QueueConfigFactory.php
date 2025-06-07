@@ -68,6 +68,12 @@ class QueueConfigFactory
             $queueConfig->setQuorum($quorum);
         }
 
+        // Feature: Caching
+        if (array_key_exists('cache_declared', $queueOptions)) {
+            $queueConfig->setCacheDeclared($queueOptions['cache_declared']);
+            unset($queueOptions['cache_declared']);
+        }
+
         // All extra options not defined
         $queueConfig->setOptions($queueOptions);
     }

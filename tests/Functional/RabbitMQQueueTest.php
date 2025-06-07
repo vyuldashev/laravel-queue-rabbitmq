@@ -4,6 +4,7 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional;
 
 use Illuminate\Support\Str;
 use PhpAmqpLib\Exchange\AMQPExchangeType;
+use PHPUnit\Framework\Attributes\TestWith;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional\TestCase as BaseTestCase;
 
@@ -202,8 +203,11 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertTrue($this->callProperty($queue, 'config')->isQuorum());
     }
 
-    public function test_declare_delete_exchange(): void
+    #[TestWith([false])]
+    #[TestWith([true])]
+    public function test_declare_delete_exchange(bool $cache): void
     {
+        $this->app['config']->set('queue.connections.rabbitmq.options.queue.cache_declared', $cache);
         $queue = $this->connection();
 
         $name = Str::random();
@@ -212,13 +216,18 @@ class RabbitMQQueueTest extends BaseTestCase
 
         $queue->declareExchange($name);
         $this->assertTrue($queue->isExchangeExists($name));
+        $this->assertEquals($cache, $this->callMethod($queue, 'isExchangeDeclared', [$name]));
 
         $queue->deleteExchange($name);
+        $this->assertFalse($this->callMethod($queue, 'isExchangeDeclared', [$name]));
         $this->assertFalse($queue->isExchangeExists($name));
     }
 
-    public function test_declare_delete_queue(): void
+    #[TestWith([false])]
+    #[TestWith([true])]
+    public function test_declare_delete_queue(bool $cache): void
     {
+        $this->app['config']->set('queue.connections.rabbitmq.options.queue.cache_declared', $cache);
         $queue = $this->connection();
 
         $name = Str::random();
@@ -227,8 +236,10 @@ class RabbitMQQueueTest extends BaseTestCase
 
         $queue->declareQueue($name);
         $this->assertTrue($queue->isQueueExists($name));
+        $this->assertEquals($cache, $this->callMethod($queue, 'isQueueDeclared', [$name]));
 
         $queue->deleteQueue($name);
+        $this->assertFalse($this->callMethod($queue, 'isQueueDeclared', [$name]));
         $this->assertFalse($queue->isQueueExists($name));
     }
 
