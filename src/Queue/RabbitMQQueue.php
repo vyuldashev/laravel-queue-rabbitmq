@@ -167,11 +167,11 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         [$mainDestination, $exchange, $exchangeType, $attempts] = $this->publishProperties($queue, $options);
         $this->declareDestination($mainDestination, $exchange, $exchangeType);
 
-        $destination = $this->getQueue($queue).'.delay.'.$ttl;
+        $destination = $this->getDelayedQueueName($queue, $ttl);
 
         $this->declareQueue($destination, true, false, $this->getDelayQueueArguments($this->getQueue($queue), $ttl));
 
-        [$message, $correlationId] = $this->createMessage($payload, $attempts);
+        [$message, $correlationId] = $this->createMessage($payload, $attempts, $ttl);
 
         // Publish directly on the delayQueue, no need to publish through an exchange.
         $this->publishBasic($message, null, $destination, true);
@@ -516,7 +516,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     /**
      * Create a AMQP message.
      */
-    protected function createMessage($payload, int $attempts = 0): array
+    protected function createMessage($payload, int $attempts = 0, int $expiration = 0): array
     {
         $properties = [
             'content_type' => 'application/json',
@@ -551,6 +551,10 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
                 'attempts' => $attempts,
             ],
         ]));
+
+        if ($expiration > 0 && $this->getConfig()->isUseExpirationForDelayedQueues()) {
+            $message->set('expiration', $expiration);
+        }
 
         return [
             $message,
@@ -645,12 +649,17 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
      */
     protected function getDelayQueueArguments(string $destination, int $ttl): array
     {
-        return [
+        $result = [
             'x-dead-letter-exchange' => $this->getExchange(),
             'x-dead-letter-routing-key' => $this->getRoutingKey($destination),
-            'x-message-ttl' => $ttl,
-            'x-expires' => $ttl * 2,
         ];
+
+        if (! $this->getConfig()->isUseExpirationForDelayedQueues()) {
+            $result['x-message-ttl'] = $ttl;
+            $result['x-expires'] = $ttl * 2;
+        }
+
+        return $result;
     }
 
     /**
@@ -799,21 +808,25 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         $this->getChannel(true);
     }
 
-    /**
-     * @param string $name
-     * @return void
-     */
     protected function cacheDeclaredQueue(string $name): void
     {
         $this->queues[$name] = 1;
     }
 
-    /**
-     * @param string $name
-     * @return void
-     */
     protected function cacheDeclaredExchange(string $name): void
     {
         $this->exchanges[$name] = 1;
+    }
+
+    protected function getDelayedQueueName(?string $queue, int $ttl): string
+    {
+        $destination = $this->getQueue($queue);
+        if ($this->getConfig()->isUseExpirationForDelayedQueues()) {
+            $destination = $destination.'_deferred';
+        } else {
+            $destination = $destination.'.delay.'.$ttl;
+        }
+
+        return $destination;
     }
 }

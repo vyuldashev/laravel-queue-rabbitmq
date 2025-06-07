@@ -20,6 +20,8 @@ class QueueConfig
 
     protected bool $queueDurable = true;
 
+    protected bool $useExpirationForDelayedQueues = false;
+
     protected int $queueMaxPriority = 2;
 
     protected string $exchange = '';
@@ -314,6 +316,18 @@ class QueueConfig
     public function setQueueAutoDelete(bool $queueAutoDelete): QueueConfig
     {
         $this->queueAutoDelete = $queueAutoDelete;
+
+        return $this;
+    }
+
+    public function isUseExpirationForDelayedQueues(): bool
+    {
+        return $this->useExpirationForDelayedQueues;
+    }
+
+    public function setUseExpirationForDelayedQueues(bool $useExpirationForDelayedQueues): QueueConfig
+    {
+        $this->useExpirationForDelayedQueues = $useExpirationForDelayedQueues;
 
         return $this;
     }

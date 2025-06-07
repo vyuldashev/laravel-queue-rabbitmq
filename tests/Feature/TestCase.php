@@ -6,8 +6,10 @@ use Illuminate\Database\DatabaseTransactionsManager;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 use PhpAmqpLib\Exception\AMQPProtocolChannelException;
+use PHPUnit\Framework\Attributes\TestWith;
 use RuntimeException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks\TestEncryptedJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks\TestJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCase as BaseTestCase;
@@ -152,19 +154,38 @@ abstract class TestCase extends BaseTestCase
         $this->assertSame(0, Queue::size());
     }
 
-    public function test_later(): void
+    #[TestWith([false])]
+    #[TestWith([true])]
+    public function test_later(bool $useExpirationOnMessage): void
     {
-        Queue::later(3, new TestJob);
+        $queueName = Str::random();
+        // Make another connection
+        $this->app['config']->set('queue.connections.rabbitmq2', $this->app['config']->get('queue.connections.rabbitmq'));
+        $this->app['config']->set('queue.connections.rabbitmq2.queue', $queueName);
+        $this->app['config']->set('queue.connections.rabbitmq2.options.queue.use_expiration_for_delayed_queues', $useExpirationOnMessage);
+        // Disable caching
+        $this->app['config']->set('queue.connections.rabbitmq2.options.queue.cache_declared', false);
 
+        if ($useExpirationOnMessage) {
+            $laterQueueName = "{$queueName}_deferred";
+        } else {
+            $laterQueueName = "{$queueName}.delay.3000";
+        }
+
+        /** @var RabbitMQQueue $connection */
+        $connection = Queue::connection('rabbitmq2');
+        $this->assertFalse($connection->isQueueExists($laterQueueName));
+        $connection->later(3, new TestJob);
+        $this->assertTrue($connection->isQueueExists($laterQueueName));
         sleep(1);
 
-        $this->assertSame(0, Queue::size());
-        $this->assertNull(Queue::pop());
+        $this->assertSame(0, $connection->size());
+        $this->assertNull($connection->pop());
 
         sleep(3);
 
-        $this->assertSame(1, Queue::size());
-        $this->assertNotNull($job = Queue::pop());
+        $this->assertSame(1, $connection->size());
+        $this->assertNotNull($job = $connection->pop());
 
         $this->assertInstanceOf(RabbitMQJob::class, $job);
 
@@ -176,7 +197,7 @@ abstract class TestCase extends BaseTestCase
         $this->assertNotNull($job->getJobId());
 
         $job->delete();
-        $this->assertSame(0, Queue::size());
+        $this->assertSame(0, $connection->size());
     }
 
     public function test_bulk(): void

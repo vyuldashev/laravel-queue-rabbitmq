@@ -85,6 +85,12 @@ class QueueConfigFactory
             }
         }
 
+        // Feature: Another strategy for later tasks
+        if (array_key_exists('use_expiration_for_delayed_queues', $queueOptions)) {
+            $queueConfig->setUseExpirationForDelayedQueues($queueOptions['use_expiration_for_delayed_queues']);
+            unset($queueOptions['use_expiration_for_delayed_queues']);
+        }
+
         // All extra options not defined
         $queueConfig->setOptions($queueOptions);
     }
