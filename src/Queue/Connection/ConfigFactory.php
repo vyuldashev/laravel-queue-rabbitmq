@@ -37,6 +37,8 @@ class ConfigFactory
 
             self::getHostFromConfig($connectionConfig, $config);
             self::getHeartbeatFromConfig($connectionConfig, $config);
+            self::getKeepAliveFromConfig($connectionConfig, $config);
+            self::getChannelRpcTimeoutConfig($connectionConfig, $config);
             self::getNetworkProtocolFromConfig($connectionConfig, $config);
         });
     }
@@ -90,6 +92,22 @@ class ConfigFactory
 
         if (is_numeric($heartbeat) && intval($heartbeat) > 0) {
             $connectionConfig->setHeartbeat((int) $heartbeat);
+        }
+    }
+
+    protected static function getKeepAliveFromConfig(AMQPConnectionConfig $connectionConfig, array $config): void
+    {
+        $keepalive = Arr::get($config, self::CONFIG_OPTIONS.'.keepalive');
+        if (is_bool($keepalive)) {
+            $connectionConfig->setKeepalive($keepalive);
+        }
+    }
+
+    protected static function getChannelRpcTimeoutConfig(AMQPConnectionConfig $connectionConfig, array $config): void
+    {
+        $timeout = Arr::get($config, self::CONFIG_OPTIONS.'.channel_rpc_timeout');
+        if (is_numeric($timeout)) {
+            $connectionConfig->setChannelRPCTimeout((float)$timeout);
         }
     }
 

@@ -58,6 +58,11 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     protected array $boundQueues = [];
 
     /**
+     * Disable retries if needs
+     */
+    protected bool $disableRetries = false;
+
+    /**
      * Current job being processed.
      */
     protected ?RabbitMQJob $currentJob = null;
@@ -80,6 +85,16 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         $this->config = $config;
         $this->dispatchAfterCommit = $config->isDispatchAfterCommit();
         $this->logChannel = Log::channel($config->getLogChannelName());
+    }
+
+    /**
+     * @param bool $value
+     *
+     * @return void
+     */
+    public function setDisableRetries(bool $value): void
+    {
+        $this->disableRetries = $value;
     }
 
     /**
@@ -885,7 +900,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     /**
      * @throws Exception
      */
-    protected function reconnect(): void
+    public function reconnect(): void
     {
         // Reconnects using the original connection settings.
         $this->getConnection()->reconnect();
@@ -917,10 +932,10 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         $currentRetry = 0;
         $retryOptions = $this->getConfig()->getRetryOptions();
 
-        $enabled = $retryOptions['enabled'] ?? false;
+        $enabled = $this->disableRetries ? false : ($retryOptions['enabled'] ?? false);
         $max = $retryOptions['max'] ?? 5;
-        $pauseMs = $retryOptions['pause_ms'] ?? 1000000;
-        $pauseS = round($pauseMs / 1000000, 2);
+        $pauseMs = $retryOptions['pause_micro_seconds'] ?? 1e6;
+        $pauseS = round($pauseMs / 1e6, 2);
 
         while (true) {
             try {

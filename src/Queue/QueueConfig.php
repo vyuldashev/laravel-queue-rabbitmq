@@ -45,7 +45,7 @@ class QueueConfig
     protected array $retryOptions = [
         'enable' => false,
         'max' => 5,
-        'pause_ms' => 1e6,
+        'pause_micro_seconds' => 1e6,
     ];
 
     protected array $options = [];
