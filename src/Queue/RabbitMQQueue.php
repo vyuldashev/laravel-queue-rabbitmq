@@ -412,7 +412,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
             $channel->close();
 
             $cfg = $this->getConfig();
-            if ($cfg->isCacheDeclared()) {
+            if ($cfg->isCacheDeclared() && ! $cfg->isQueueAutoDelete()) {
                 $this->cacheDeclaredQueue($queueName);
             }
 
@@ -600,6 +600,20 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     }
 
     /**
+     * @param string $destination
+     * @return void
+     */
+    public function declareQueueByConfig(string $destination): void
+    {
+        $this->declareQueue(
+            $destination,
+            $this->getConfig()->isQueueDurable(),
+            $this->getConfig()->isQueueAutoDelete(),
+            $this->getQueueArguments($destination)
+        );
+    }
+
+    /**
      * Get the Queue arguments.
      */
     protected function getQueueArguments(string $destination): array
@@ -722,7 +736,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         }
 
         // Create a queue for amq.direct publishing.
-        $this->declareQueue($destination, true, false, $this->getQueueArguments($destination));
+        $this->declareQueueByConfig($destination);
     }
 
     /**

@@ -16,6 +16,10 @@ class QueueConfig
 
     protected bool $cacheDeclared = true;
 
+    protected bool $queueAutoDelete = false;
+
+    protected bool $queueDurable = true;
+
     protected int $queueMaxPriority = 2;
 
     protected string $exchange = '';
@@ -286,6 +290,30 @@ class QueueConfig
     public function setCacheDeclared(bool $cacheDeclared): QueueConfig
     {
         $this->cacheDeclared = $cacheDeclared;
+
+        return $this;
+    }
+
+    public function isQueueDurable(): bool
+    {
+        return $this->queueDurable;
+    }
+
+    public function setQueueDurable(bool $queueDurable): QueueConfig
+    {
+        $this->queueDurable = $queueDurable;
+
+        return $this;
+    }
+
+    public function isQueueAutoDelete(): bool
+    {
+        return $this->queueAutoDelete;
+    }
+
+    public function setQueueAutoDelete(bool $queueAutoDelete): QueueConfig
+    {
+        $this->queueAutoDelete = $queueAutoDelete;
 
         return $this;
     }

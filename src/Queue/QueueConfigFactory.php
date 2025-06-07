@@ -74,6 +74,17 @@ class QueueConfigFactory
             unset($queueOptions['cache_declared']);
         }
 
+        // Feature: Queue flags
+        $queueFlags = Arr::pull($queueOptions, 'flags');
+        if ($queueFlags) {
+            if (array_key_exists('durable', $queueFlags)) {
+                $queueConfig->setQueueDurable($queueFlags['durable']);
+            }
+            if (array_key_exists('auto_delete', $queueFlags)) {
+                $queueConfig->setQueueAutoDelete($queueFlags['auto_delete']);
+            }
+        }
+
         // All extra options not defined
         $queueConfig->setOptions($queueOptions);
     }

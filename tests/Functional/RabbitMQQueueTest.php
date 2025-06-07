@@ -4,6 +4,7 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional;
 
 use Illuminate\Support\Str;
 use PhpAmqpLib\Exchange\AMQPExchangeType;
+use PhpAmqpLib\Wire\AMQPTable;
 use PHPUnit\Framework\Attributes\TestWith;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional\TestCase as BaseTestCase;
@@ -241,6 +242,32 @@ class RabbitMQQueueTest extends BaseTestCase
         $queue->deleteQueue($name);
         $this->assertFalse($this->callMethod($queue, 'isQueueDeclared', [$name]));
         $this->assertFalse($queue->isQueueExists($name));
+    }
+
+    public function test_declare_queue_by_config(): void
+    {
+        $durable = false;
+        $autoDelete = true;
+        $this->app['config']->set('queue.connections.rabbitmq.options.queue.flags', [
+            'durable' => $durable,
+            'auto_delete' => $autoDelete,
+        ]);
+
+        $queue = $this->connection();
+        $name = Str::random();
+        $this->assertFalse($queue->isQueueExists($name));
+
+        $queue->declareQueueByConfig($name);
+        // No exception expected
+        $res = $queue->getChannel()->queue_declare(
+            $name,
+            false,
+            $durable,
+            false,
+            $autoDelete,
+            false
+        );
+        $this->assertIsArray($res);
     }
 
     public function test_queue_arguments(): void
