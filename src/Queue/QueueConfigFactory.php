@@ -68,6 +68,44 @@ class QueueConfigFactory
             $queueConfig->setQuorum($quorum);
         }
 
+        // Feature: Retries with Logs
+        if ($retriesOption = Arr::pull($queueOptions, 'retries')) {
+            $queueConfig->setRetryOptions($retriesOption);
+        }
+        if (array_key_exists('log_channel', $queueOptions)) {
+            $queueConfig->setLogChannelName($queueOptions['log_channel']);
+            unset($queueOptions['log_channel']);
+        }
+
+        // Feature: Caching
+        if (array_key_exists('cache_declared', $queueOptions)) {
+            $queueConfig->setCacheDeclared($queueOptions['cache_declared']);
+            unset($queueOptions['cache_declared']);
+        }
+
+        // Feature: Queue flags
+        $queueFlags = Arr::pull($queueOptions, 'flags');
+        if ($queueFlags) {
+            if (array_key_exists('durable', $queueFlags)) {
+                $queueConfig->setQueueDurable($queueFlags['durable']);
+            }
+            if (array_key_exists('auto_delete', $queueFlags)) {
+                $queueConfig->setQueueAutoDelete($queueFlags['auto_delete']);
+            }
+        }
+
+        // Feature: Another strategy for later tasks
+        if (array_key_exists('use_expiration_for_delayed_queues', $queueOptions)) {
+            $queueConfig->setUseExpirationForDelayedQueues($queueOptions['use_expiration_for_delayed_queues']);
+            unset($queueOptions['use_expiration_for_delayed_queues']);
+        }
+
+        // Feature: Declare full route
+        if (array_key_exists('declare_full_route', $queueOptions)) {
+            $queueConfig->setDeclareFullRoute($queueOptions['declare_full_route']);
+            unset($queueOptions['declare_full_route']);
+        }
+
         // All extra options not defined
         $queueConfig->setOptions($queueOptions);
     }
