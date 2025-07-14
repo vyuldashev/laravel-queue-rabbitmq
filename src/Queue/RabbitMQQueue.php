@@ -627,6 +627,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     protected function getDelayQueueArguments(string $destination, int $ttl): array
     {
         return [
+            'x-queue-type' => 'classic',
             'x-dead-letter-exchange' => $this->getExchange(),
             'x-dead-letter-routing-key' => $this->getRoutingKey($destination),
             'x-message-ttl' => $ttl,
