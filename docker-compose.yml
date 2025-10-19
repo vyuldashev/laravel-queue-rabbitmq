@@ -1,5 +1,3 @@
-version: '3.7'
-
 services:
 
   rabbitmq:
@@ -41,3 +39,18 @@ services:
       - 15672:15672
       - 5671:5671
       - 5672:5672
+
+  php:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile
+    environment:
+      HOST: rabbitmq
+      PORT: 5672
+    volumes:
+      - .:/app
+    working_dir: /app
+    tty: true
+    stdin_open: true
+    depends_on:
+      - rabbitmq
