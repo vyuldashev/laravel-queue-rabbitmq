@@ -40,7 +40,7 @@ abstract class TestCase extends BaseTestCase
                     'cafile' => null,
                     'local_cert' => null,
                     'local_key' => null,
-                    'verify_peer' => true,
+                    'verify_peer' => false,
                     'passphrase' => null,
                 ],
             ],
@@ -50,7 +50,7 @@ abstract class TestCase extends BaseTestCase
         ]);
     }
 
-    protected function connection(string $name = null): RabbitMQQueue
+    protected function connection(?string $name = null): RabbitMQQueue
     {
         return Queue::connection($name);
     }
