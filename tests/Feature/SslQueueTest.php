@@ -43,7 +43,7 @@ class SslQueueTest extends TestCase
         ]);
     }
 
-    public function test_connection(): void
+    public function testConnection(): void
     {
         $this->assertInstanceOf(AMQPSSLConnection::class, $this->connection()->getChannel()->getConnection());
     }
