@@ -20,12 +20,12 @@ class QueueTest extends TestCase
         ]);
     }
 
-    public function test_connection(): void
+    public function testConnection(): void
     {
         $this->assertInstanceOf(AMQPStreamConnection::class, $this->connection()->getChannel()->getConnection());
     }
 
-    public function test_without_reconnect(): void
+    public function testWithoutReconnect(): void
     {
         $queue = $this->connection('rabbitmq');
 
