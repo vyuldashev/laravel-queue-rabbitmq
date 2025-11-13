@@ -4,5 +4,5 @@
 composer.lock
 .phpstorm.meta.php
 phpunit.xml
-.phpunit.result.cache
+.phpunit.*
 .php_cs.cache

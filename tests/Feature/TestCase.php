@@ -15,14 +15,21 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCase as BaseTestCase;
 abstract class TestCase extends BaseTestCase
 {
     /**
+     * Set to false for skipped tests.
+     */
+    protected bool $interactsWithConnection = true;
+
+    /**
      * @throws AMQPProtocolChannelException
      */
     protected function setUp(): void
     {
         parent::setUp();
 
-        if ($this->connection()->isQueueExists()) {
-            $this->connection()->purge();
+        if ($this->interactsWithConnection) {
+            if ($this->connection()->isQueueExists()) {
+                $this->connection()->purge();
+            }
         }
     }
 
@@ -31,11 +38,13 @@ abstract class TestCase extends BaseTestCase
      */
     protected function tearDown(): void
     {
-        if ($this->connection()->isQueueExists()) {
-            $this->connection()->purge();
-        }
+        if ($this->interactsWithConnection) {
+            if ($this->connection()->isQueueExists()) {
+                $this->connection()->purge();
+            }
 
-        self::assertSame(0, Queue::size());
+            self::assertSame(0, Queue::size());
+        }
 
         parent::tearDown();
     }
