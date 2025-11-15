@@ -14,6 +14,14 @@ class QueueConfig
 
     protected bool $prioritizeDelayed = false;
 
+    protected bool $cacheDeclared = true;
+
+    protected bool $queueAutoDelete = false;
+
+    protected bool $queueDurable = true;
+
+    protected bool $useExpirationForDelayedQueues = false;
+
     protected int $queueMaxPriority = 2;
 
     protected string $exchange = '';
@@ -22,6 +30,8 @@ class QueueConfig
 
     protected string $exchangeRoutingKey = '%s';
 
+    protected bool $declareFullRoute = false;
+
     protected bool $rerouteFailed = false;
 
     protected string $failedExchange = '';
@@ -29,6 +39,14 @@ class QueueConfig
     protected string $failedRoutingKey = '%s.failed';
 
     protected bool $quorum = false;
+
+    protected ?string $logChannelName = null;
+
+    protected array $retryOptions = [
+        'enable' => false,
+        'max' => 5,
+        'pause_micro_seconds' => 1e6,
+    ];
 
     protected array $options = [];
 
@@ -274,5 +292,89 @@ class QueueConfig
     protected function toBoolean($value): bool
     {
         return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    public function isCacheDeclared(): bool
+    {
+        return $this->cacheDeclared;
+    }
+
+    public function setCacheDeclared(bool $cacheDeclared): QueueConfig
+    {
+        $this->cacheDeclared = $cacheDeclared;
+
+        return $this;
+    }
+
+    public function isQueueDurable(): bool
+    {
+        return $this->queueDurable;
+    }
+
+    public function setQueueDurable(bool $queueDurable): QueueConfig
+    {
+        $this->queueDurable = $queueDurable;
+
+        return $this;
+    }
+
+    public function isQueueAutoDelete(): bool
+    {
+        return $this->queueAutoDelete;
+    }
+
+    public function setQueueAutoDelete(bool $queueAutoDelete): QueueConfig
+    {
+        $this->queueAutoDelete = $queueAutoDelete;
+
+        return $this;
+    }
+
+    public function isUseExpirationForDelayedQueues(): bool
+    {
+        return $this->useExpirationForDelayedQueues;
+    }
+
+    public function setUseExpirationForDelayedQueues(bool $useExpirationForDelayedQueues): QueueConfig
+    {
+        $this->useExpirationForDelayedQueues = $useExpirationForDelayedQueues;
+
+        return $this;
+    }
+
+    public function getRetryOptions(): array
+    {
+        return $this->retryOptions;
+    }
+
+    public function setRetryOptions(array $retryOptions): QueueConfig
+    {
+        $this->retryOptions = $retryOptions;
+
+        return $this;
+    }
+
+    public function getLogChannelName(): ?string
+    {
+        return $this->logChannelName;
+    }
+
+    public function setLogChannelName(?string $logChannelName): QueueConfig
+    {
+        $this->logChannelName = $logChannelName;
+
+        return $this;
+    }
+
+    public function isDeclareFullRoute(): bool
+    {
+        return $this->declareFullRoute;
+    }
+
+    public function setDeclareFullRoute(bool $declareFullRoute): QueueConfig
+    {
+        $this->declareFullRoute = $declareFullRoute;
+
+        return $this;
     }
 }
