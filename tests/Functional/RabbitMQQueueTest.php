@@ -11,7 +11,7 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional\TestCase as BaseTest
 
 class RabbitMQQueueTest extends BaseTestCase
 {
-    public function test_connection(): void
+    public function testConnection(): void
     {
         $queue = $this->connection();
         $this->assertInstanceOf(RabbitMQQueue::class, $queue);
@@ -23,56 +23,56 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertInstanceOf(RabbitMQQueue::class, $queue);
     }
 
-    public function test_config_reroute_failed(): void
+    public function testConfigRerouteFailed(): void
     {
         $queue = $this->connection();
-        $this->assertFalse($this->callProperty($queue, 'config')->isRerouteFailed());
+        $this->assertFalse($this->callProperty($queue, 'rabbitMQConfig')->isRerouteFailed());
 
         $queue = $this->connection('rabbitmq-with-options');
-        $this->assertTrue($this->callProperty($queue, 'config')->isRerouteFailed());
+        $this->assertTrue($this->callProperty($queue, 'rabbitMQConfig')->isRerouteFailed());
 
         $queue = $this->connection('rabbitmq-with-options-empty');
-        $this->assertFalse($this->callProperty($queue, 'config')->isRerouteFailed());
+        $this->assertFalse($this->callProperty($queue, 'rabbitMQConfig')->isRerouteFailed());
 
         $queue = $this->connection('rabbitmq-with-options-null');
-        $this->assertFalse($this->callProperty($queue, 'config')->isRerouteFailed());
+        $this->assertFalse($this->callProperty($queue, 'rabbitMQConfig')->isRerouteFailed());
     }
 
-    public function test_config_prioritize_delayed(): void
+    public function testConfigPrioritizeDelayed(): void
     {
         $queue = $this->connection();
-        $this->assertFalse($this->callProperty($queue, 'config')->isPrioritizeDelayed());
+        $this->assertFalse($this->callProperty($queue, 'rabbitMQConfig')->isPrioritizeDelayed());
 
         $queue = $this->connection('rabbitmq-with-options');
-        $this->assertTrue($this->callProperty($queue, 'config')->isPrioritizeDelayed());
+        $this->assertTrue($this->callProperty($queue, 'rabbitMQConfig')->isPrioritizeDelayed());
 
         $queue = $this->connection('rabbitmq-with-options-empty');
-        $this->assertFalse($this->callProperty($queue, 'config')->isPrioritizeDelayed());
+        $this->assertFalse($this->callProperty($queue, 'rabbitMQConfig')->isPrioritizeDelayed());
 
         $queue = $this->connection('rabbitmq-with-options-null');
-        $this->assertFalse($this->callProperty($queue, 'config')->isPrioritizeDelayed());
+        $this->assertFalse($this->callProperty($queue, 'rabbitMQConfig')->isPrioritizeDelayed());
     }
 
-    public function test_queue_max_priority(): void
+    public function testQueueMaxPriority(): void
     {
         $queue = $this->connection();
-        $this->assertIsInt($this->callProperty($queue, 'config')->getQueueMaxPriority());
-        $this->assertSame(2, $this->callProperty($queue, 'config')->getQueueMaxPriority());
+        $this->assertIsInt($this->callProperty($queue, 'rabbitMQConfig')->getQueueMaxPriority());
+        $this->assertSame(2, $this->callProperty($queue, 'rabbitMQConfig')->getQueueMaxPriority());
 
         $queue = $this->connection('rabbitmq-with-options');
-        $this->assertIsInt($this->callProperty($queue, 'config')->getQueueMaxPriority());
-        $this->assertSame(20, $this->callProperty($queue, 'config')->getQueueMaxPriority());
+        $this->assertIsInt($this->callProperty($queue, 'rabbitMQConfig')->getQueueMaxPriority());
+        $this->assertSame(20, $this->callProperty($queue, 'rabbitMQConfig')->getQueueMaxPriority());
 
         $queue = $this->connection('rabbitmq-with-options-empty');
-        $this->assertIsInt($this->callProperty($queue, 'config')->getQueueMaxPriority());
-        $this->assertSame(2, $this->callProperty($queue, 'config')->getQueueMaxPriority());
+        $this->assertIsInt($this->callProperty($queue, 'rabbitMQConfig')->getQueueMaxPriority());
+        $this->assertSame(2, $this->callProperty($queue, 'rabbitMQConfig')->getQueueMaxPriority());
 
         $queue = $this->connection('rabbitmq-with-options-null');
-        $this->assertIsInt($this->callProperty($queue, 'config')->getQueueMaxPriority());
-        $this->assertSame(2, $this->callProperty($queue, 'config')->getQueueMaxPriority());
+        $this->assertIsInt($this->callProperty($queue, 'rabbitMQConfig')->getQueueMaxPriority());
+        $this->assertSame(2, $this->callProperty($queue, 'rabbitMQConfig')->getQueueMaxPriority());
     }
 
-    public function test_config_exchange_type(): void
+    public function testConfigExchangeType(): void
     {
         $queue = $this->connection();
         $this->assertSame(AMQPExchangeType::DIRECT, $this->callMethod($queue, 'getExchangeType'));
@@ -90,11 +90,11 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertSame(AMQPExchangeType::DIRECT, $this->callMethod($queue, 'getExchangeType'));
 
         // testing an unkown type with a default
-        $this->callProperty($queue, 'config')->setExchangeType('unknown');
+        $this->callProperty($queue, 'rabbitMQConfig')->setExchangeType('unknown');
         $this->assertSame(AMQPExchangeType::DIRECT, $this->callMethod($queue, 'getExchangeType'));
     }
 
-    public function test_exchange(): void
+    public function testExchange(): void
     {
         $queue = $this->connection();
         $this->assertSame('test', $this->callMethod($queue, 'getExchange', ['test']));
@@ -121,7 +121,7 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertSame('', $this->callMethod($queue, 'getExchange', ['']));
     }
 
-    public function test_failed_exchange(): void
+    public function testFailedExchange(): void
     {
         $queue = $this->connection();
         $this->assertSame('test', $this->callMethod($queue, 'getFailedExchange', ['test']));
@@ -148,7 +148,7 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertSame('', $this->callMethod($queue, 'getFailedExchange', ['']));
     }
 
-    public function test_routing_key(): void
+    public function testRoutingKey(): void
     {
         $queue = $this->connection();
         $this->assertSame('test', $this->callMethod($queue, 'getRoutingKey', ['test']));
@@ -163,11 +163,11 @@ class RabbitMQQueueTest extends BaseTestCase
 
         $queue = $this->connection('rabbitmq-with-options-null');
         $this->assertSame('test', $this->callMethod($queue, 'getRoutingKey', ['test']));
-        $this->callProperty($queue, 'config')->setExchangeRoutingKey('.an.alternate.routing-key');
+        $this->callProperty($queue, 'rabbitMQConfig')->setExchangeRoutingKey('.an.alternate.routing-key');
         $this->assertSame('an.alternate.routing-key', $this->callMethod($queue, 'getRoutingKey', ['test']));
     }
 
-    public function test_failed_routing_key(): void
+    public function testFailedRoutingKey(): void
     {
         $queue = $this->connection();
         $this->assertSame('test.failed', $this->callMethod($queue, 'getFailedRoutingKey', ['test']));
@@ -182,31 +182,31 @@ class RabbitMQQueueTest extends BaseTestCase
 
         $queue = $this->connection('rabbitmq-with-options-null');
         $this->assertSame('test.failed', $this->callMethod($queue, 'getFailedRoutingKey', ['test']));
-        $this->callProperty($queue, 'config')->setFailedRoutingKey('.an.alternate.routing-key');
+        $this->callProperty($queue, 'rabbitMQConfig')->setFailedRoutingKey('.an.alternate.routing-key');
         $this->assertSame('an.alternate.routing-key', $this->callMethod($queue, 'getFailedRoutingKey', ['test']));
     }
 
-    public function test_config_quorum(): void
+    public function testConfigQuorum(): void
     {
         $queue = $this->connection();
-        $this->assertFalse($this->callProperty($queue, 'config')->isQuorum());
+        $this->assertFalse($this->callProperty($queue, 'rabbitMQConfig')->isQuorum());
 
         $queue = $this->connection('rabbitmq-with-options');
-        $this->assertFalse($this->callProperty($queue, 'config')->isQuorum());
+        $this->assertFalse($this->callProperty($queue, 'rabbitMQConfig')->isQuorum());
 
         $queue = $this->connection('rabbitmq-with-options-empty');
-        $this->assertFalse($this->callProperty($queue, 'config')->isQuorum());
+        $this->assertFalse($this->callProperty($queue, 'rabbitMQConfig')->isQuorum());
 
         $queue = $this->connection('rabbitmq-with-options-null');
-        $this->assertFalse($this->callProperty($queue, 'config')->isQuorum());
+        $this->assertFalse($this->callProperty($queue, 'rabbitMQConfig')->isQuorum());
 
         $queue = $this->connection('rabbitmq-with-quorum-options');
-        $this->assertTrue($this->callProperty($queue, 'config')->isQuorum());
+        $this->assertTrue($this->callProperty($queue, 'rabbitMQConfig')->isQuorum());
     }
 
     #[TestWith([false])]
     #[TestWith([true])]
-    public function test_declare_delete_exchange(bool $cache): void
+    public function testDeclareDeleteExchange(bool $cache): void
     {
         $this->app['config']->set('queue.connections.rabbitmq.options.queue.cache_declared', $cache);
         $queue = $this->connection();
@@ -226,7 +226,7 @@ class RabbitMQQueueTest extends BaseTestCase
 
     #[TestWith([false])]
     #[TestWith([true])]
-    public function test_declare_delete_queue(bool $cache): void
+    public function testDeclareDeleteQueue(bool $cache): void
     {
         $this->app['config']->set('queue.connections.rabbitmq.options.queue.cache_declared', $cache);
         $queue = $this->connection();
@@ -244,7 +244,7 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertFalse($queue->isQueueExists($name));
     }
 
-    public function test_declare_queue_by_config(): void
+    public function testDeclareQueueByConfig(): void
     {
         $durable = false;
         $autoDelete = true;
@@ -270,7 +270,7 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertIsArray($res);
     }
 
-    public function test_queue_arguments(): void
+    public function testQueueArguments(): void
     {
         $name = Str::random();
 
@@ -310,7 +310,7 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertEquals(array_values($expected), array_values($actual));
     }
 
-    public function test_delay_queue_arguments(): void
+    public function testDelayQueueArguments(): void
     {
         $this->app['config']->set('queue.connections.rabbitmq.options.queue.use_expiration_for_delayed_queues', true);
         $name = Str::random();
