@@ -17,7 +17,7 @@ class ConsumeCommandTest extends TestCase
 {
     #[TestWith([false])]
     #[TestWith([true])]
-    public function test_consume_one_job(bool $blocking): void
+    public function testConsumeOneJob(bool $blocking): void
     {
         $queueNameAndConnection = Str::random();
         $this->app['config']->set("queue.connections.$queueNameAndConnection", $this->app['config']->get('queue.connections.rabbitmq'));
@@ -37,7 +37,7 @@ class ConsumeCommandTest extends TestCase
 
     #[TestWith([false])]
     #[TestWith([true])]
-    public function test_consume_with_retry(bool $blocking): void
+    public function testConsumeWithRetry(bool $blocking): void
     {
         $queueNameAndConnection = Str::random();
         $this->app['config']->set("queue.connections.$queueNameAndConnection", $this->app['config']->get('queue.connections.rabbitmq'));
@@ -74,7 +74,7 @@ class ConsumeCommandTest extends TestCase
         $this->assertEquals(2, $numberOfCalls);
     }
 
-    public function test_consume_blocking_alive_check(): void
+    public function testConsumeBlockingAliveCheck(): void
     {
         $this->markTestSkippedUnless(extension_loaded('sockets'), 'Sockets extension is required');
 

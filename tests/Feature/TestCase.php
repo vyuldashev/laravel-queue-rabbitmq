@@ -80,7 +80,7 @@ abstract class TestCase extends BaseTestCase
         $this->assertSame(0, Queue::size());
     }
 
-    public function test_push_bulk_raw(): void
+    public function testPushBulkRaw(): void
     {
         $payload1 = Str::random();
         $payload2 = Str::random();

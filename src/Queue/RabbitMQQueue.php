@@ -399,7 +399,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
             $channel->exchange_declare($exchange, '', true);
             $channel->close();
 
-            if ($this->getConfig()->isCacheDeclared()) {
+            if ($this->getRabbitMQConfig()->isCacheDeclared()) {
                 $this->cacheDeclaredExchange($exchange);
             }
 
@@ -479,7 +479,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
             $channel->queue_declare($queueName, true);
             $channel->close();
 
-            $cfg = $this->getConfig();
+            $cfg = $this->getRabbitMQConfig();
             if ($cfg->isCacheDeclared() && ! $cfg->isQueueAutoDelete()) {
                 $this->cacheDeclaredQueue($queueName);
             }
@@ -517,7 +517,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
             new AMQPTable($arguments)
         );
 
-        if (! $autoDelete && ! isset($arguments['x-expires']) && $this->getConfig()->isCacheDeclared()) {
+        if (! $autoDelete && ! isset($arguments['x-expires']) && $this->getRabbitMQConfig()->isCacheDeclared()) {
             $this->cacheDeclaredQueue($name);
         }
     }
@@ -549,7 +549,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         }
 
         $this->getChannel()->queue_bind($queue, $exchange, $routingKey);
-        if ($this->getConfig()->isCacheDeclared()) {
+        if ($this->getRabbitMQConfig()->isCacheDeclared()) {
             $this->boundQueues[$bindKey] = 1;
         }
     }
@@ -636,7 +636,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
             ],
         ]));
 
-        if ($expiration > 0 && $this->getConfig()->isUseExpirationForDelayedQueues()) {
+        if ($expiration > 0 && $this->getRabbitMQConfig()->isUseExpirationForDelayedQueues()) {
             $message->set('expiration', $expiration);
         }
 
@@ -695,8 +695,8 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     {
         $this->declareQueue(
             $destination,
-            $this->getConfig()->isQueueDurable(),
-            $this->getConfig()->isQueueAutoDelete(),
+            $this->getRabbitMQConfig()->isQueueDurable(),
+            $this->getRabbitMQConfig()->isQueueAutoDelete(),
             $this->getQueueArguments($destination)
         );
     }
@@ -747,7 +747,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
             'x-dead-letter-routing-key' => $this->getRoutingKey($destination),
         ];
 
-        if (! $this->getConfig()->isUseExpirationForDelayedQueues()) {
+        if (! $this->getRabbitMQConfig()->isUseExpirationForDelayedQueues()) {
             $result['x-message-ttl'] = $ttl;
             $result['x-expires'] = $ttl * 2;
         }
@@ -822,7 +822,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
      */
     protected function declareDestination(string $destination, ?string $exchange = null, string $exchangeType = AMQPExchangeType::DIRECT): void
     {
-        $declareAll = $this->getConfig()->isDeclareFullRoute();
+        $declareAll = $this->getRabbitMQConfig()->isDeclareFullRoute();
 
         // When an exchange is provided and no exchange is present in RabbitMQ, create an exchange.
         if ($exchange) {
@@ -930,7 +930,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     protected function retryOnError(callable $call)
     {
         $currentRetry = 0;
-        $retryOptions = $this->getConfig()->getRetryOptions();
+        $retryOptions = $this->getRabbitMQConfig()->getRetryOptions();
 
         $enabled = $this->disableRetries ? false : ($retryOptions['enabled'] ?? false);
         $max = $retryOptions['max'] ?? 5;
@@ -968,7 +968,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     protected function getDelayedQueueName(?string $queue, int $ttl): string
     {
         $destination = $this->getQueue($queue);
-        if ($this->getConfig()->isUseExpirationForDelayedQueues()) {
+        if ($this->getRabbitMQConfig()->isUseExpirationForDelayedQueues()) {
             $destination = $destination.'_deferred';
         } else {
             $destination = $destination.'.delay.'.$ttl;
