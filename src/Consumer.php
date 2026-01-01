@@ -82,6 +82,10 @@ class Consumer extends Worker
         /** @var RabbitMQQueue $connection */
         $connection = $this->manager->connection($connectionName);
 
+        // Auto-declare exchange, queue, and binding before consuming.
+        // This ensures consumers can start even when no jobs have been dispatched.
+        $connection->declareConsumerDestination($queue);
+
         $this->channel = $connection->getChannel();
 
         $this->channel->basic_qos(
