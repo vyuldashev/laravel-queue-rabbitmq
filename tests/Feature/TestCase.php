@@ -514,7 +514,7 @@ abstract class TestCase extends BaseTestCase
         $this->app['config']->set('queue.connections.rabbitmq2.options.queue.retries', [
             'enabled' => $enableRetries,
             'max' => 1,
-            'pause_micro_seconds' => 1
+            'pause_micro_seconds' => 1,
         ]);
 
         /** @var RabbitMQQueue $connection */

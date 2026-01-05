@@ -108,7 +108,7 @@ class ConfigFactory
     {
         $timeout = Arr::get($config, self::CONFIG_OPTIONS.'.channel_rpc_timeout');
         if (is_numeric($timeout)) {
-            $connectionConfig->setChannelRPCTimeout((float)$timeout);
+            $connectionConfig->setChannelRPCTimeout((float) $timeout);
         }
     }
 

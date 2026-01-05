@@ -6,4 +6,3 @@ composer.lock
 phpunit.xml
 .phpunit.*
 .php_cs.cache
-.phpunit.cache

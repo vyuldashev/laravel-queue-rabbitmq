@@ -11,6 +11,7 @@ class TestJobCallService implements ShouldQueue
     use Dispatchable, Queueable;
 
     public $service;
+
     public $method;
 
     public function __construct(string $service, string $method)

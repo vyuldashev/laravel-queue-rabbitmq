@@ -4,7 +4,6 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional;
 
 use Illuminate\Support\Str;
 use PhpAmqpLib\Exchange\AMQPExchangeType;
-use PhpAmqpLib\Wire\AMQPTable;
 use PHPUnit\Framework\Attributes\TestWith;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional\TestCase as BaseTestCase;
@@ -320,7 +319,7 @@ class RabbitMQQueueTest extends BaseTestCase
         $actual = $this->callMethod($queue, 'getDelayQueueArguments', [$name, $ttl]);
         $expected = [
             'x-dead-letter-exchange' => '',
-            'x-dead-letter-routing-key' => $name
+            'x-dead-letter-routing-key' => $name,
         ];
         $this->assertEquals(array_keys($expected), array_keys($actual));
         $this->assertEquals(array_values($expected), array_values($actual));

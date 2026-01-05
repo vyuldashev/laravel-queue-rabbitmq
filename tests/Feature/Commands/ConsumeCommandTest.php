@@ -25,13 +25,13 @@ class ConsumeCommandTest extends TestCase
 
         $service = $this->createMock(TestJob::class);
         $serviceName = Str::random();
-        $this->app->singleton($serviceName, fn() => $service);
+        $this->app->singleton($serviceName, fn () => $service);
         $service
             ->expects($this->once())
             ->method('handle');
 
         Queue::push(new TestJobCallService($serviceName, 'handle'), '', $queueNameAndConnection);
-        $blocking = (int)$blocking;
+        $blocking = (int) $blocking;
         $this->artisan("rabbitmq:consume $queueNameAndConnection --max-jobs=1 --blocking=$blocking");
     }
 
@@ -49,14 +49,14 @@ class ConsumeCommandTest extends TestCase
         // First job does nothing
         $service1 = $this->createMock(TestJob::class);
         $serviceName1 = Str::random();
-        $this->app->singleton($serviceName1, fn() => $service1);
+        $this->app->singleton($serviceName1, fn () => $service1);
         $service1
             ->expects($this->once())
             ->method('handle');
         Queue::push(new TestJobCallService($serviceName1, 'handle'), '', $queueNameAndConnection);
 
         // Second job must fail first time (by breaking channel) and be success second time
-        $service2 = (object)[];
+        $service2 = (object) [];
         $numberOfCalls = 0;
         $service2->callback = function () use (&$numberOfCalls, $connection) {
             $numberOfCalls++;
@@ -65,11 +65,11 @@ class ConsumeCommandTest extends TestCase
             }
         };
         $serviceName2 = Str::random();
-        $this->app->singleton($serviceName2, fn() => $service2);
+        $this->app->singleton($serviceName2, fn () => $service2);
 
         Queue::push(new TestJobCallService($serviceName2, 'callback'), '', $queueNameAndConnection);
 
-        $blocking = (int)$blocking;
+        $blocking = (int) $blocking;
         $this->artisan("rabbitmq:consume $queueNameAndConnection --max-jobs=2 --blocking=$blocking --auto-reconnect=1 --verbose-messages=1 --init-queue=1");
         $this->assertEquals(2, $numberOfCalls);
     }
@@ -96,7 +96,7 @@ class ConsumeCommandTest extends TestCase
         $connection = Queue::connection($queueNameAndConnection);
 
         $port = random_int(10000, 50000);
-        $pathToSocksFile = __DIR__ . '/../../Script/socket_fake.php';
+        $pathToSocksFile = __DIR__.'/../../Script/socket_fake.php';
         $descriptors = [
             ['pipe', 'r'], // stdin
             ['pipe', 'w'], // stdout
@@ -105,12 +105,12 @@ class ConsumeCommandTest extends TestCase
         $proc = proc_open("php $pathToSocksFile $port", $descriptors, $pipes);
         sleep(1);
         $status = proc_get_status($proc);
-        if (!$status['running']) {
-            throw new \Exception('Cant make fake socket' . fread($pipes[1], 8192));
+        if (! $status['running']) {
+            throw new \Exception('Cant make fake socket'.fread($pipes[1], 8192));
         }
 
         try {
-            $service = (object)[];
+            $service = (object) [];
             $numberOfCalls1 = 0;
             // Listen and do nothing
             $service->callback1 = function () use (&$numberOfCalls1, $connection, $port) {
@@ -134,7 +134,7 @@ class ConsumeCommandTest extends TestCase
                 $numberOfCalls2++;
             };
             $serviceName = Str::random();
-            $this->app->singleton($serviceName, fn() => $service);
+            $this->app->singleton($serviceName, fn () => $service);
             $connection->push(new TestJobCallService($serviceName, 'callback1'), '', $queueNameAndConnection);
             $connection->push(new TestJobCallService($serviceName, 'callback2'), '', $queueNameAndConnection);
 

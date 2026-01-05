@@ -60,8 +60,8 @@ class ConsumeCommand extends WorkCommand
         $consumer->setBlocking($this->booleanOption('blocking'));
         $consumer->setInitQueue($this->booleanOption('init-queue'));
         $consumer->setAutoReconnect($this->booleanOption('auto-reconnect'));
-        $consumer->setAutoReconnectPause((float)$this->option('auto-reconnect-pause'));
-        $consumer->setAliveCheck((float)$this->option('alive-check'));
+        $consumer->setAutoReconnectPause((float) $this->option('auto-reconnect-pause'));
+        $consumer->setAliveCheck((float) $this->option('alive-check'));
 
         $consumer->setInteractWithIO($this);
         $this->useVerboseForMessages = $this->booleanOption('verbose-messages');
@@ -99,6 +99,7 @@ class ConsumeCommand extends WorkCommand
     {
         if ($this->useVerboseForMessages) {
             parent::listenForEvents();
+
             return;
         }
 
