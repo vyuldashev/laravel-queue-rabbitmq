@@ -97,7 +97,7 @@ class ConsumeCommand extends WorkCommand
      */
     protected function listenForEvents()
     {
-        if ($this->useVerboseForMessages) {
+        if (! $this->useVerboseForMessages) {
             parent::listenForEvents();
 
             return;
