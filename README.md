@@ -403,7 +403,7 @@ class RabbitMQQueue extends BaseRabbitMQQueue
 ### Default Queue
 
 The connection does use a default queue with value 'default', when no queue is provided by laravel.
-It is possible to change te default queue by adding an extra parameter in the connection config.
+It is possible to change the default queue by adding an extra parameter in the connection config.
 
 ```php
 'connections' => [
