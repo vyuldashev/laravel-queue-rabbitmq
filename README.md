@@ -584,6 +584,50 @@ There are two ways of consuming messages.
 
 2. `rabbitmq:consume` command which is provided by this package. This command utilizes `basic_consume` and is more performant than `basic_get` by ~2x, but does not support multiple queues.
 
+### Getting performance and durability
+To get the best performance and durability you must use option 2, and you need to extend the base config and use some extra options in the command.
+
+The command to execute:
+```bash
+  rabbitmq:consume --blocking=1 --auto-reconnect=1 --alive-check=30 --init-queue=1 --verbose-messages=1 --prefetch-count=1 
+```
+- `--blocking=1` is used to use blocking waiting mechanism [performance] (STRONGLY RECOMMENDED)
+- `--auto-reconnect=1` is used to auto reconnect if something is wrong with the connection [durability] (recommended)
+- `--alive-check=30` is used to custom check if connection is stuck [durability] (recommended with `blocking=1` if you have virtualization/proxies)
+- `--init-queue=1` is used to auto create queue before consuming [durability] (recommended)
+- `--verbose-messages=1` is used to not write anything about processed messages [performance] (not necessary)
+- `--prefetch-count=1` is used to limit number of messages prefetched [durability] (not necessary)
+
+
+The config to provide:
+```php
+'connections' => [
+    // ...
+
+    'rabbitmq' => [
+        // ...
+
+        'options' => [
+            // ...            
+            'queue' => [
+                'use_expiration_for_delayed_queues' => true // To create only one later-queue for any TTL
+                'declare_full_route' => true // To auto-init full route of message if you need both queue + exchange
+                'retries' => [ // To enable retries if the queue fails to push
+                    'enabled' => true,
+                    'max' => 5, // number of retries
+                    'pause_micro_seconds' => 1e6 // pause between retries
+                ],
+                
+                'channel_rpc_timeout' => 3 // To make custom alive-check work (required with `blocking=1` and --alive-check=N`)
+                'keepalive' => true // To keep the connection alive (STRONGLY RECOMMENDED with `blocking=1`)
+            ]
+        ],
+    ],
+
+    // ...    
+],
+```
+
 ## Testing
 
 Setup RabbitMQ using `docker-compose`:

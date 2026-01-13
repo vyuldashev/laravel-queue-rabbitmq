@@ -4,6 +4,7 @@ namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional;
 
 use Illuminate\Support\Str;
 use PhpAmqpLib\Exchange\AMQPExchangeType;
+use PHPUnit\Framework\Attributes\TestWith;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Functional\TestCase as BaseTestCase;
 
@@ -202,8 +203,11 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertTrue($this->callProperty($queue, 'rabbitMQConfig')->isQuorum());
     }
 
-    public function testDeclareDeleteExchange(): void
+    #[TestWith([false])]
+    #[TestWith([true])]
+    public function testDeclareDeleteExchange(bool $cache): void
     {
+        $this->app['config']->set('queue.connections.rabbitmq.options.queue.cache_declared', $cache);
         $queue = $this->connection();
 
         $name = Str::random();
@@ -212,13 +216,18 @@ class RabbitMQQueueTest extends BaseTestCase
 
         $queue->declareExchange($name);
         $this->assertTrue($queue->isExchangeExists($name));
+        $this->assertEquals($cache, $this->callMethod($queue, 'isExchangeDeclared', [$name]));
 
         $queue->deleteExchange($name);
+        $this->assertFalse($this->callMethod($queue, 'isExchangeDeclared', [$name]));
         $this->assertFalse($queue->isExchangeExists($name));
     }
 
-    public function testDeclareDeleteQueue(): void
+    #[TestWith([false])]
+    #[TestWith([true])]
+    public function testDeclareDeleteQueue(bool $cache): void
     {
+        $this->app['config']->set('queue.connections.rabbitmq.options.queue.cache_declared', $cache);
         $queue = $this->connection();
 
         $name = Str::random();
@@ -227,9 +236,37 @@ class RabbitMQQueueTest extends BaseTestCase
 
         $queue->declareQueue($name);
         $this->assertTrue($queue->isQueueExists($name));
+        $this->assertEquals($cache, $this->callMethod($queue, 'isQueueDeclared', [$name]));
 
         $queue->deleteQueue($name);
+        $this->assertFalse($this->callMethod($queue, 'isQueueDeclared', [$name]));
         $this->assertFalse($queue->isQueueExists($name));
+    }
+
+    public function testDeclareQueueByConfig(): void
+    {
+        $durable = false;
+        $autoDelete = true;
+        $this->app['config']->set('queue.connections.rabbitmq.options.queue.flags', [
+            'durable' => $durable,
+            'auto_delete' => $autoDelete,
+        ]);
+
+        $queue = $this->connection();
+        $name = Str::random();
+        $this->assertFalse($queue->isQueueExists($name));
+
+        $queue->declareQueueByConfig($name);
+        // No exception expected
+        $res = $queue->getChannel()->queue_declare(
+            $name,
+            false,
+            $durable,
+            false,
+            $autoDelete,
+            false
+        );
+        $this->assertIsArray($res);
     }
 
     public function testQueueArguments(): void
@@ -274,6 +311,7 @@ class RabbitMQQueueTest extends BaseTestCase
 
     public function testDelayQueueArguments(): void
     {
+        $this->app['config']->set('queue.connections.rabbitmq.options.queue.use_expiration_for_delayed_queues', true);
         $name = Str::random();
         $ttl = 12000;
 
@@ -282,8 +320,6 @@ class RabbitMQQueueTest extends BaseTestCase
         $expected = [
             'x-dead-letter-exchange' => '',
             'x-dead-letter-routing-key' => $name,
-            'x-message-ttl' => $ttl,
-            'x-expires' => $ttl * 2,
         ];
         $this->assertEquals(array_keys($expected), array_keys($actual));
         $this->assertEquals(array_values($expected), array_values($actual));
