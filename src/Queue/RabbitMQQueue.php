@@ -482,6 +482,37 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     }
 
     /**
+     * Declare exchange, queue, and binding for a consumer.
+     *
+     * This ensures consumers can start even when no jobs have been dispatched.
+     * Unlike declareDestination() which is used during publishing, this method
+     * always declares the queue and creates the binding when an exchange is configured.
+     *
+     * @throws AMQPProtocolChannelException
+     */
+    public function declareConsumerDestination(?string $queue = null): void
+    {
+        $queue = $this->getQueue($queue);
+        $exchange = $this->getExchange();
+        $exchangeType = $this->getExchangeType();
+
+        // Declare exchange if configured
+        if ($exchange && ! $this->isExchangeExists($exchange)) {
+            $this->declareExchange($exchange, $exchangeType);
+        }
+
+        // Always declare the queue for consumers
+        if (! $this->isQueueExists($queue)) {
+            $this->declareQueue($queue, true, false, $this->getQueueArguments($queue));
+        }
+
+        // Bind queue to exchange if exchange is configured
+        if ($exchange) {
+            $this->bindQueue($queue, $exchange, $this->getRoutingKey($queue));
+        }
+    }
+
+    /**
      * Purge the queue of messages.
      */
     public function purge(?string $queue = null): void
