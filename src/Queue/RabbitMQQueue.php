@@ -597,7 +597,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     /**
      * Get the Queue arguments.
      */
-    protected function getQueueArguments(string $destination): array
+    public function getQueueArguments(string $destination, ?string $failedExchange = null): array
     {
         $arguments = [];
 
@@ -610,7 +610,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         }
 
         if ($this->getRabbitMQConfig()->isRerouteFailed()) {
-            $arguments['x-dead-letter-exchange'] = $this->getFailedExchange();
+            $arguments['x-dead-letter-exchange'] = $this->getFailedExchange($failedExchange);
             $arguments['x-dead-letter-routing-key'] = $this->getFailedRoutingKey($destination);
         }
 
