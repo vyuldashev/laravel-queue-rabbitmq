@@ -6,6 +6,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Str;
 use Laravel\Horizon\Events\JobDeleted;
+use Laravel\Horizon\Events\JobPending;
 use Laravel\Horizon\Events\JobPushed;
 use Laravel\Horizon\Events\JobReserved;
 use Laravel\Horizon\JobPayload;
@@ -49,6 +50,8 @@ class RabbitMQQueue extends BaseRabbitMQQueue
     public function pushRaw($payload, $queue = null, array $options = []): int|string|null
     {
         $payload = (new JobPayload($payload))->prepare($this->lastPushed ?? null)->value;
+
+        $this->event($this->getQueue($queue), new JobPending($payload));
 
         return tap(parent::pushRaw($payload, $queue, $options), function () use ($queue, $payload): void {
             $this->event($this->getQueue($queue), new JobPushed($payload));
