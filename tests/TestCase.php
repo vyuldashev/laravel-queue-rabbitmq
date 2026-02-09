@@ -10,6 +10,11 @@ use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 abstract class TestCase extends BaseTestCase
 {
+    /**
+     * Will result in a fatal error if removed - don't know why.
+     */
+    public static $latestResponse = null;
+
     protected function getPackageProviders($app): array
     {
         return [
