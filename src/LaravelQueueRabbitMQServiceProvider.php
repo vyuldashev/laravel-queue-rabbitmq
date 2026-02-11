@@ -72,6 +72,6 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
 
         $this->publishes([
             __DIR__.'/../config/rabbitmq.php' => config_path('rabbitmq.php'),
-        ], 'config');
+        ], 'rabbitmq-config');
     }
 }
