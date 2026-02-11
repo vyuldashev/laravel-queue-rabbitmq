@@ -15,21 +15,21 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->mergeConfigFrom(
-            __DIR__.'/../config/rabbitmq.php',
-            'queue.connections.rabbitmq'
-        );
+        $configPath = with(config_path('rabbitmq.php'), function (string $path) {
+            return file_exists($path) ? $path : __DIR__ . '/../config/rabbitmq.php';
+        });
+        $this->replaceConfigRecursivelyFrom($configPath, 'queue.connections.rabbitmq');
 
         if ($this->app->runningInConsole()) {
-            $this->app->singleton('rabbitmq.consumer', function () {
+            $this->app->singleton('rabbitmq.consumer', function ($app) {
                 $isDownForMaintenance = function () {
                     return $this->app->isDownForMaintenance();
                 };
 
                 return new Consumer(
-                    $this->app['queue'],
-                    $this->app['events'],
-                    $this->app[ExceptionHandler::class],
+                    $app['queue'],
+                    $app['events'],
+                    $app[ExceptionHandler::class],
                     $isDownForMaintenance
                 );
             });
@@ -67,5 +67,9 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
         $queue->addConnector('rabbitmq', function () {
             return new RabbitMQConnector($this->app['events']);
         });
+
+        $this->publishes([
+            __DIR__ . '/../config/rabbitmq.php' => config_path('rabbitmq.php'),
+        ], 'config');
     }
 }

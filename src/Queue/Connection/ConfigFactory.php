@@ -31,6 +31,11 @@ class ConfigFactory
                 true)
             );
 
+            // Set the connection name if specified
+            if ($connectionName = value(Arr::get($config, 'connection_name'), $config)) {
+                $connectionConfig->setConnectionName($connectionName);
+            }
+
             if ($connectionConfig->isSecure()) {
                 self::getSLLOptionsFromConfig($connectionConfig, $config);
             }

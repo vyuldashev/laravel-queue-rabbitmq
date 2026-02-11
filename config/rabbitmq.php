@@ -9,7 +9,7 @@ return [
 
     'driver' => 'rabbitmq',
     'queue' => env('RABBITMQ_QUEUE', 'default'),
-    'connection' => 'default',
+    'connection' => env('RABBITMQ_CONNECTION', 'default'),
 
     'hosts' => [
         [
