@@ -16,7 +16,7 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
     public function register(): void
     {
         $configPath = with(config_path('rabbitmq.php'), function (string $path) {
-            return file_exists($path) ? $path : __DIR__ . '/../config/rabbitmq.php';
+            return file_exists($path) ? $path : __DIR__.'/../config/rabbitmq.php';
         });
         $this->replaceConfigRecursivelyFrom($configPath, 'queue.connections.rabbitmq');
 
@@ -69,7 +69,7 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
         });
 
         $this->publishes([
-            __DIR__ . '/../config/rabbitmq.php' => config_path('rabbitmq.php'),
+            __DIR__.'/../config/rabbitmq.php' => config_path('rabbitmq.php'),
         ], 'config');
     }
 }
