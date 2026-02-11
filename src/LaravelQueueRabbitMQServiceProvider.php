@@ -18,7 +18,9 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
         $configPath = with(config_path('rabbitmq.php'), function (string $path) {
             return file_exists($path) ? $path : __DIR__.'/../config/rabbitmq.php';
         });
-        $this->replaceConfigRecursivelyFrom($configPath, 'queue.connections.rabbitmq');
+        method_exists($this, 'replaceConfigRecursivelyFrom')
+            ? $this->replaceConfigRecursivelyFrom($configPath, 'queue.connections.rabbitmq')
+            : $this->mergeConfigFrom($configPath, 'queue.connections.rabbitmq');
 
         if ($this->app->runningInConsole()) {
             $this->app->singleton('rabbitmq.consumer', function ($app) {
