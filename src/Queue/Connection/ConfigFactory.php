@@ -35,7 +35,7 @@ class ConfigFactory
             // Set the connection name if specified
             if ($name = Arr::get($config, 'connection_name')) {
                 $connectionConfig->setConnectionName(
-                    value(is_callable($name) ? Closure::fromCallable($name) : $name, $config)
+                    value(is_callable($name) ? Closure::fromCallable($name) : $name, $config) ?: ''
                 );
             }
 
