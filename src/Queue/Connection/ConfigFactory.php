@@ -2,6 +2,7 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Connection;
 
+use Closure;
 use Illuminate\Support\Arr;
 use PhpAmqpLib\Connection\AMQPConnectionConfig;
 
@@ -30,6 +31,13 @@ class ConfigFactory
                 [true, 1, '1', 'true', 'yes'],
                 true)
             );
+
+            // Set the connection name if specified
+            if ($name = Arr::get($config, 'connection_name')) {
+                $connectionConfig->setConnectionName(
+                    value(is_callable($name) ? Closure::fromCallable($name) : $name, $config) ?: ''
+                );
+            }
 
             if ($connectionConfig->isSecure()) {
                 self::getSLLOptionsFromConfig($connectionConfig, $config);
