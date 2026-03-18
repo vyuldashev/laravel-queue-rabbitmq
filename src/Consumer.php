@@ -197,6 +197,7 @@ class Consumer extends Worker
      *
      * @param  int  $status
      * @param  WorkerOptions|null  $options
+     * @param  string|null  $reason
      * @return int
      */
     public function stop($status = 0, $options = null, $reason = null)

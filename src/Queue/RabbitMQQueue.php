@@ -96,38 +96,6 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
 
     /**
      * {@inheritdoc}
-     */
-    public function pendingSize($queue = null): int
-    {
-        return $this->size($queue);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function delayedSize($queue = null): int
-    {
-        return 0;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function reservedSize($queue = null): int
-    {
-        return 0;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function creationTimeOfOldestPendingJob($queue = null): ?int
-    {
-        return null;
-    }
-
-    /**
-     * {@inheritdoc}
      *
      * @throws AMQPProtocolChannelException
      */
