@@ -42,7 +42,7 @@ class LaravelQueueRabbitMQServiceProvider extends ServiceProvider
             });
 
             $this->commands([
-                Console\ConsumeCommand::class,
+                ConsumeCommand::class,
             ]);
         }
 
