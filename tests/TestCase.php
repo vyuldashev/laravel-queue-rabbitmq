@@ -15,45 +15,42 @@ abstract class TestCase extends BaseTestCase
      * Compatibility shim for newer PHPUnit / Testbench combinations that
      * introspect this static property during test bootstrap.
      */
-    protected static ?TestResponse $latestResponse = null;
+    public static ?TestResponse $latestResponse = null;
 
     protected function getPackageProviders($app): array
     {
-        return [
-            LaravelQueueRabbitMQServiceProvider::class,
-        ];
+        return [LaravelQueueRabbitMQServiceProvider::class];
     }
 
     protected function getEnvironmentSetUp($app): void
     {
-        $app['config']->set('queue.default', 'rabbitmq');
-        $app['config']->set('queue.connections.rabbitmq', [
-            'driver' => 'rabbitmq',
-            'queue' => 'default',
-            'connection' => AMQPLazyConnection::class,
+        $app["config"]->set("queue.default", "rabbitmq");
+        $app["config"]->set("queue.connections.rabbitmq", [
+            "driver" => "rabbitmq",
+            "queue" => "default",
+            "connection" => AMQPLazyConnection::class,
 
-            'hosts' => [
+            "hosts" => [
                 [
-                    'host' => getenv('HOST'),
-                    'port' => getenv('PORT'),
-                    'vhost' => '/',
-                    'user' => 'guest',
-                    'password' => 'guest',
+                    "host" => getenv("HOST"),
+                    "port" => getenv("PORT"),
+                    "vhost" => "/",
+                    "user" => "guest",
+                    "password" => "guest",
                 ],
             ],
 
-            'options' => [
-                'ssl_options' => [
-                    'cafile' => null,
-                    'local_cert' => null,
-                    'local_key' => null,
-                    'verify_peer' => false,
-                    'passphrase' => null,
+            "options" => [
+                "ssl_options" => [
+                    "cafile" => null,
+                    "local_cert" => null,
+                    "local_key" => null,
+                    "verify_peer" => false,
+                    "passphrase" => null,
                 ],
             ],
 
-            'worker' => 'default',
-
+            "worker" => "default",
         ]);
     }
 
