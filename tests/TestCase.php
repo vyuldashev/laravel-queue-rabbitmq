@@ -3,7 +3,6 @@
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Tests;
 
 use Illuminate\Support\Facades\Queue;
-use Illuminate\Testing\TestResponse;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 use PhpAmqpLib\Connection\AMQPLazyConnection;
 use VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider;
@@ -15,7 +14,7 @@ abstract class TestCase extends BaseTestCase
      * Compatibility shim for newer PHPUnit / Testbench combinations that
      * introspect this static property during test bootstrap.
      */
-    public static ?TestResponse $latestResponse = null;
+    public static $latestResponse = null;
 
     protected function getPackageProviders($app): array
     {
