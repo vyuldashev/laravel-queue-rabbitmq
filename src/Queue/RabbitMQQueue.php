@@ -222,6 +222,9 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     }
 
     /**
+     * @throws AMQPChannelClosedException
+     * @throws AMQPConnectionClosedException
+     * @throws AMQPConnectionBlockedException
      * @throws AMQPProtocolChannelException
      */
     protected function publishBatch($jobs, $data = '', $queue = null): void
@@ -782,6 +785,11 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         $this->getChannel()->basic_publish($msg, $exchange, $destination, $mandatory, $immediate, $ticket);
     }
 
+    /**
+     * @throws AMQPChannelClosedException
+     * @throws AMQPConnectionClosedException
+     * @throws AMQPConnectionBlockedException
+     */
     protected function batchPublish(): void
     {
         $this->getChannel()->publish_batch();
