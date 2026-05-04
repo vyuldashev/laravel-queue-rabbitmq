@@ -32,14 +32,7 @@ class Consumer extends Worker
     /** @var AMQPChannel */
     protected $channel;
 
-    /**
-     * The job currently being processed.
-     *
-     * Must remain public to match Illuminate\Queue\Worker::$currentJob.
-     *
-     * @var object|null
-     */
-    public $currentJob;
+    protected $currentJob;
 
     public function setContainer(Container $value): void
     {
