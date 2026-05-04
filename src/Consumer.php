@@ -2,12 +2,10 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ;
 
-use Exception;
 use Illuminate\Container\Container;
 use Illuminate\Queue\Worker;
 use Illuminate\Queue\WorkerOptions;
 use PhpAmqpLib\Channel\AMQPChannel;
-use PhpAmqpLib\Exception\AMQPRuntimeException;
 use PhpAmqpLib\Message\AMQPMessage;
 use Throwable;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
@@ -77,14 +75,6 @@ class Consumer extends Worker
      */
     public function daemon($connectionName, $queue, WorkerOptions $options)
     {
-        if ($this->supportsAsyncSignals()) {
-            $this->listenForSignals();
-        }
-
-        $lastRestart = $this->getTimestampOfLastQueueRestart();
-
-        [$startTime, $jobsProcessed] = [hrtime(true) / 1e9, 0];
-
         /** @var RabbitMQQueue $connection */
         $connection = $this->manager->connection($connectionName);
 
@@ -96,7 +86,6 @@ class Consumer extends Worker
             false
         );
 
-        $jobClass = $connection->getJobClass();
         $arguments = [];
         if ($this->maxPriority) {
             $arguments['priority'] = ['I', $this->maxPriority];
@@ -109,82 +98,19 @@ class Consumer extends Worker
             false,
             false,
             false,
-            function (AMQPMessage $message) use ($connection, $options, $connectionName, $queue, $jobClass, &$jobsProcessed): void {
-                $job = new $jobClass(
-                    $this->container,
-                    $connection,
-                    $message,
-                    $connectionName,
-                    $queue
-                );
-
-                $this->currentJob = $job;
-
-                if ($this->supportsAsyncSignals()) {
-                    $this->registerTimeoutHandler($job, $options);
-                }
-
-                $jobsProcessed++;
-
-                $this->runJob($job, $connectionName, $options);
-
-                if ($this->supportsAsyncSignals()) {
-                    $this->resetTimeoutHandler();
-                }
-
-                if ($options->rest > 0) {
-                    $this->sleep($options->rest);
-                }
+            function (AMQPMessage $message) use ($connection): void {
+                // Store the message in the queue for pop() to retrieve
+                $connection->setPendingMessage($message);
             },
             null,
             $arguments
         );
 
-        while ($this->channel->is_consuming()) {
-            // Before reserving any jobs, we will make sure this queue is not paused and
-            // if it is we will just pause this worker for a given amount of time and
-            // make sure we do not need to kill this worker process off completely.
-            if (! $this->daemonShouldRun($options, $connectionName, $queue)) {
-                $this->pauseWorker($options, $lastRestart);
+        // Mark the queue as using consumer mode
+        $connection->setConsumerMode(true);
 
-                continue;
-            }
-
-            // If the daemon should run (not in maintenance mode, etc.), then we can wait for a job.
-            try {
-                $this->channel->wait(null, true, (int) $options->timeout);
-            } catch (AMQPRuntimeException $exception) {
-                $this->exceptions->report($exception);
-
-                $this->kill(self::EXIT_ERROR, $options);
-            } catch (Exception|Throwable $exception) {
-                $this->exceptions->report($exception);
-
-                $this->stopWorkerIfLostConnection($exception);
-            }
-
-            // If no job is got off the queue, we will need to sleep the worker.
-            if ($this->currentJob === null) {
-                $this->sleep($options->sleep);
-            }
-
-            // Finally, we will check to see if we have exceeded our memory limits or if
-            // the queue should restart based on other indications. If so, we'll stop
-            // this worker and let whatever is "monitoring" it restart the process.
-            $status = $this->stopIfNecessary(
-                $options,
-                $lastRestart,
-                $startTime,
-                $jobsProcessed,
-                $this->currentJob
-            );
-
-            if (! is_null($status)) {
-                return $this->stop($status, $options);
-            }
-
-            $this->currentJob = null;
-        }
+        // Let Laravel handle the daemon loop.
+        return parent::daemon($connectionName, $queue, $options);
     }
 
     /**

@@ -40,6 +40,16 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     protected ?AMQPChannel $channel = null;
 
     /**
+     * Pending message received from basic_consume callback.
+     */
+    protected ?AMQPMessage $pendingMessage = null;
+
+    /**
+     * Whether the queue is using basic_consume (consumer mode).
+     */
+    protected bool $consumerMode = false;
+
+    /**
      * List of already declared exchanges.
      */
     protected array $exchanges = [];
@@ -261,6 +271,46 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
 
             $job = $this->getJobClass();
 
+            if ($this->consumerMode) {
+                if (null !== $this->pendingMessage) {
+                    $message = $this->pendingMessage;
+                    $this->pendingMessage = null;
+
+                    return $this->currentJob = new $job(
+                        $this->container,
+                        $this,
+                        $message,
+                        $this->connectionName,
+                        $queue
+                    );
+                }
+
+                // Wait for a message from callback.
+                if ($this->channel) {
+                    try {
+                        $this->channel->wait(null, false, 1);
+                    } catch (AMQPRuntimeException $exception) {
+                        // Timeout or other wait error.
+                    }
+
+                    // Check again if a message arrived
+                    if (null !== $this->pendingMessage) {
+                        $message = $this->pendingMessage;
+                        $this->pendingMessage = null;
+
+                        return $this->currentJob = new $job(
+                            $this->container,
+                            $this,
+                            $message,
+                            $this->connectionName,
+                            $queue
+                        );
+                    }
+                }
+
+                return null;
+            }
+
             /** @var AMQPMessage|null $message */
             if ($message = $this->getChannel()->basic_get($queue)) {
                 return $this->currentJob = new $job(
@@ -334,6 +384,22 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
         );
 
         return $job;
+    }
+
+    /**
+     * Set a pending message from basic_consume callback.
+     */
+    public function setPendingMessage(AMQPMessage $message): void
+    {
+        $this->pendingMessage = $message;
+    }
+
+    /**
+     * Mark the queue as using consumer mode (basic_consume).
+     */
+    public function setConsumerMode(bool $active): void
+    {
+        $this->consumerMode = $active;
     }
 
     /**
