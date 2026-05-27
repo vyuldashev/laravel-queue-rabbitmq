@@ -2,37 +2,56 @@
 
 namespace VladimirYuldashev\LaravelQueueRabbitMQ\Console;
 
+use Illuminate\Console\Parser;
+use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Queue\Console\WorkCommand;
+use Illuminate\Queue\Worker;
 use Illuminate\Support\Str;
+use Symfony\Component\Console\Input\InputOption;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Consumer;
 
 class ConsumeCommand extends WorkCommand
 {
-    protected $signature = 'rabbitmq:consume
-                            {connection? : The name of the queue connection to work}
-                            {--name=default : The name of the consumer}
-                            {--queue= : The name of the queue to work. Please notice that there is no support for multiple queues}
-                            {--once : Only process the next job on the queue}
-                            {--stop-when-empty : Stop when the queue is empty}
-                            {--delay=0 : The number of seconds to delay failed jobs (Deprecated)}
-                            {--backoff=0 : The number of seconds to wait before retrying a job that encountered an uncaught exception}
-                            {--max-jobs=0 : The number of jobs to process before stopping}
-                            {--max-time=0 : The maximum number of seconds the worker should run}
-                            {--force : Force the worker to run even in maintenance mode}
-                            {--memory=128 : The memory limit in megabytes}
-                            {--sleep=3 : Number of seconds to sleep when no job is available}
-                            {--rest=0 : Number of seconds to rest between jobs}
-                            {--timeout=60 : The number of seconds a child process can run}
-                            {--tries=1 : Number of times to attempt a job before logging it failed}
-                            {--json : Output the queue worker information as JSON}
+    protected const NAME = 'rabbitmq:consume';
 
+    /**
+     * The RabbitMQ-specific options added on top of the inherited WorkCommand signature.
+     * The leading name is a parser-required throwaway; only the options are used.
+     */
+    protected const RABBITMQ_SIGNATURE = self::NAME.'
                             {--max-priority=}
                             {--consumer-tag}
                             {--prefetch-size=0}
-                            {--prefetch-count=1000}
-                           ';
+                            {--prefetch-count=1000}';
 
     protected $description = 'Consume messages';
+
+    public function __construct(Worker $worker, Cache $cache)
+    {
+        // Inherit WorkCommand's signature so we pick up every option Laravel adds upstream.
+        parent::__construct($worker, $cache);
+
+        $this->setName(self::NAME);
+
+        // Add our options, skipping any name the parent already defines to avoid a clash.
+        foreach ($this->rabbitmqOptions() as $option) {
+            if (! $this->getDefinition()->hasOption($option->getName())) {
+                $this->getDefinition()->addOption($option);
+            }
+        }
+    }
+
+    /**
+     * Parse the RabbitMQ signature DSL into InputOption objects.
+     *
+     * @return array<int, InputOption>
+     */
+    protected function rabbitmqOptions(): array
+    {
+        [, , $options] = Parser::parse(self::RABBITMQ_SIGNATURE);
+
+        return $options;
+    }
 
     public function handle(): void
     {
