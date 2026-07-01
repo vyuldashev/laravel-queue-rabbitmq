@@ -1,6 +1,6 @@
 {
-    "name": "vladimir-yuldashev/laravel-queue-rabbitmq",
-    "description": "RabbitMQ driver for Laravel Queue. Supports Laravel Horizon.",
+    "name": "vincedom/laravel-queue-rabbitmq",
+    "description": "[Fork temporaire] RabbitMQ driver for Laravel Queue. Supports Laravel Horizon.",
     "license": "MIT",
     "authors": [
         {
@@ -8,6 +8,9 @@
             "email": "misterio92@gmail.com"
         }
     ],
+    "replace": {
+        "vladimir-yuldashev/laravel-queue-rabbitmq": "^13.0"
+    },
     "require": {
         "php": "^8.0",
         "ext-json": "*",

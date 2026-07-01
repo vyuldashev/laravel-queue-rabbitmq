@@ -1,3 +1,7 @@
+> ⚠️ **Temporary fork** of [vladimir-yuldashev/laravel-queue-rabbitmq](https://github.com/vyuldashev/laravel-queue-rabbitmq),
+> published as `vincedom/laravel-queue-rabbitmq` while waiting for the upstream PR ([#669](https://github.com/vyuldashev/laravel-queue-rabbitmq/pull/669)) to be merged.
+> Drop-in replacement (same PSR-4 namespace, `replace` declared). Will be marked `abandoned` once the PR is merged.
+
 RabbitMQ Queue driver for Laravel
 ======================
 [![Latest Stable Version](https://poser.pugx.org/vladimir-yuldashev/laravel-queue-rabbitmq/v/stable?format=flat-square)](https://packagist.org/packages/vladimir-yuldashev/laravel-queue-rabbitmq)
