@@ -8,6 +8,7 @@ use Illuminate\Queue\Worker;
 use Illuminate\Queue\WorkerOptions;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Exception\AMQPRuntimeException;
+use PhpAmqpLib\Exception\AMQPTimeoutException;
 use PhpAmqpLib\Message\AMQPMessage;
 use Throwable;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
@@ -28,6 +29,15 @@ class Consumer extends Worker
 
     /** @var int */
     protected $prefetchCount;
+
+    /**
+     * Seconds to block in channel wait() for a message before looping back to check
+     * signals/maintenance/restart/memory. Independent of WorkerOptions::$timeout, which
+     * is the per-job pcntl_alarm execution watchdog and has nothing to do with this.
+     *
+     * @var int
+     */
+    protected $waitTimeout = 3;
 
     /** @var AMQPChannel */
     protected $channel;
@@ -55,6 +65,11 @@ class Consumer extends Worker
     public function setPrefetchCount(int $value): void
     {
         $this->prefetchCount = $value;
+    }
+
+    public function setWaitTimeout(int $value): void
+    {
+        $this->waitTimeout = $value;
     }
 
     /**
@@ -97,8 +112,8 @@ class Consumer extends Worker
         //   1. Illuminate\Queue\Worker::$currentJob became public in Laravel 13.7,
         //      so redeclaring it on Consumer hits a visibility narrowing error.
         //   2. Worker::runJob() may reset $this->currentJob to null after each job,
-        //      which made the "if (currentJob === null) sleep" branch trigger after
-        //      every successful job and starved throughput (see #661).
+        //      which previously fed a stale/incorrect value into stopIfNecessary()
+        //      below and starved throughput (see #661).
         $currentJob = null;
 
         $this->channel->basic_consume(
@@ -150,8 +165,12 @@ class Consumer extends Worker
             }
 
             // If the daemon should run (not in maintenance mode, etc.), then we can wait for a job.
+            // Blocking on purpose (needed for heartbeat detection, see PR description); this also
+            // paces the loop now, so don't reintroduce non_blocking=true without a sleep() too.
             try {
-                $this->channel->wait(null, true, (int) $options->timeout);
+                $this->channel->wait(null, false, $this->waitTimeout);
+            } catch (AMQPTimeoutException $exception) {
+                // no messages within $waitTimeout - not an error, loop back around
             } catch (AMQPRuntimeException $exception) {
                 $this->exceptions->report($exception);
 
@@ -160,11 +179,6 @@ class Consumer extends Worker
                 $this->exceptions->report($exception);
 
                 $this->stopWorkerIfLostConnection($exception);
-            }
-
-            // If no job was consumed during this wait() cycle, sleep the worker.
-            if ($currentJob === null) {
-                $this->sleep($options->sleep);
             }
 
             // Finally, we will check to see if we have exceeded our memory limits or if
