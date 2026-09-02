@@ -22,7 +22,8 @@ class ConsumeCommand extends WorkCommand
                             {--max-priority=}
                             {--consumer-tag}
                             {--prefetch-size=0}
-                            {--prefetch-count=1000}';
+                            {--prefetch-count=1000}
+                            {--wait-timeout=3}';
 
     protected $description = 'Consume messages';
 
@@ -64,6 +65,7 @@ class ConsumeCommand extends WorkCommand
         $consumer->setMaxPriority((int) $this->option('max-priority'));
         $consumer->setPrefetchSize((int) $this->option('prefetch-size'));
         $consumer->setPrefetchCount((int) $this->option('prefetch-count'));
+        $consumer->setWaitTimeout((int) $this->option('wait-timeout'));
 
         parent::handle();
     }
