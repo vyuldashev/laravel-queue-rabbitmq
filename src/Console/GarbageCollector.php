@@ -103,7 +103,7 @@ class GarbageCollector extends Command
                     && !isset($dlqTargets[$queue->name])
                     && $messages === 0;
             })
-            ->pluck('name')
+            ->map(fn ($queue) => ['name' => $queue->name, 'type' => $queue->type ?? null])
             ->values()
             ->toArray();
 
@@ -113,9 +113,16 @@ class GarbageCollector extends Command
         ]);
 
         foreach ($queuesToRemove as $queue) {
+            $queueName = $queue['name'];
+            // RabbitMQ rejects if-empty/if-unused on quorum queues entirely
+            // (see https://github.com/rabbitmq/rabbitmq-server/issues/10543), so a plain
+            // unconditional delete is used for them instead — emptiness is already
+            // guaranteed by the messages === 0 filter above.
+            $deleteQuery = 'quorum' === ($queue['type'] ?? null) ? '' : '?if-empty=true&if-unused=true';
+
             try {
                 $client->delete(
-                    "{$scheme}$url/api/queues/%2F/{$queue}?if-empty=true&if-unused=true", // %2F stands for /
+                    "{$scheme}$url/api/queues/%2F/{$queueName}{$deleteQuery}", // %2F stands for /
                     [
                         'headers' => [
                             'Authorization' => 'Basic ' . base64_encode(
@@ -124,11 +131,11 @@ class GarbageCollector extends Command
                         ]
                     ]
                 );
-                $this->info("RabbitMQ. Delete $queue queue");
+                $this->info("RabbitMQ. Delete $queueName queue");
             } catch (\Throwable $exception) {
-                $this->warn("Was not able to remove $queue with error {$exception->getMessage()}");
+                $this->warn("Was not able to remove $queueName with error {$exception->getMessage()}");
                 logger()->warning('RabbitMQ Garbage Collector failed to remove queue', [
-                    'queue' => $queue,
+                    'queue' => $queueName,
                     'message' => $exception->getMessage(),
                     'trace' => $exception->getTraceAsString()
                 ]);
