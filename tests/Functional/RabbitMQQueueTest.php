@@ -309,5 +309,13 @@ class RabbitMQQueueTest extends BaseTestCase
         ];
         $this->assertEquals(array_keys($expected), array_keys($actual));
         $this->assertEquals(array_values($expected), array_values($actual));
+
+        $quorumArguments = $this->callMethod(
+            $this->connection('rabbitmq-with-quorum-options'),
+            'getDelayQueueArguments',
+            [$name, $ttl]
+        );
+        $this->assertSame('quorum', $quorumArguments['x-queue-type']);
+        $this->assertArrayNotHasKey('x-expires', $quorumArguments);
     }
 }
