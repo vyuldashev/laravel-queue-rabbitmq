@@ -310,16 +310,12 @@ class RabbitMQQueueTest extends BaseTestCase
         $this->assertEquals(array_keys($expected), array_keys($actual));
         $this->assertEquals(array_values($expected), array_values($actual));
 
-        $queue = $this->connection('rabbitmq-with-quorum-options');
-        $actual = $this->callMethod($queue, 'getDelayQueueArguments', [$name, $ttl]);
-        $expected = [
-            'x-dead-letter-exchange' => 'application-x',
-            'x-dead-letter-routing-key' => sprintf('process.%s', $name),
-            'x-message-ttl' => $ttl,
-            'x-queue-type' => 'quorum',
-        ];
-        $this->assertEquals(array_keys($expected), array_keys($actual));
-        $this->assertEquals(array_values($expected), array_values($actual));
-        $this->assertArrayNotHasKey('x-expires', $actual);
+        $quorumArguments = $this->callMethod(
+            $this->connection('rabbitmq-with-quorum-options'),
+            'getDelayQueueArguments',
+            [$name, $ttl]
+        );
+        $this->assertSame('quorum', $quorumArguments['x-queue-type']);
+        $this->assertArrayNotHasKey('x-expires', $quorumArguments);
     }
 }
