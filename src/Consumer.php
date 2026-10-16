@@ -173,7 +173,17 @@ class Consumer extends Worker
             // if it is we will just pause this worker for a given amount of time and
             // make sure we do not need to kill this worker process off completely.
             if (! $this->daemonShouldRun($options, $connectionName, $queue)) {
-                $this->pauseWorker($options, $lastRestart);
+                // Like Worker::pauseWorker(): sleep, then check whether the worker should stop, so
+                // that a paused worker still stops on SIGTERM, queue:restart and the limits.
+                // pauseWorker() itself is not called: some Laravel versions don't pass it the
+                // start time, and --max-time would then stop the worker at once.
+                $this->sleep($options->sleep > 0 ? $options->sleep : 1);
+
+                [$status, $reason] = $this->shouldStop($options, $lastRestart, $startTime, $jobsProcessed, $currentJob, $lastJobProcessedAt, $workerTracksJobs);
+
+                if (! is_null($status)) {
+                    return $this->stop($status, $options, $reason);
+                }
 
                 continue;
             }
@@ -199,16 +209,7 @@ class Consumer extends Worker
             // Finally, we will check to see if we have exceeded our memory limits or if
             // the queue should restart based on other indications. If so, we'll stop
             // this worker and let whatever is "monitoring" it restart the process.
-            if ($workerTracksJobs) {
-                $result = $this->stopIfNecessary($options, $lastRestart, $startTime, $currentJob);
-            } else {
-                // Laravel 11.53, 12.60 and 13.10 added the last argument for --stop-when-empty-for;
-                // older versions ignore it.
-                $result = $this->stopIfNecessary($options, $lastRestart, $startTime, $jobsProcessed, $currentJob, $lastJobProcessedAt);
-            }
-
-            // Laravel 11.52+, 12.59+ and 13.x return the exit status together with the stop reason.
-            [$status, $reason] = is_array($result) ? $result : [$result, null];
+            [$status, $reason] = $this->shouldStop($options, $lastRestart, $startTime, $jobsProcessed, $currentJob, $lastJobProcessedAt, $workerTracksJobs);
 
             if (! is_null($status)) {
                 return $this->stop($status, $options, $reason);
@@ -216,6 +217,26 @@ class Consumer extends Worker
 
             $currentJob = null;
         }
+    }
+
+    /**
+     * Ask Worker::stopIfNecessary() whether the worker should stop, in the form that the
+     * installed Laravel version expects.
+     *
+     * @return array{0: int|null, 1: mixed} the exit status, or null to go on, and the stop reason
+     */
+    protected function shouldStop(WorkerOptions $options, $lastRestart, float $startTime, int $jobsProcessed, $currentJob, ?float $lastJobProcessedAt, bool $workerTracksJobs): array
+    {
+        if ($workerTracksJobs) {
+            $result = $this->stopIfNecessary($options, $lastRestart, $startTime, $currentJob);
+        } else {
+            // Laravel 11.53, 12.60 and 13.10 added the last argument for --stop-when-empty-for;
+            // older versions ignore it.
+            $result = $this->stopIfNecessary($options, $lastRestart, $startTime, $jobsProcessed, $currentJob, $lastJobProcessedAt);
+        }
+
+        // Laravel 11.52+, 12.59+ and 13.x return the exit status together with the stop reason.
+        return is_array($result) ? $result : [$result, null];
     }
 
     /**

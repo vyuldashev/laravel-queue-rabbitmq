@@ -117,6 +117,34 @@ class ConsumeCommandTest extends TestCase
         $this->assertSame(1, $stopping->jobsProcessed);
     }
 
+    public function testConsumeInMaintenanceModeStillStopsOnMaxTime(): void
+    {
+        // A paused consumer that never checks whether to stop would block the test run:
+        // fail instead.
+        if (extension_loaded('pcntl')) {
+            pcntl_async_signals(true);
+            pcntl_signal(SIGALRM, function (): void {
+                throw new RuntimeException('rabbitmq:consume did not stop while the application was down');
+            });
+            pcntl_alarm(30);
+        }
+
+        $this->app->maintenanceMode()->activate([]);
+
+        try {
+            [$processed, $stopping] = $this->consume([]);
+        } finally {
+            $this->app->maintenanceMode()->deactivate();
+        }
+
+        $this->assertSame(0, $processed);
+        $this->assertSame(0, $stopping->status);
+
+        if (enum_exists(WorkerStopReason::class)) {
+            $this->assertSame(WorkerStopReason::MaxTimeExceeded, $stopping->reason);
+        }
+    }
+
     /**
      * Run rabbitmq:consume on the test queue and return the number of processed jobs
      * and the WorkerStopping event. --max-time stops the consumer if the stop
