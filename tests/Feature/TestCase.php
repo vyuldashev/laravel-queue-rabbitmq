@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use PhpAmqpLib\Exception\AMQPProtocolChannelException;
 use RuntimeException;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks\TestEncryptedJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\Mocks\TestJob;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCase as BaseTestCase;
@@ -47,6 +48,24 @@ abstract class TestCase extends BaseTestCase
         }
 
         parent::tearDown();
+    }
+
+    /**
+     * Pop a job, polling instead of sleeping a fixed time: publishing and requeueing are asynchronous on the broker.
+     */
+    protected function popWithin(RabbitMQQueue $queue, ?string $name = null, float $seconds = 5): ?RabbitMQJob
+    {
+        $deadline = microtime(true) + $seconds;
+
+        do {
+            if ($job = $queue->pop($name)) {
+                return $job;
+            }
+
+            usleep(50000);
+        } while (microtime(true) < $deadline);
+
+        return null;
     }
 
     public function testSizeDoesNotThrowExceptionOnUnknownQueue(): void

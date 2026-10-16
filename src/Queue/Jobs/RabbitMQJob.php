@@ -72,13 +72,14 @@ class RabbitMQJob extends Job implements JobContract
      */
     public function attempts(): int
     {
-        if (! $data = $this->getRabbitMQMessageHeaders()) {
-            return 1;
-        }
+        $headers = $this->getRabbitMQMessageHeaders() ?? [];
 
-        $laravelAttempts = (int) Arr::get($data, 'laravel.attempts', 0);
-
-        return $laravelAttempts + 1;
+        // "laravel.attempts" counts the runs before this message was (re)published by release().
+        // Quorum queues add "x-delivery-count" when the broker redelivers this same message,
+        // e.g. after the worker was killed by a timeout, so those runs are counted as well.
+        return (int) Arr::get($headers, 'laravel.attempts', 0)
+            + (int) Arr::get($headers, 'x-delivery-count', 0)
+            + 1;
     }
 
     /**
