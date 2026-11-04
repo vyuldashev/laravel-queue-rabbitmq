@@ -584,6 +584,12 @@ There are two ways of consuming messages.
 
 2. `rabbitmq:consume` command which is provided by this package. This command utilizes `basic_consume` and is more performant than `basic_get` by ~2x, but does not support multiple queues.
 
+The `rabbitmq:consume` command also accepts a `--vhost` option to consume from a different virtual host than the one in the connection config, without defining a separate connection:
+
+```bash
+php artisan rabbitmq:consume rabbitmq --queue=default --vhost=tenant-a
+```
+
 ## Testing
 
 Setup RabbitMQ using `docker-compose`:
