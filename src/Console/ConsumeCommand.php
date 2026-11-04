@@ -22,7 +22,8 @@ class ConsumeCommand extends WorkCommand
                             {--max-priority=}
                             {--consumer-tag}
                             {--prefetch-size=0}
-                            {--prefetch-count=1000}';
+                            {--prefetch-count=1000}
+                            {--vhost= : The RabbitMQ virtual host to consume from (overrides the connection config)}';
 
     protected $description = 'Consume messages';
 
@@ -55,6 +56,8 @@ class ConsumeCommand extends WorkCommand
 
     public function handle(): void
     {
+        $this->applyVhostOption();
+
         /** @var Consumer $consumer */
         $consumer = $this->worker;
 
@@ -81,5 +84,25 @@ class ConsumeCommand extends WorkCommand
         ]);
 
         return Str::substr($consumerTag, 0, 255);
+    }
+
+    protected function applyVhostOption(): void
+    {
+        $vhost = $this->option('vhost');
+
+        if ($vhost === null || $vhost === '') {
+            return;
+        }
+
+        $connection = $this->argument('connection') ?: $this->laravel['config']['queue.default'];
+        $key = "queue.connections.{$connection}.hosts";
+
+        $hosts = $this->laravel['config']->get($key, []);
+
+        foreach ($hosts as $index => $host) {
+            $hosts[$index]['vhost'] = $vhost;
+        }
+
+        $this->laravel['config']->set($key, $hosts);
     }
 }
