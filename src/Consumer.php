@@ -108,8 +108,13 @@ class Consumer extends Worker
             ->getParameters()[0]->getName() === 'connectionName';
 
         // Laravel 13.18 keeps the processed jobs count and the time of the last job on the
-        // worker instead of taking them as arguments of Worker::stopIfNecessary().
+        // worker instead of taking them as arguments of Worker::stopIfNecessary(). Worker::kill()
+        // reads them too, so they are updated around each job, like Worker::daemon() does.
         $workerTracksJobs = property_exists(Worker::class, 'jobsProcessed');
+
+        if ($workerTracksJobs) {
+            $this->jobsProcessed = 0;
+        }
 
         $this->channel->basic_consume(
             $queue,
@@ -118,7 +123,7 @@ class Consumer extends Worker
             false,
             false,
             false,
-            function (AMQPMessage $message) use ($connection, $options, $connectionName, $queue, $jobClass, $timeoutHandlerTakesQueue, &$jobsProcessed, &$lastJobProcessedAt, &$currentJob): void {
+            function (AMQPMessage $message) use ($connection, $options, $connectionName, $queue, $jobClass, $timeoutHandlerTakesQueue, $workerTracksJobs, &$jobsProcessed, &$lastJobProcessedAt, &$currentJob): void {
                 $job = new $jobClass(
                     $this->container,
                     $connection,
@@ -137,11 +142,19 @@ class Consumer extends Worker
                     }
                 }
 
-                $jobsProcessed++;
+                if ($workerTracksJobs) {
+                    $this->jobsProcessed++;
+                } else {
+                    $jobsProcessed++;
+                }
 
                 $this->runJob($job, $connectionName, $options);
 
-                $lastJobProcessedAt = hrtime(true) / 1e9;
+                if ($workerTracksJobs) {
+                    $this->lastJobProcessedAt = hrtime(true) / 1e9;
+                } else {
+                    $lastJobProcessedAt = hrtime(true) / 1e9;
+                }
 
                 if ($this->supportsAsyncSignals()) {
                     $this->resetTimeoutHandler();
@@ -187,9 +200,6 @@ class Consumer extends Worker
             // the queue should restart based on other indications. If so, we'll stop
             // this worker and let whatever is "monitoring" it restart the process.
             if ($workerTracksJobs) {
-                $this->jobsProcessed = $jobsProcessed;
-                $this->lastJobProcessedAt = $lastJobProcessedAt;
-
                 $result = $this->stopIfNecessary($options, $lastRestart, $startTime, $currentJob);
             } else {
                 // Laravel 11.53, 12.60 and 13.10 added the last argument for --stop-when-empty-for;
