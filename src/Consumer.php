@@ -9,6 +9,7 @@ use Illuminate\Queue\WorkerOptions;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Exception\AMQPRuntimeException;
 use PhpAmqpLib\Message\AMQPMessage;
+use ReflectionMethod;
 use Throwable;
 use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
@@ -74,7 +75,7 @@ class Consumer extends Worker
 
         $lastRestart = $this->getTimestampOfLastQueueRestart();
 
-        [$startTime, $jobsProcessed] = [hrtime(true) / 1e9, 0];
+        [$startTime, $jobsProcessed, $lastJobProcessedAt] = [hrtime(true) / 1e9, 0, null];
 
         /** @var RabbitMQQueue $connection */
         $connection = $this->manager->connection($connectionName);
@@ -101,6 +102,20 @@ class Consumer extends Worker
         //      every successful job and starved throughput (see #661).
         $currentJob = null;
 
+        // Laravel 13.31 added the connection and queue names as the first two
+        // parameters of Worker::registerTimeoutHandler().
+        $timeoutHandlerTakesQueue = (new ReflectionMethod(Worker::class, 'registerTimeoutHandler'))
+            ->getParameters()[0]->getName() === 'connectionName';
+
+        // Laravel 13.18 keeps the processed jobs count and the time of the last job on the
+        // worker instead of taking them as arguments of Worker::stopIfNecessary(). Worker::kill()
+        // reads them too, so they are updated around each job, like Worker::daemon() does.
+        $workerTracksJobs = property_exists(Worker::class, 'jobsProcessed');
+
+        if ($workerTracksJobs) {
+            $this->jobsProcessed = 0;
+        }
+
         $this->channel->basic_consume(
             $queue,
             $this->consumerTag,
@@ -108,7 +123,7 @@ class Consumer extends Worker
             false,
             false,
             false,
-            function (AMQPMessage $message) use ($connection, $options, $connectionName, $queue, $jobClass, &$jobsProcessed, &$currentJob): void {
+            function (AMQPMessage $message) use ($connection, $options, $connectionName, $queue, $jobClass, $timeoutHandlerTakesQueue, $workerTracksJobs, &$jobsProcessed, &$lastJobProcessedAt, &$currentJob): void {
                 $job = new $jobClass(
                     $this->container,
                     $connection,
@@ -120,12 +135,26 @@ class Consumer extends Worker
                 $currentJob = $job;
 
                 if ($this->supportsAsyncSignals()) {
-                    $this->registerTimeoutHandler($job, $options);
+                    if ($timeoutHandlerTakesQueue) {
+                        $this->registerTimeoutHandler($connectionName, $queue, $job, $options);
+                    } else {
+                        $this->registerTimeoutHandler($job, $options);
+                    }
                 }
 
-                $jobsProcessed++;
+                if ($workerTracksJobs) {
+                    $this->jobsProcessed++;
+                } else {
+                    $jobsProcessed++;
+                }
 
                 $this->runJob($job, $connectionName, $options);
+
+                if ($workerTracksJobs) {
+                    $this->lastJobProcessedAt = hrtime(true) / 1e9;
+                } else {
+                    $lastJobProcessedAt = hrtime(true) / 1e9;
+                }
 
                 if ($this->supportsAsyncSignals()) {
                     $this->resetTimeoutHandler();
@@ -170,16 +199,19 @@ class Consumer extends Worker
             // Finally, we will check to see if we have exceeded our memory limits or if
             // the queue should restart based on other indications. If so, we'll stop
             // this worker and let whatever is "monitoring" it restart the process.
-            $status = $this->stopIfNecessary(
-                $options,
-                $lastRestart,
-                $startTime,
-                $jobsProcessed,
-                $currentJob
-            );
+            if ($workerTracksJobs) {
+                $result = $this->stopIfNecessary($options, $lastRestart, $startTime, $currentJob);
+            } else {
+                // Laravel 11.53, 12.60 and 13.10 added the last argument for --stop-when-empty-for;
+                // older versions ignore it.
+                $result = $this->stopIfNecessary($options, $lastRestart, $startTime, $jobsProcessed, $currentJob, $lastJobProcessedAt);
+            }
+
+            // Laravel 11.52+, 12.59+ and 13.x return the exit status together with the stop reason.
+            [$status, $reason] = is_array($result) ? $result : [$result, null];
 
             if (! is_null($status)) {
-                return $this->stop($status, $options);
+                return $this->stop($status, $options, $reason);
             }
 
             $currentJob = null;
